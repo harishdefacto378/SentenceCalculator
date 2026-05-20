@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Sentence Calculator · NDPS Act 1985</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #faf9f5; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+    #__bundler_loading { position: fixed; bottom: 20px; right: 20px; font: 13px/1.4 -apple-system, BlinkMacSystemFont, sans-serif; color: #666; background: #fff; padding: 8px 14px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.12); z-index: 10000; }
+    #__bundler_thumbnail { position: fixed; inset: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #faf9f5; z-index: 9999; }
+    #__bundler_thumbnail svg { width: 100%; height: 100%; object-fit: contain; }
+    #__bundler_placeholder { color: #999; font-size: 14px; }
+  </style>
+  <noscript>
+    <style>#__bundler_loading { display: none; }</style>
+    <div style="position:fixed;bottom:12px;left:12px;font:13px/1.4 -apple-system,BlinkMacSystemFont,sans-serif;color:#999;background:rgba(255,255,255,0.9);padding:6px 12px;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,0.08);z-index:10000;">
+      This page requires JavaScript to display.
+    </div>
+  </noscript>
+</head>
+<body>
+  <div id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect width="200" height="200" fill="#6e36a7"></rect><g transform="translate(60,55)" fill="#d8c97a"><rect x="0" y="0" width="8" height="80"></rect><rect x="72" y="0" width="8" height="80"></rect><rect x="-12" y="18" width="104" height="5"></rect><rect x="-6" y="55" width="92" height="5"></rect><path d="M-18 80 L98 80 L88 92 L-8 92 Z"></path></g></svg></div>
+  <div id="__bundler_loading">Unpacking...</div>
+
+  <script>
+    
+document.addEventListener('DOMContentLoaded', async function() {
+  const loading = document.getElementById('__bundler_loading');
+  function setStatus(msg) { if (loading) loading.textContent = msg; }
+
+  // Error sink persists across replaceWith since it's on window, not the DOM.
+  window.addEventListener('error', function(e) {
+    var p = document.body || document.documentElement;
+    var d = document.getElementById('__bundler_err') || p.appendChild(document.createElement('div'));
+    d.id = '__bundler_err';
+    d.style.cssText = 'position:fixed;bottom:12px;left:12px;right:12px;font:12px/1.4 ui-monospace,monospace;background:#2a1215;color:#ff8a80;padding:10px 14px;border-radius:8px;border:1px solid #5c2b2e;z-index:99999;white-space:pre-wrap;max-height:40vh;overflow:auto';
+    d.textContent = (d.textContent ? d.textContent + String.fromCharCode(10) : '') +
+      '[bundle] ' + (e.message || e.type) +
+      (e.filename ? ' (' + e.filename.slice(0, 60) + ':' + e.lineno + ')' : '');
+  }, true);
+
+  try {
+    const manifestEl = document.querySelector('script[type="__bundler/manifest"]');
+    const templateEl = document.querySelector('script[type="__bundler/template"]');
+    if (!manifestEl || !templateEl) {
+      setStatus('Error: missing bundle data');
+      console.error('[bundler] Missing script tags — manifestEl:', !!manifestEl, 'templateEl:', !!templateEl);
+      return;
+    }
+
+    const manifest = JSON.parse(manifestEl.textContent);
+    let template = JSON.parse(templateEl.textContent);
+
+    const uuids = Object.keys(manifest);
+    setStatus('Unpacking ' + uuids.length + ' assets...');
+
+    const blobUrls = {};
+    await Promise.all(uuids.map(async (uuid) => {
+      const entry = manifest[uuid];
+      try {
+        const binaryStr = atob(entry.data);
+        const bytes = new Uint8Array(binaryStr.length);
+        for (let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i);
+
+        let finalBytes = bytes;
+        if (entry.compressed) {
+          if (typeof DecompressionStream !== 'undefined') {
+            const ds = new DecompressionStream('gzip');
+            const writer = ds.writable.getWriter();
+            const reader = ds.readable.getReader();
+            writer.write(bytes);
+            writer.close();
+            const chunks = [];
+            let totalLen = 0;
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              chunks.push(value);
+              totalLen += value.length;
+            }
+            finalBytes = new Uint8Array(totalLen);
+            let offset = 0;
+            for (const chunk of chunks) { finalBytes.set(chunk, offset); offset += chunk.length; }
+          } else {
+            console.warn('DecompressionStream not available, asset ' + uuid + ' may not render');
+          }
+        }
+
+        blobUrls[uuid] = URL.createObjectURL(new Blob([finalBytes], { type: entry.mime }));
+      } catch (err) {
+        console.error('Failed to decode asset ' + uuid + ':', err);
+        blobUrls[uuid] = URL.createObjectURL(new Blob([], { type: entry.mime }));
+      }
+    }));
+
+    const extResEl = document.querySelector('script[type="__bundler/ext_resources"]');
+    const extResources = extResEl ? JSON.parse(extResEl.textContent) : [];
+    const resourceMap = {};
+    for (const entry of extResources) {
+      if (blobUrls[entry.uuid]) resourceMap[entry.id] = blobUrls[entry.uuid];
+    }
+
+    setStatus('Rendering...');
+    for (const uuid of uuids) template = template.split(uuid).join(blobUrls[uuid]);
+
+    // Strip integrity + crossorigin — blob URLs from a file:// document inherit
+    // a null origin, so crossorigin forces a CORS fetch that SRI then rejects.
+    // The manifest bytes are ours; SRI protects against CDN compromise, not this.
+    template = template.replace(/\s+integrity="[^"]*"/gi, '').replace(/\s+crossorigin="[^"]*"/gi, '');
+
+    const resourceScript = '<script>window.__resources = ' +
+      JSON.stringify(resourceMap).split('</' + 'script>').join('<\\/' + 'script>') +
+      ';</' + 'script>';
+    // Inject after <head> so the DOCTYPE stays first; prepending the script
+    // would push the parser into quirks mode. DOMParser always emits a <head>
+    // (synthesizing one if the source HTML omitted it) but may carry
+    // attributes through, so match the full opening tag. slice() rather than
+    // replace() keeps us clear of $-pattern substitution in resourceScript.
+    const headOpen = template.match(/<head[^>]*>/i);
+    if (headOpen) {
+      const i = headOpen.index + headOpen[0].length;
+      template = template.slice(0, i) + resourceScript + template.slice(i);
+    }
+
+    // Parse the template and swap the root element. Scripts inserted via
+    // DOMParser/replaceWith are inert per spec — re-create each with
+    // createElement so they execute, awaiting onload for src scripts to
+    // preserve ordering (React before ReactDOM before Babel before text/babel).
+    const doc = new DOMParser().parseFromString(template, 'text/html');
+    document.documentElement.replaceWith(doc.documentElement);
+    const dead = Array.from(document.scripts);
+    for (const old of dead) {
+      const s = document.createElement('script');
+      for (const a of old.attributes) s.setAttribute(a.name, a.value);
+      s.textContent = old.textContent;
+      // text/babel scripts with a src: fetch and inline. transformScriptTags
+      // does XHR against the src, but blob:null/ from a file:// origin is
+      // silently dropped. Inlining makes it a plain inline babel script,
+      // which transformScriptTags handles unconditionally.
+      if ((s.type === 'text/babel' || s.type === 'text/jsx') && s.src) {
+        const r = await fetch(s.src);
+        s.textContent = await r.text();
+        s.removeAttribute('src');
+      }
+      const p = s.src ? new Promise(function(r) { s.onload = s.onerror = r; }) : null;
+      old.replaceWith(s);
+      if (p) await p;
+    }
+    // Babel standalone auto-transforms type=text/babel on DOMContentLoaded,
+    // which fired before we swapped the document. Trigger manually if present.
+    if (window.Babel && typeof window.Babel.transformScriptTags === 'function') {
+      window.Babel.transformScriptTags();
+    }
+  } catch (err) {
+    setStatus('Error unpacking: ' + err.message);
+    console.error('Bundle unpack error:', err);
+  }
+});
+
+  </script>
+
+  <script type="__bundler/manifest">
+{"85e9ae94-8a9b-4908-a644-90472a5910ae":{"mime":"image/png","compressed":false,"data":"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"}}
+  </script>
+
+  <script type="__bundler/ext_resources">
+[]
+  </script>
+
+  <script type="__bundler/template">
+"<!DOCTYPE html>\n<html lang=\"en\"><head>\n<meta charset=\"utf-8\">\n<title>Sentence Calculator · NDPS Act 1985<\u002Ftitle>\n<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n\n<style>\n  :root {\n    --bg: #f5f5f5;\n    --paper: #ffffff;\n    --paper-2: #fafafa;\n    --paper-hover: #f5f5f5;\n    --ink: #242424;\n    --ink-2: #424242;\n    --ink-3: #616161;\n    --rule: #e0e0e0;\n    --rule-2: #d1d1d1;\n    --brand-40: #5b2c8e;\n    --brand-50: #6e36a7;\n    --brand-60: #8146bf;\n    --brand-130: #f3e6fa;\n    --brand-140: #faf2fd;\n    --brand: var(--brand-50);\n    --accent-gold: #b8860b;\n    --warn: #bc4b09;\n    --warn-bg: #fdf6ec;\n    --warn-border: #f6c187;\n  }\n  * { box-sizing: border-box; }\n  html, body { margin: 0; padding: 0; }\n  body {\n    background: var(--bg); color: var(--ink);\n    font-family: \"Segoe UI Variable\", \"Segoe UI\", system-ui, sans-serif;\n    font-size: 14px; line-height: 20px;\n    -webkit-font-smoothing: antialiased;\n    min-height: 100vh;\n  }\n  .shell { max-width: 1100px; margin: 0 auto; padding: 32px 24px 64px; }\n  .hero {\n    background: linear-gradient(135deg, var(--brand-40) 0%, var(--brand-60) 100%);\n    color: #fff; border-radius: 12px;\n    padding: 36px 40px; display: grid;\n    grid-template-columns: 64px 1fr auto; gap: 20px; align-items: center;\n    box-shadow: 0 4px 16px rgba(91,44,142,0.18);\n  }\n  .seal { width: 64px; height: 64px; object-fit: contain; display: block; }\n  .hero h1 { margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -0.01em; line-height: 32px; }\n  .hero .actname { color: rgba(255,255,255,0.85); font-size: 13px; margin-top: 4px; }\n  .pill {\n    display: inline-flex; align-items: center; gap: 6px;\n    background: rgba(255,255,255,0.14);\n    border: 1px solid rgba(255,255,255,0.3);\n    color: #fff;\n    padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 500;\n  }\n  .ticker {\n    background: #c50f1f; color: #fff; padding: 8px 16px;\n    font-size: 12.5px; text-align: center; margin-top: 16px; border-radius: 6px;\n    letter-spacing: 0.02em;\n  }\n  h2.section {\n    font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;\n    color: var(--ink-3); margin: 36px 0 14px;\n  }\n  .grid {\n    display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;\n  }\n  @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }\n  .card {\n    background: var(--paper); border: 1px solid var(--rule); border-radius: 10px;\n    overflow: hidden; transition: transform 0.15s, box-shadow 0.15s;\n    display: flex; flex-direction: column;\n  }\n  .card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }\n  .card .thumb {\n    aspect-ratio: 16 / 9;\n    display: grid; place-items: center;\n    color: rgba(255,255,255,0.95);\n    font-weight: 700; letter-spacing: 0.04em;\n    position: relative;\n  }\n  .card .thumb svg { width: 56%; height: 56%; }\n  .card .thumb.calc { background: linear-gradient(135deg, #5b2c8e, #8146bf); }\n  .card .thumb.cmp { background: linear-gradient(135deg, #2c8a3e, #4caf50); }\n  .card .thumb.about { background: linear-gradient(135deg, #b8860b, #d4a72c); }\n  .card .body { padding: 18px 20px 20px; flex: 1; display: flex; flex-direction: column; }\n  .card .body h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.005em; }\n  .card .body p { margin: 0 0 16px; font-size: 13.5px; color: var(--ink-2); line-height: 20px; }\n  .card .body p.feature-list { color: var(--ink-3); font-size: 12.5px; line-height: 19px; }\n  .card .body .open {\n    align-self: flex-start;\n    margin-top: auto;\n    background: var(--brand); color: #fff; border: 1px solid var(--brand);\n    padding: 6px 14px; border-radius: 4px; font-size: 13px; font-weight: 600;\n    text-decoration: none; display: inline-flex; align-items: center; gap: 6px;\n  }\n  .card .body .open:hover { background: var(--brand-40); border-color: var(--brand-40); }\n  .meta {\n    display: flex; gap: 12px; padding: 18px 20px; background: var(--paper-2);\n    border-top: 1px solid var(--rule); font-size: 12px; color: var(--ink-3);\n    flex-wrap: wrap;\n  }\n  .meta span { display: inline-flex; align-items: center; gap: 4px; }\n  .info {\n    background: var(--paper); border: 1px solid var(--rule); border-radius: 10px;\n    padding: 22px 28px; margin-top: 22px;\n  }\n  .info h3 { margin: 0 0 10px; font-size: 15px; font-weight: 600; }\n  .info p { margin: 0 0 8px; color: var(--ink-2); font-size: 13.5px; line-height: 21px; }\n  .info p:last-child { margin-bottom: 0; }\n  .info strong { color: var(--ink); }\n  footer.site {\n    margin-top: 36px; padding-top: 18px; border-top: 1px solid var(--rule);\n    color: var(--ink-3); font-size: 12px;\n    display: flex; justify-content: space-between; gap: 18px; flex-wrap: wrap;\n  }\n  footer.site a { color: var(--brand); text-decoration: none; }\n  footer.site a:hover { text-decoration: underline; }\n<\u002Fstyle>\n<\u002Fhead>\n<body>\n\n<div class=\"shell\">\n  <div class=\"hero\">\n    <img class=\"seal\" src=\"85e9ae94-8a9b-4908-a644-90472a5910ae\" alt=\"\">\n    <div>\n      <h1>Sentence Calculator<\u002Fh1>\n      <div class=\"actname\">The Narcotic Drugs and Psychotropic Substances Act, 1985 · India<\u002Fdiv>\n    <\u002Fdiv>\n    <span class=\"pill\">⚠ Aid for practitioners<\u002Fspan>\n  <\u002Fdiv>\n\n  <div class=\"ticker\">Computed values are an aid for legal practitioners. They are not decisive and do not replace the Court's independent reasoning.<\u002Fdiv>\n\n  <h2 class=\"section\">Choose a tool<\u002Fh2>\n  <div class=\"grid\">\n\n    <a class=\"card\" href=\"index.html\" style=\"text-decoration:none;color:inherit;\">\n      <div class=\"thumb calc\">\n        <svg viewBox=\"0 0 100 100\" fill=\"currentColor\"><rect x=\"20\" y=\"10\" width=\"60\" height=\"80\" rx=\"6\" fill=\"rgba(255,255,255,0.15)\" stroke=\"rgba(255,255,255,0.4)\" stroke-width=\"1.5\"><\u002Frect><rect x=\"28\" y=\"20\" width=\"44\" height=\"14\" rx=\"2\" fill=\"rgba(255,255,255,0.85)\"><\u002Frect><rect x=\"28\" y=\"42\" width=\"12\" height=\"12\" rx=\"2\" fill=\"rgba(255,255,255,0.5)\"><\u002Frect><rect x=\"44\" y=\"42\" width=\"12\" height=\"12\" rx=\"2\" fill=\"rgba(255,255,255,0.5)\"><\u002Frect><rect x=\"60\" y=\"42\" width=\"12\" height=\"12\" rx=\"2\" fill=\"rgba(255,255,255,0.5)\"><\u002Frect><rect x=\"28\" y=\"58\" width=\"12\" height=\"12\" rx=\"2\" fill=\"rgba(255,255,255,0.5)\"><\u002Frect><rect x=\"44\" y=\"58\" width=\"12\" height=\"12\" rx=\"2\" fill=\"rgba(255,255,255,0.5)\"><\u002Frect><rect x=\"60\" y=\"58\" width=\"12\" height=\"28\" rx=\"2\" fill=\"rgba(255,255,255,0.85)\"><\u002Frect><rect x=\"28\" y=\"74\" width=\"28\" height=\"12\" rx=\"2\" fill=\"rgba(255,255,255,0.5)\"><\u002Frect><\u002Fsvg>\n      <\u002Fdiv>\n      <div class=\"body\">\n        <h3>Calculator<\u002Fh3>\n        <p>Proportional sentence &amp; fine based on substance, quantity, and date. Includes judicial discretion and aggravating / mitigating factors.<\u002Fp>\n        <p class=\"feature-list\">Substance picker · Qty + unit · Discretion ± % · Factor tables · Live report<\u002Fp>\n        <span class=\"open\">Open calculator →<\u002Fspan>\n      <\u002Fdiv>\n      <div class=\"meta\">\n        <span>📐 Section 21(c), 20(b)(ii), 17(c), 22(c)<\u002Fspan>\n        <span>⚖ NDPS Act 1985<\u002Fspan>\n      <\u002Fdiv>\n    <\u002Fa>\n\n    <a class=\"card\" href=\"comparison.html\" style=\"text-decoration:none;color:inherit;\">\n      <div class=\"thumb cmp\">\n        <svg viewBox=\"0 0 100 100\" fill=\"currentColor\"><g fill=\"rgba(255,255,255,0.85)\"><rect x=\"18\" y=\"60\" width=\"14\" height=\"26\" rx=\"2\"><\u002Frect><rect x=\"38\" y=\"44\" width=\"14\" height=\"42\" rx=\"2\"><\u002Frect><rect x=\"58\" y=\"30\" width=\"14\" height=\"56\" rx=\"2\"><\u002Frect><rect x=\"78\" y=\"16\" width=\"6\" height=\"70\" rx=\"2\" fill=\"rgba(255,255,255,0.4)\"><\u002Frect><\u002Fg><line x1=\"14\" y1=\"86\" x2=\"86\" y2=\"86\" stroke=\"rgba(255,255,255,0.6)\" stroke-width=\"1.5\"><\u002Fline><\u002Fsvg>\n      <\u002Fdiv>\n      <div class=\"body\">\n        <h3>Comparison<\u002Fh3>\n        <p>Build up to six scenarios and compare them side-by-side. Sentence range, fine range, and a 0–20 year statutory spectrum.<\u002Fp>\n        <p class=\"feature-list\">Scenario chips · KPI strip · Table view · Chart view · Spectrum view<\u002Fp>\n        <span class=\"open\">Open comparison →<\u002Fspan>\n      <\u002Fdiv>\n      <div class=\"meta\">\n        <span>📊 3 views<\u002Fspan>\n        <span>↕ Up to 6 scenarios<\u002Fspan>\n      <\u002Fdiv>\n    <\u002Fa>\n\n    <a class=\"card\" href=\"about.html\" style=\"text-decoration:none;color:inherit;\">\n      <div class=\"thumb about\">\n        <svg viewBox=\"0 0 100 100\" fill=\"currentColor\"><circle cx=\"50\" cy=\"38\" r=\"14\" fill=\"rgba(255,255,255,0.85)\"><\u002Fcircle><path d=\"M22 86 Q22 60 50 60 Q78 60 78 86 Z\" fill=\"rgba(255,255,255,0.85)\"><\u002Fpath><circle cx=\"50\" cy=\"38\" r=\"14\" fill=\"none\" stroke=\"rgba(255,255,255,1)\" stroke-width=\"2\"><\u002Fcircle><\u002Fsvg>\n      <\u002Fdiv>\n      <div class=\"body\">\n        <h3>About<\u002Fh3>\n        <p>Team, methodology, instructional videos in English / Hindi / Punjabi, and contact for support and feedback.<\u002Fp>\n        <p class=\"feature-list\">Conceived by Justice Anoop Chitkara · de facto infotech · Research team<\u002Fp>\n        <span class=\"open\">Open about →<\u002Fspan>\n      <\u002Fdiv>\n      <div class=\"meta\">\n        <span>🎥 3 videos<\u002Fspan>\n        <span>👥 Team &amp; credits<\u002Fspan>\n      <\u002Fdiv>\n    <\u002Fa>\n\n  <\u002Fdiv>\n\n  <div class=\"info\">\n    <h3>Using the calculator<\u002Fh3>\n    <p>Select a notified substance from the drop-down, enter the seized quantity with the right unit, and pick the offence date. The base sentence and fine are computed proportionally across the small-quantity / intermediate / commercial bands defined under the NDPS Act, 1985.<\u002Fp>\n    <p>Use the <strong>Discretion<\u002Fstrong> sliders to express the Court's increase or decrease percentage, and tick the <strong>Aggravating<\u002Fstrong> and <strong>Mitigating<\u002Fstrong> factors that apply. The live <strong>Report<\u002Fstrong> tab summarises the inputs, the chemical and statutory specification, and the resulting sentence and fine.<\u002Fp>\n    <p>For comparing multiple hypotheticals — different substances, different quantities, or the same case under varying judicial discretion — open the <strong>Comparison<\u002Fstrong> page.<\u002Fp>\n  <\u002Fdiv>\n\n  <footer class=\"site\">\n    <span>Justice Anoop Chitkara <span style=\"opacity:0.7;\">©<\u002Fspan><\u002Fspan>\n    <span>Feedback: <a href=\"mailto:sentencecalculator.in@gmail.com\">sentencecalculator.in@gmail.com<\u002Fa><\u002Fspan>\n    <span>Support: <a href=\"mailto:customer.support@defactoinfotech.com\">customer.support@defactoinfotech.com<\u002Fa><\u002Fspan>\n  <\u002Ffooter>\n<\u002Fdiv>\n\n\n\n<\u002Fbody><\u002Fhtml>"
+  </script>
+</body>
+</html>

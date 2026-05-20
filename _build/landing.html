@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Landing moved</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta http-equiv="refresh" content="0; url=/dist/landing.html" />
+</head>
+<body>
+If you are not redirected, <a href="/dist/landing.html">open the new landing page</a>.
+</body>
+</html>
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect width="200" height="200" fill="#6e36a7"/><g transform="translate(60,55)" fill="#d8c97a"><rect x="0" y="0" width="8" height="80"/><rect x="72" y="0" width="8" height="80"/><rect x="-12" y="18" width="104" height="5"/><rect x="-6" y="55" width="92" height="5"/><path d="M-18 80 L98 80 L88 92 L-8 92 Z"/></g></svg></template>
+<style>
+  :root {
+    --bg: #f5f5f5;
+    --paper: #ffffff;
+    --paper-2: #fafafa;
+    --paper-hover: #f5f5f5;
+    --ink: #242424;
+    --ink-2: #424242;
+    --ink-3: #616161;
+    --rule: #e0e0e0;
+    --rule-2: #d1d1d1;
+    --brand-40: #5b2c8e;
+    --brand-50: #6e36a7;
+    --brand-60: #8146bf;
+    --brand-130: #f3e6fa;
+    --brand-140: #faf2fd;
+    --brand: var(--brand-50);
+    --accent-gold: #b8860b;
+    --warn: #bc4b09;
+    --warn-bg: #fdf6ec;
+    --warn-border: #f6c187;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font-family: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+    font-size: 14px; line-height: 20px;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+  .shell { max-width: 1100px; margin: 0 auto; padding: 32px 24px 64px; }
+  .hero {
+    background: linear-gradient(135deg, var(--brand-40) 0%, var(--brand-60) 100%);
+    color: #fff; border-radius: 12px;
+    padding: 36px 40px; display: grid;
+    grid-template-columns: 64px 1fr auto; gap: 20px; align-items: center;
+    box-shadow: 0 4px 16px rgba(91,44,142,0.18);
+  }
+  .seal { width: 64px; height: 64px; object-fit: contain; display: block; }
+  .hero h1 { margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -0.01em; line-height: 32px; }
+  .hero .actname { color: rgba(255,255,255,0.85); font-size: 13px; margin-top: 4px; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.14);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #fff;
+    padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 500;
+  }
+  .ticker {
+    background: #c50f1f; color: #fff; padding: 8px 16px;
+    font-size: 12.5px; text-align: center; margin-top: 16px; border-radius: 6px;
+    letter-spacing: 0.02em;
+  }
+  h2.section {
+    font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--ink-3); margin: 36px 0 14px;
+  }
+  .grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
+  }
+  @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--paper); border: 1px solid var(--rule); border-radius: 10px;
+    overflow: hidden; transition: transform 0.15s, box-shadow 0.15s;
+    display: flex; flex-direction: column;
+  }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+  .card .thumb {
+    aspect-ratio: 16 / 9;
+    display: grid; place-items: center;
+    color: rgba(255,255,255,0.95);
+    font-weight: 700; letter-spacing: 0.04em;
+    position: relative;
+  }
+  .card .thumb svg { width: 56%; height: 56%; }
+  .card .thumb.calc { background: linear-gradient(135deg, #5b2c8e, #8146bf); }
+  .card .thumb.cmp { background: linear-gradient(135deg, #2c8a3e, #4caf50); }
+  .card .thumb.about { background: linear-gradient(135deg, #b8860b, #d4a72c); }
+  .card .body { padding: 18px 20px 20px; flex: 1; display: flex; flex-direction: column; }
+  .card .body h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.005em; }
+  .card .body p { margin: 0 0 16px; font-size: 13.5px; color: var(--ink-2); line-height: 20px; }
+  .card .body p.feature-list { color: var(--ink-3); font-size: 12.5px; line-height: 19px; }
+  .card .body .open {
+    align-self: flex-start;
+    margin-top: auto;
+    background: var(--brand); color: #fff; border: 1px solid var(--brand);
+    padding: 6px 14px; border-radius: 4px; font-size: 13px; font-weight: 600;
+    text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+  }
+  .card .body .open:hover { background: var(--brand-40); border-color: var(--brand-40); }
+  .meta {
+    display: flex; gap: 12px; padding: 18px 20px; background: var(--paper-2);
+    border-top: 1px solid var(--rule); font-size: 12px; color: var(--ink-3);
+    flex-wrap: wrap;
+  }
+  .meta span { display: inline-flex; align-items: center; gap: 4px; }
+  .info {
+    background: var(--paper); border: 1px solid var(--rule); border-radius: 10px;
+    padding: 22px 28px; margin-top: 22px;
+  }
+  .info h3 { margin: 0 0 10px; font-size: 15px; font-weight: 600; }
+  .info p { margin: 0 0 8px; color: var(--ink-2); font-size: 13.5px; line-height: 21px; }
+  .info p:last-child { margin-bottom: 0; }
+  .info strong { color: var(--ink); }
+  footer.site {
+    margin-top: 36px; padding-top: 18px; border-top: 1px solid var(--rule);
+    color: var(--ink-3); font-size: 12px;
+    display: flex; justify-content: space-between; gap: 18px; flex-wrap: wrap;
+  }
+  footer.site a { color: var(--brand); text-decoration: none; }
+  footer.site a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <div class="hero">
+    <img class="seal" src="https://USERNAME.github.io/REPO/assets/logo.png" alt="" onerror="this.style.display='none'" />
+    <div>
+      <h1>Sentence Calculator</h1>
+      <div class="actname">The Narcotic Drugs and Psychotropic Substances Act, 1985 · India</div>
+    </div>
+    <span class="pill">⚠ Aid for practitioners</span>
+  </div>
+
+  <div class="ticker">Computed values are an aid for legal practitioners. They are not decisive and do not replace the Court's independent reasoning.</div>
+
+  <h2 class="section">Choose a tool</h2>
+  <div class="grid">
+
+    <a class="card" href="index.html" style="text-decoration:none;color:inherit;">
+      <div class="thumb calc">
+        <svg viewBox="0 0 100 100" fill="currentColor"><rect x="20" y="10" width="60" height="80" rx="6" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/><rect x="28" y="20" width="44" height="14" rx="2" fill="rgba(255,255,255,0.85)"/><rect x="28" y="42" width="12" height="12" rx="2" fill="rgba(255,255,255,0.5)"/><rect x="44" y="42" width="12" height="12" rx="2" fill="rgba(255,255,255,0.5)"/><rect x="60" y="42" width="12" height="12" rx="2" fill="rgba(255,255,255,0.5)"/><rect x="28" y="58" width="12" height="12" rx="2" fill="rgba(255,255,255,0.5)"/><rect x="44" y="58" width="12" height="12" rx="2" fill="rgba(255,255,255,0.5)"/><rect x="60" y="58" width="12" height="28" rx="2" fill="rgba(255,255,255,0.85)"/><rect x="28" y="74" width="28" height="12" rx="2" fill="rgba(255,255,255,0.5)"/></svg>
+      </div>
+      <div class="body">
+        <h3>Calculator</h3>
+        <p>Proportional sentence &amp; fine based on substance, quantity, and date. Includes judicial discretion and aggravating / mitigating factors.</p>
+        <p class="feature-list">Substance picker · Qty + unit · Discretion ± % · Factor tables · Live report</p>
+        <span class="open">Open calculator →</span>
+      </div>
+      <div class="meta">
+        <span>📐 Section 21(c), 20(b)(ii), 17(c), 22(c)</span>
+        <span>⚖ NDPS Act 1985</span>
+      </div>
+    </a>
+
+    <a class="card" href="comparison.html" style="text-decoration:none;color:inherit;">
+      <div class="thumb cmp">
+        <svg viewBox="0 0 100 100" fill="currentColor"><g fill="rgba(255,255,255,0.85)"><rect x="18" y="60" width="14" height="26" rx="2"/><rect x="38" y="44" width="14" height="42" rx="2"/><rect x="58" y="30" width="14" height="56" rx="2"/><rect x="78" y="16" width="6" height="70" rx="2" fill="rgba(255,255,255,0.4)"/></g><line x1="14" y1="86" x2="86" y2="86" stroke="rgba(255,255,255,0.6)" stroke-width="1.5"/></svg>
+      </div>
+      <div class="body">
+        <h3>Comparison</h3>
+        <p>Build up to six scenarios and compare them side-by-side. Sentence range, fine range, and a 0–20 year statutory spectrum.</p>
+        <p class="feature-list">Scenario chips · KPI strip · Table view · Chart view · Spectrum view</p>
+        <span class="open">Open comparison →</span>
+      </div>
+      <div class="meta">
+        <span>📊 3 views</span>
+        <span>↕ Up to 6 scenarios</span>
+      </div>
+    </a>
+
+    <a class="card" href="about.html" style="text-decoration:none;color:inherit;">
+      <div class="thumb about">
+        <svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="38" r="14" fill="rgba(255,255,255,0.85)"/><path d="M22 86 Q22 60 50 60 Q78 60 78 86 Z" fill="rgba(255,255,255,0.85)"/><circle cx="50" cy="38" r="14" fill="none" stroke="rgba(255,255,255,1)" stroke-width="2"/></svg>
+      </div>
+      <div class="body">
+        <h3>About</h3>
+        <p>Team, methodology, instructional videos in English / Hindi / Punjabi, and contact for support and feedback.</p>
+        <p class="feature-list">Conceived by Justice Anoop Chitkara · de facto infotech · Research team</p>
+        <span class="open">Open about →</span>
+      </div>
+      <div class="meta">
+        <span>🎥 3 videos</span>
+        <span>👥 Team &amp; credits</span>
+      </div>
+    </a>
+
+  </div>
+
+  <div class="info">
+    <h3>Using the calculator</h3>
+    <p>Select a notified substance from the drop-down, enter the seized quantity with the right unit, and pick the offence date. The base sentence and fine are computed proportionally across the small-quantity / intermediate / commercial bands defined under the NDPS Act, 1985.</p>
+    <p>Use the <strong>Discretion</strong> sliders to express the Court's increase or decrease percentage, and tick the <strong>Aggravating</strong> and <strong>Mitigating</strong> factors that apply. The live <strong>Report</strong> tab summarises the inputs, the chemical and statutory specification, and the resulting sentence and fine.</p>
+    <p>For comparing multiple hypotheticals — different substances, different quantities, or the same case under varying judicial discretion — open the <strong>Comparison</strong> page.</p>
+  </div>
+
+  <footer class="site">
+    <span>Justice Anoop Chitkara <span style="opacity:0.7;">©</span></span>
+    <span>Feedback: <a href="mailto:sentencecalculator.in@gmail.com">sentencecalculator.in@gmail.com</a></span>
+    <span>Support: <a href="mailto:customer.support@defactoinfotech.com">customer.support@defactoinfotech.com</a></span>
+  </footer>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Sentence Calculator · NDPS Act 1985</title>
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect width="200" height="200" fill="#6e36a7"/><g transform="translate(60,55)" fill="#d8c97a" stroke="#d8c97a" stroke-width="2"><rect x="0" y="0" width="8" height="80"/><rect x="72" y="0" width="8" height="80"/><rect x="-12" y="18" width="104" height="5"/><rect x="-6" y="55" width="92" height="5"/><path d="M-18 80 L98 80 L88 92 L-8 92 Z"/></g></svg></template>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+  /* Fluent UI 9 design tokens — distilled */
+  :root {
+    /* Neutral palette */
+    --bg: #f5f5f5;                    /* colorNeutralBackground3 */
+    --paper: #ffffff;                 /* colorNeutralBackground1 */
+    --paper-2: #fafafa;               /* colorNeutralBackground2 */
+    --paper-hover: #f5f5f5;
+    --ink: #242424;                   /* colorNeutralForeground1 */
+    --ink-2: #424242;                 /* colorNeutralForeground2 */
+    --ink-3: #616161;                 /* colorNeutralForeground3 */
+    --ink-disabled: #bdbdbd;          /* colorNeutralForegroundDisabled */
+    --rule: #e0e0e0;                  /* colorNeutralStroke2 */
+    --rule-2: #d1d1d1;                /* colorNeutralStroke1 */
+    --rule-strong: #b3b3b3;
+
+    /* Brand — Royale ramp (royal purple) */
+    --brand-10: #2e1747;
+    --brand-20: #3b1d5e;
+    --brand-30: #4a2476;
+    --brand-40: #5b2c8e;
+    --brand-50: #6e36a7;
+    --brand-60: #8146bf;
+    --brand-70: #9760cd;
+    --brand-80: #ad7adb;
+    --brand-90: #c294e6;
+    --brand-100: #d9b6ee;
+    --brand-130: #f3e6fa;
+    --brand-140: #faf2fd;
+    --brand-150: #fdf9fe;
+    --brand: var(--brand-60);                /* colorBrandBackground */
+    --brand-hover: var(--brand-50);          /* colorBrandBackgroundHover */
+    --brand-pressed: var(--brand-40);        /* colorBrandBackgroundPressed */
+    --brand-fg: var(--brand-50);             /* colorBrandForeground1 */
+    --brand-fg-2: var(--brand-40);           /* colorBrandForeground2 */
+    --brand-bg-tint: var(--brand-140);       /* colorBrandBackground2 */
+    --brand-bg-tint-2: var(--brand-130);     /* hover/border tint */
+    /* Royale gold accent — for select decoration */
+    --accent-gold: #b8860b;
+    --accent-gold-soft: #fbf3df;
+
+    /* Status palette */
+    --danger: #c50f1f;                /* colorPaletteRedForeground1 */
+    --danger-bg: #fdf3f4;             /* colorPaletteRedBackground1 */
+    --danger-border: #f1bbbc;
+    --success: #0e700e;               /* colorPaletteGreenForeground1 */
+    --success-bg: #f1faf1;
+    --success-border: #9fd89f;
+    --warn: #bc4b09;                  /* colorPaletteDarkOrangeForeground1 */
+    --warn-bg: #fdf6ec;
+    --warn-border: #f6c187;
+    --info-bg: var(--brand-140);
+
+    /* Radii */
+    --r-sm: 4px;
+    --r-md: 4px;     /* Fluent default */
+    --r-lg: 8px;
+    --r-circ: 999px;
+
+    /* Shadows (curated subset) */
+    --shadow-2: 0 0 2px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.14);
+    --shadow-4: 0 0 2px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.14);
+    --shadow-8: 0 0 2px rgba(0,0,0,0.12), 0 4px 8px rgba(0,0,0,0.14);
+    --shadow-16: 0 0 2px rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.14);
+
+    /* Type */
+    --font: "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    --font-mono: "Cascadia Code", "Consolas", ui-monospace, monospace;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font);
+    font-size: 14px;
+    line-height: 20px;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    padding-bottom: 120px;
+  }
+  button { font-family: inherit; cursor: pointer; }
+  input, select { font-family: inherit; }
+  .mono { font-family: var(--font-mono); }
+
+  /* ──────── Header (Fluent app shell) ──────── */
+  .header {
+    background: var(--paper);
+    border-bottom: 1px solid var(--rule);
+    padding: 12px 24px;
+  }
+  .header-inner {
+    max-width: 1340px; margin: 0 auto;
+    display: grid;
+    grid-template-columns: 48px 1fr auto;
+    align-items: center;
+    gap: 16px;
+  }
+  .seal {
+    width: 40px; height: 40px;
+    object-fit: contain;
+    display: block;
+  }
+  .header-title h1 {
+    margin: 0;
+    color: var(--ink);
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    line-height: 28px;
+  }
+  .header-title .actname {
+    color: var(--ink-3);
+    font-size: 12px;
+    line-height: 16px;
+    margin-top: 2px;
+    font-weight: 400;
+  }
+  .pill-warn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--warn-bg);
+    color: var(--warn);
+    border: 1px solid var(--warn-border);
+    border-radius: var(--r-md);
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 16px;
+  }
+  .pill-warn .ic {
+    width: 14px; height: 14px;
+    display: grid; place-items: center;
+    color: var(--warn);
+    font-size: 12px;
+  }
+  .disclaimer-strip {
+    max-width: 1340px; margin: 6px auto 0;
+    padding: 0 4px;
+    color: var(--ink-3);
+    font-size: 12px;
+    line-height: 16px;
+  }
+
+  /* ──────── Shell layout ──────── */
+  .shell {
+    max-width: 1340px;
+    margin: 16px auto 0;
+    padding: 0 24px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    gap: 16px;
+  }
+  @media (max-width: 1080px) { .shell { grid-template-columns: 1fr; } }
+  .col { display: flex; flex-direction: column; gap: 16px; }
+
+  /* ──────── Card (Fluent Card) ──────── */
+  .card {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-2);
+    overflow: hidden;
+  }
+  .card-head {
+    padding: 12px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--rule);
+    gap: 12px;
+  }
+  .card-head h2 {
+    margin: 0;
+    color: var(--ink);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 20px;
+    letter-spacing: -0.005em;
+    text-transform: none;
+  }
+  /* aggressive/mitigating header tints – sectional color cue */
+  .card-head.aggrav { background: var(--danger-bg); border-bottom-color: var(--danger-border); }
+  .card-head.aggrav h2 { color: var(--danger); }
+  .card-head.mitig { background: var(--success-bg); border-bottom-color: var(--success-border); }
+  .card-head.mitig h2 { color: var(--success); }
+  .card-head .actions { display: flex; gap: 8px; }
+  .card-body { padding: 16px; }
+
+  /* ──────── Buttons (Fluent v9) ──────── */
+  .btn {
+    background: var(--brand);
+    color: #fff;
+    border: 1px solid var(--brand);
+    padding: 5px 12px;
+    border-radius: var(--r-md);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 20px;
+    height: 32px;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: background 0.1s, border-color 0.1s, box-shadow 0.1s;
+  }
+  .btn:hover { background: var(--brand-hover); border-color: var(--brand-hover); }
+  .btn:active { background: var(--brand-pressed); border-color: var(--brand-pressed); }
+  .btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .btn:disabled {
+    background: #f0f0f0; color: var(--ink-disabled);
+    border-color: var(--rule); cursor: not-allowed;
+  }
+  /* Subtle button — Fluent "subtle" */
+  .btn.ghost {
+    background: transparent;
+    color: var(--ink);
+    border-color: transparent;
+  }
+  .btn.ghost:hover { background: #f0f0f0; }
+  .btn.ghost:active { background: #e6e6e6; }
+  /* Outline tab buttons */
+  .btn.tab {
+    background: transparent;
+    color: var(--ink-2);
+    border: 1px solid var(--rule-2);
+    height: 28px; padding: 3px 10px;
+    font-weight: 400; font-size: 13px;
+  }
+  .btn.tab:hover { background: var(--paper-hover); color: var(--ink); }
+  .btn.tab.active {
+    background: var(--brand-bg-tint);
+    color: var(--brand-fg);
+    border-color: var(--brand-fg);
+    font-weight: 600;
+  }
+
+  /* ──────── Form (Fluent Field/Input) ──────── */
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 0;
+    border-bottom: 1px solid transparent;
+  }
+  .form-row + .form-row { border-top: 1px solid var(--rule); }
+  .form-row label {
+    font-size: 14px; color: var(--ink); font-weight: 400;
+  }
+  .form-row .sub-label {
+    display: block;
+    font-size: 12px;
+    color: var(--ink-3);
+    margin-top: 2px;
+    font-style: normal;
+  }
+  /* Fluent Input — bottom-border accent on focus */
+  .input {
+    border: 1px solid var(--rule-2);
+    border-bottom-color: var(--ink-3);
+    background: var(--paper);
+    border-radius: var(--r-md) var(--r-md) 0 0;
+    padding: 5px 10px;
+    font-size: 14px;
+    line-height: 20px;
+    color: var(--ink);
+    width: 200px;
+    height: 32px;
+    transition: border-color 0.1s, box-shadow 0.1s;
+  }
+  .input:hover { border-color: var(--rule-strong); border-bottom-color: var(--ink); }
+  .input:focus {
+    outline: none;
+    border-color: var(--rule-2);
+    border-bottom: 2px solid var(--brand);
+    padding-bottom: 4px;
+  }
+  .input.num { width: 96px; text-align: right; font-family: var(--font-mono); font-size: 13px; }
+  .input.sm { width: 64px; padding: 5px 8px; font-size: 13px; text-align: right; font-family: var(--font-mono); height: 28px; }
+  .input-group { display: flex; gap: 8px; align-items: center; }
+  /* Fluent Dropdown */
+  .select {
+    border: 1px solid var(--rule-2);
+    border-bottom-color: var(--ink-3);
+    background: var(--paper);
+    border-radius: var(--r-md) var(--r-md) 0 0;
+    padding: 5px 28px 5px 10px;
+    font-size: 14px;
+    line-height: 20px;
+    height: 32px;
+    color: var(--ink);
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' stroke='%23424242' stroke-width='1.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    cursor: pointer;
+  }
+  .select:hover { border-color: var(--rule-strong); border-bottom-color: var(--ink); }
+
+  /* ──────── Results (Fluent MessageBar style — informational) ──────── */
+  .results {
+    margin-top: 12px;
+    background: var(--info-bg);
+    border: 1px solid var(--brand-bg-tint-2);
+    border-radius: var(--r-md);
+    padding: 12px 14px;
+  }
+  .result-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    padding: 4px 0;
+    font-size: 13px;
+    line-height: 18px;
+    color: var(--ink-2);
+  }
+  .result-row .v {
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 13px;
+  }
+  .result-row .v.big {
+    font-family: var(--font);
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  /* ──────── Banner (Fluent MessageBar — intent: brand / info) ──────── */
+  .banner {
+    margin: 12px 0 0;
+    background: var(--brand-bg-tint);
+    color: var(--brand-fg-2);
+    border: 1px solid var(--brand-bg-tint-2);
+    border-radius: var(--r-md);
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: left;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .banner::before {
+    content: "ⓘ";
+    color: var(--brand);
+    font-size: 14px;
+    flex: 0 0 auto;
+  }
+  .banner.cap {
+    background: var(--paper-2); color: var(--ink-2);
+    border-color: var(--rule);
+  }
+  .banner.cap::before { content: "▣"; color: var(--ink-3); }
+
+  /* ──────── Tables ──────── */
+  .table-head {
+    display: grid;
+    grid-template-columns: 30px 1fr 96px 96px 96px;
+    gap: 10px;
+    padding: 10px 16px;
+    background: var(--paper-2);
+    border-bottom: 1px solid var(--rule);
+    border-top: 1px solid var(--rule);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-2);
+    text-transform: none;
+    letter-spacing: 0;
+    line-height: 16px;
+  }
+  .table-head .num-col {
+    text-align: center;
+    font-size: 12px;
+    line-height: 16px;
+  }
+  .table-head .num-col em {
+    display: block; font-style: normal; font-weight: 400;
+    color: var(--ink-3); font-size: 11px; margin-top: 2px;
+  }
+  .factor-row {
+    display: grid;
+    grid-template-columns: 30px 1fr 96px 96px 96px;
+    gap: 10px;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--rule);
+    align-items: center;
+    font-size: 13px;
+    line-height: 18px;
+  }
+  .factor-row:last-of-type { border-bottom: 0; }
+  .factor-row:hover { background: var(--paper-hover); }
+  .factor-row .idx {
+    display: inline-flex; gap: 6px; align-items: center;
+    font-family: var(--font); font-size: 12px; color: var(--ink-3);
+  }
+  .factor-row .arrow { font-size: 13px; line-height: 1; font-weight: 700; }
+  .factor-row.aggrav .arrow { color: var(--danger); }
+  .factor-row.mitig .arrow { color: var(--success); }
+  .factor-row .label { color: var(--ink); }
+  .factor-row .cell { text-align: right; }
+
+  .table-foot {
+    display: grid;
+    grid-template-columns: 30px 1fr 96px 96px 96px;
+    gap: 10px;
+    padding: 10px 16px;
+    background: var(--paper-2);
+    border-top: 1px solid var(--rule);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .table-foot .label { color: var(--ink-2); grid-column: 1 / 3; }
+  .table-foot .val { text-align: right; font-family: var(--font-mono); color: var(--ink); }
+  .table-foot .val.aggrav { color: var(--danger); }
+  .table-foot .val.mitig { color: var(--success); }
+
+  .custom-row {
+    display: flex; gap: 8px; padding: 12px 16px;
+    background: var(--paper-2);
+    border-top: 1px solid var(--rule);
+  }
+  .custom-row input {
+    flex: 1;
+    border: 1px solid var(--rule-2);
+    border-bottom-color: var(--ink-3);
+    border-radius: var(--r-md) var(--r-md) 0 0;
+    padding: 5px 10px;
+    font-size: 14px; height: 32px;
+  }
+  .custom-row input:focus {
+    outline: none; border-bottom: 2px solid var(--brand); padding-bottom: 4px;
+  }
+
+  /* ──────── Report (Fluent Accordion/Tab) ──────── */
+  .report-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--rule);
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .report-head h2 {
+    margin: 0;
+    font-size: 14px;
+    color: var(--ink);
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .report-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+  .report-body { padding: 16px; }
+  .report-body h3 {
+    margin: 0 0 8px;
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--brand-fg);
+    line-height: 20px;
+  }
+  .spec-row {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 14px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--rule);
+    font-size: 13px;
+    line-height: 18px;
+  }
+  .spec-row:last-child { border-bottom: 0; }
+  .spec-row .k { color: var(--ink-2); }
+  .spec-row .v { color: var(--ink); font-family: var(--font-mono); font-size: 12.5px; }
+  .spec-row .v.na { color: var(--ink-3); font-style: italic; font-family: var(--font); }
+
+  .report-section + .report-section { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--rule); }
+
+  /* Fluent MessageBar — warning intent */
+  .disclaimer-box {
+    margin-top: 12px;
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-border);
+    border-radius: var(--r-md);
+    padding: 8px 12px;
+    display: flex; gap: 8px; align-items: flex-start;
+    font-size: 13px;
+    line-height: 18px;
+  }
+  .disclaimer-box .ic { color: var(--warn); font-size: 16px; line-height: 18px; }
+  .disclaimer-box .body { color: var(--ink); }
+  .disclaimer-box .body b { color: var(--warn); font-weight: 600; }
+
+  /* ──────── Summary panel ──────── */
+  .summary-grid { display: grid; grid-template-columns: 1fr; gap: 0; }
+  .summary-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 14px;
+    padding: 6px 0;
+    font-size: 13px;
+    line-height: 18px;
+    color: var(--ink-2);
+  }
+  .summary-row .v {
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-weight: 500;
+  }
+  .summary-row .v.big {
+    font-family: var(--font);
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  /* ──────── FAB (Fluent v9 doesn't really have FABs; reuse but flatter) ──────── */
+  .fab-bar {
+    position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%);
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: var(--r-circ);
+    padding: 4px;
+    display: flex; gap: 2px;
+    box-shadow: var(--shadow-16);
+    z-index: 50;
+  }
+  .fab {
+    width: 36px; height: 36px; border-radius: var(--r-circ);
+    border: 0; background: transparent;
+    color: var(--ink-2);
+    display: grid; place-items: center;
+    transition: background 0.1s, color 0.1s;
+  }
+  .fab:hover { background: var(--paper-hover); color: var(--ink); }
+  .fab.active { background: var(--brand-bg-tint); color: var(--brand-fg); }
+  .fab svg { width: 18px; height: 18px; }
+
+  /* ──────── Footer ──────── */
+  footer.site {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--paper);
+    border-top: 1px solid var(--rule);
+    color: var(--ink-2);
+    font-size: 12px;
+    line-height: 16px;
+    padding: 10px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    z-index: 40;
+  }
+  footer.site a { color: var(--brand-fg); text-decoration: none; }
+  footer.site a:hover { text-decoration: underline; }
+  footer.site .pip { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+  footer.site .survey a { font-weight: 600; }
+
+  .row-flex { display: flex; align-items: center; gap: 8px; }
+
+  /* Toast (Fluent Toaster look) */
+  .toast {
+    position: fixed; bottom: 116px; left: 50%; transform: translateX(-50%);
+    background: var(--paper);
+    color: var(--ink);
+    border: 1px solid var(--rule);
+    padding: 10px 16px;
+    border-radius: var(--r-md);
+    font-size: 13px;
+    box-shadow: var(--shadow-16);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s, transform 0.2s;
+    z-index: 100;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(-6px); }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <img class="seal" src="assets/logo.png" alt="Sentence Calculator" />
+    <div class="header-title">
+      <h1>Sentence Calculator</h1>
+      <div class="actname">The Narcotic Drugs and Psychotropic Substances Act, 1985 (India)</div>
+    </div>
+    <nav style="display:flex;gap:14px;align-items:center;font-size:13px;">
+      <a href="comparison.html" style="color:var(--brand-fg);text-decoration:none;font-weight:500;">Compare</a>
+      <a href="about.html" style="color:var(--brand-fg);text-decoration:none;font-weight:500;">About</a>
+      <button class="pill-warn"><span class="ic">⚠</span> Consider without Relying</button>
+    </nav>
+  </div>
+  <div class="disclaimer-strip">Computed values are an aid for legal practitioners. They are not to be treated as decisive or replace the Court's independent reasoning.</div>
+</header>
+
+<div id="root"></div>
+
+<div class="toast" id="toast">Copied to clipboard</div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="data.jsx"></script>
+<script type="text/babel" src="app.jsx"></script>
+</body>
+</html>
