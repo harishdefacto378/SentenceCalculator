@@ -1,5 +1,6 @@
 // LandingPage.jsx — Landing page component for Sentence Calculator
-// Loaded as type="text/babel"; exposes window.LandingPage for use in app.jsx.
+import './LandingPage.css';
+import logoUrl from './assets/logo.png';
 
 // ── SVG thumbnails ────────────────────────────────────────────────────────────
 
@@ -48,7 +49,7 @@ function AboutThumbSvg() {
 function LandingHero() {
   return (
     <div className="lp-hero">
-      <img className="lp-seal" src="assets/logo.png" alt="" />
+      <img className="lp-seal" src={logoUrl} alt="" />
       <div>
         <h1>Sentence Calculator</h1>
         <div className="lp-actname">
