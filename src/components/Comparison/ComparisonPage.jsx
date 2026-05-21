@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { SUBSTANCES, UNITS } from '../../../data';
 import logoUrl from '../../../assets/logo.png';
 import './ComparisonPage.css';
@@ -340,12 +341,13 @@ function ComparisonContent() {
   );
 }
 
-export default function ComparisonPage({ onNavigate }) {
+export default function ComparisonPage() {
+  const navigate = useNavigate();
   return (
     <div className="cmp-page">
       <header className="header">
         <div className="header-inner">
-          <button className="back-btn" onClick={() => onNavigate('landing')} aria-label="Back">
+          <button className="back-btn" onClick={() => navigate('/')} aria-label="Back">
             <svg width="18" height="18" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </button>
           <img className="seal" src={logoUrl} alt="Sentence Calculator" />

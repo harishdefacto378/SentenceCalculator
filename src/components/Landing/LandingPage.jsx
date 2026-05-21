@@ -6,12 +6,12 @@ import ToolsGrid from './ToolsGrid';
 import InfoSection from './InfoSection';
 import Footer from './Footer';
 
-export default function LandingPage({ onNavigate }) {
+export default function LandingPage() {
   return (
     <div className="lp-shell">
       <Navbar />
       <Ticker />
-      <ToolsGrid onNavigate={onNavigate} />
+      <ToolsGrid />
       <InfoSection />
       <Footer />
     </div>

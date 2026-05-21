@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import ToolCard, { THUMB_ICONS } from './ToolCard';
 
 const TOOLS = [
@@ -34,7 +35,8 @@ const TOOLS = [
   },
 ];
 
-export default function ToolsGrid({ onNavigate }) {
+export default function ToolsGrid() {
+  const navigate = useNavigate();
   return (
     <>
       <h2 className="lp-section-heading">Choose a tool</h2>
@@ -49,7 +51,7 @@ export default function ToolsGrid({ onNavigate }) {
             features={tool.features}
             openLabel={tool.openLabel}
             metaItems={tool.metaItems}
-            onClick={() => onNavigate(tool.target)}
+            onClick={() => navigate('/' + tool.target)}
           />
         ))}
       </div>

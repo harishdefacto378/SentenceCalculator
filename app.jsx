@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom/client';
+import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import ENV from './src/config/env';
 import LandingPage from './src/components/Landing/LandingPage';
 import ComparisonPage from './src/components/Comparison/ComparisonPage';
@@ -316,7 +317,8 @@ function FabBar({ active, setActive, onHome }) {
 // App
 // ────────────────────────────────────────────────────────────────────────────
 
-function App({ onBackToLanding }) {
+function App() {
+  const navigate = useNavigate();
   const [propState, setPropState] = useState({ substance: "Heroin (Diacetylmorphine)", qty: "50", unit: "Gram", date: "" });
   const [discState, setDiscState] = useState({ inc: 0, dec: 0 });
   const [aggravFactors, setAggravFactors] = useState(AGGRAVATING);
@@ -435,7 +437,7 @@ function App({ onBackToLanding }) {
         </div>
       </div>
 
-      <FabBar active={fabActive} setActive={setFabActive} onHome={onBackToLanding} />
+      <FabBar active={fabActive} setActive={setFabActive} onHome={() => navigate('/')} />
 
       <footer className="site">
         <div className="pip">Justice Anoop Chitkara <span style={{ opacity: 0.7 }}>©</span></div>
@@ -449,33 +451,53 @@ function App({ onBackToLanding }) {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
-// Root — manages navigation between the landing page and the calculator
+// Router — defines all routes and manages browser nav side-effects
 // ────────────────────────────────────────────────────────────────────────────
 
-function Root() {
-  const [page, setPage] = useState("landing");
-
-  // Show the static app header only for the calculator page.
-  useEffect(() => {
-    const header = document.getElementById("app-header");
-    if (header) header.style.display = page === "calculator" ? "" : "none";
-  }, [page]);
-
-  // Expose navigation for the static header's onclick links.
-  useEffect(() => {
-    window.__navigate = (to) => setPage(to);
-    return () => { window.__navigate = null; };
-  }, []);
-
-  function handleNavigate(to) {
-    setPage(to);
-  }
-
-  if (page === "landing")    return <LandingPage onNavigate={handleNavigate} />;
-  if (page === "comparison") return <ComparisonPage onNavigate={handleNavigate} />;
-  if (page === "about")      return <AboutPage onNavigate={handleNavigate} />;
-
-  return <App onBackToLanding={() => setPage("landing")} />;
+function NotFound() {
+  const navigate = useNavigate();
+  return (
+    <div style={{ textAlign: 'center', padding: '60px 20px', fontFamily: 'var(--font-sans, sans-serif)' }}>
+      <h2 style={{ fontSize: '2rem', marginBottom: '12px' }}>404 — Page Not Found</h2>
+      <p style={{ color: '#666', marginBottom: '24px' }}>The page you're looking for doesn't exist.</p>
+      <button
+        onClick={() => navigate('/')}
+        style={{ padding: '10px 24px', cursor: 'pointer', borderRadius: '6px', border: '1px solid #ccc' }}
+      >
+        Back to Home
+      </button>
+    </div>
+  );
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(<Root />);
+function AppRouter() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const header = document.getElementById("app-header");
+    if (header) header.style.display = location.pathname === '/calculator' ? "" : "none";
+  }, [location]);
+
+  useEffect(() => {
+    const routeMap = { landing: '/', calculator: '/calculator', comparison: '/comparison', about: '/about' };
+    window.__navigate = (to) => navigate(routeMap[to] || '/');
+    return () => { window.__navigate = null; };
+  }, [navigate]);
+
+  return (
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/calculator" element={<App />} />
+      <Route path="/comparison" element={<ComparisonPage />} />
+      <Route path="/about" element={<AboutPage />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <BrowserRouter>
+    <AppRouter />
+  </BrowserRouter>
+);

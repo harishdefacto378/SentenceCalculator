@@ -1,13 +1,15 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import logoUrl from '../../../assets/logo.png';
 import './AboutPage.css';
 
-export default function AboutPage({ onNavigate }) {
+export default function AboutPage() {
+  const navigate = useNavigate();
   return (
     <div className="ab-page">
       <header className="header">
         <div className="header-inner">
-          <button className="back-btn" onClick={() => onNavigate('landing')} aria-label="Back">
+          <button className="back-btn" onClick={() => navigate('/')} aria-label="Back">
             <svg width="18" height="18" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </button>
           <img className="seal" src={logoUrl} alt="Sentence Calculator" />
