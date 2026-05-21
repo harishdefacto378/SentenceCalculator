@@ -1,6 +1,8 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom/client';
 import LandingPage from './src/components/Landing/LandingPage';
+import ComparisonPage from './src/components/Comparison/ComparisonPage';
+import AboutPage from './src/components/About/AboutPage';
 import { SUBSTANCES, UNITS, AGGRAVATING, MITIGATING } from './data';
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -452,21 +454,25 @@ function App({ onBackToLanding }) {
 function Root() {
   const [page, setPage] = useState("landing");
 
-  // Show/hide the static app header (defined in index.html) based on current page.
+  // Show the static app header only for the calculator page.
   useEffect(() => {
     const header = document.getElementById("app-header");
-    if (header) header.style.display = page === "landing" ? "none" : "";
+    if (header) header.style.display = page === "calculator" ? "" : "none";
   }, [page]);
 
+  // Expose navigation for the static header's onclick links.
+  useEffect(() => {
+    window.__navigate = (to) => setPage(to);
+    return () => { window.__navigate = null; };
+  }, []);
+
   function handleNavigate(to) {
-    if (to === "comparison") { window.location.href = "comparison.html"; return; }
-    if (to === "about")      { window.location.href = "about.html";      return; }
     setPage(to);
   }
 
-  if (page === "landing") {
-    return <LandingPage onNavigate={handleNavigate} />;
-  }
+  if (page === "landing")    return <LandingPage onNavigate={handleNavigate} />;
+  if (page === "comparison") return <ComparisonPage onNavigate={handleNavigate} />;
+  if (page === "about")      return <AboutPage onNavigate={handleNavigate} />;
 
   return <App onBackToLanding={() => setPage("landing")} />;
 }
