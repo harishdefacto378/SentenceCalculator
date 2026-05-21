@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "rsbuild dev",
+    "staging": "rsbuild build --env-mode staging",
     "build": "rsbuild build",
     "preview": "rsbuild preview",
     "start": "node api/server.js",

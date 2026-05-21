@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom/client';
+import ENV from './src/config/env';
 import LandingPage from './src/components/Landing/LandingPage';
 import ComparisonPage from './src/components/Comparison/ComparisonPage';
 import AboutPage from './src/components/About/AboutPage';
@@ -339,7 +340,7 @@ function App({ onBackToLanding }) {
   const [base, setBase] = useState({ sentenceDays: 0, fine: 0, type: "NA", pctOfUpper: 0, section: "NA" });
 
   async function fetchBase(sub, qty) {
-    const endpoint = window.API_CALC_ENDPOINT || "/api/calculate";
+    const endpoint = `${ENV.API_BASE_URL}/api/calculate`;
     try {
       const res = await fetch(endpoint, {
         method: "POST",
