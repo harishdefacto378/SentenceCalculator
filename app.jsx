@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom/client';
-import LandingPage from './LandingPage';
+import LandingPage from './src/components/Landing/LandingPage';
 import { SUBSTANCES, UNITS, AGGRAVATING, MITIGATING } from './data';
 
 // ────────────────────────────────────────────────────────────────────────────
