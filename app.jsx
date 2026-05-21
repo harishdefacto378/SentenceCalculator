@@ -1,5 +1,8 @@
 const { useState, useMemo, useEffect, useRef } = React;
 
+// LandingPage is defined in LandingPage.jsx (loaded before this file).
+const LandingPage = window.LandingPage;
+
 // ────────────────────────────────────────────────────────────────────────────
 // Calculation helpers
 // ────────────────────────────────────────────────────────────────────────────
@@ -284,7 +287,7 @@ function Spec({ k, v }) {
   );
 }
 
-function FabBar({ active, setActive }) {
+function FabBar({ active, setActive, onHome }) {
   const Icon = ({ name }) => {
     const paths = {
       up:   <path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round"/>,
@@ -298,7 +301,7 @@ function FabBar({ active, setActive }) {
   return (
     <div className="fab-bar">
       <button className="fab" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}><Icon name="up" /></button>
-      <button className={"fab " + (active === "home" ? "active" : "")} onClick={() => setActive("home")}><Icon name="home" /></button>
+      <button className={"fab " + (active === "home" ? "active" : "")} onClick={onHome || (() => setActive("home"))}><Icon name="home" /></button>
       <button className={"fab " + (active === "stats" ? "active" : "")} onClick={() => setActive("stats")}><Icon name="bars" /></button>
       <button className={"fab " + (active === "report" ? "active" : "")} onClick={() => setActive("report")}><Icon name="book" /></button>
       <button className={"fab " + (active === "info" ? "active" : "")} onClick={() => setActive("info")}><Icon name="info" /></button>
@@ -310,7 +313,7 @@ function FabBar({ active, setActive }) {
 // App
 // ────────────────────────────────────────────────────────────────────────────
 
-function App() {
+function App({ onBackToLanding }) {
   const [propState, setPropState] = useState({ substance: "Heroin (Diacetylmorphine)", qty: "50", unit: "Gram", date: "" });
   const [discState, setDiscState] = useState({ inc: 0, dec: 0 });
   const [aggravFactors, setAggravFactors] = useState(window.AGGRAVATING);
@@ -429,7 +432,7 @@ function App() {
         </div>
       </div>
 
-      <FabBar active={fabActive} setActive={setFabActive} />
+      <FabBar active={fabActive} setActive={setFabActive} onHome={onBackToLanding} />
 
       <footer className="site">
         <div className="pip">Justice Anoop Chitkara <span style={{ opacity: 0.7 }}>©</span></div>
@@ -442,4 +445,30 @@ function App() {
   );
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+// ────────────────────────────────────────────────────────────────────────────
+// Root — manages navigation between the landing page and the calculator
+// ────────────────────────────────────────────────────────────────────────────
+
+function Root() {
+  const [page, setPage] = useState("landing");
+
+  // Show/hide the static app header (defined in index.html) based on current page.
+  useEffect(() => {
+    const header = document.getElementById("app-header");
+    if (header) header.style.display = page === "landing" ? "none" : "";
+  }, [page]);
+
+  function handleNavigate(to) {
+    if (to === "comparison") { window.location.href = "comparison.html"; return; }
+    if (to === "about")      { window.location.href = "about.html";      return; }
+    setPage(to);
+  }
+
+  if (page === "landing") {
+    return <LandingPage onNavigate={handleNavigate} />;
+  }
+
+  return <App onBackToLanding={() => setPage("landing")} />;
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<Root />);

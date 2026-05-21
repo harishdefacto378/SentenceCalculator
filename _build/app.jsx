@@ -1,41 +1,15 @@
 const { useState, useMemo, useEffect, useRef } = React;
 
+// LandingPage is defined in LandingPage.jsx (loaded before this file).
+const LandingPage = window.LandingPage;
+
 // ────────────────────────────────────────────────────────────────────────────
 // Calculation helpers
 // ────────────────────────────────────────────────────────────────────────────
 
-// Returns base sentence (in days) and fine (₹) before discretion / factors.
-function computeProportional(substance, qty) {
-  if (!substance || !qty || qty <= 0) {
-    return { sentenceDays: 0, fine: 0, type: "NA", pctOfUpper: 0, section: "NA" };
-  }
-  const { smallQty, commercialQty, section } = substance;
-  let type, pctOfUpper, sentenceDays, fine;
-
-  if (qty < smallQty) {
-    type = "Small Quantity";
-    pctOfUpper = 0;
-    // up to 1 year, scales with qty proportional to small threshold
-    const ratio = qty / smallQty;
-    sentenceDays = Math.round(365 * ratio);
-    fine = Math.round(10000 * ratio);
-  } else if (qty >= commercialQty) {
-    type = "Commercial Quantity";
-    pctOfUpper = 100;
-    // 10–20 years; map to qty above commercial up to 5× commercial
-    const over = Math.min(1, (qty - commercialQty) / (commercialQty * 4));
-    sentenceDays = Math.round((10 + over * 10) * 365);
-    fine = Math.round(100000 + over * 100000);
-  } else {
-    type = "Intermediate (Lesser) Quantity";
-    // map between small (1y, ₹10k) and commercial (10y, ₹1L)
-    const ratio = (qty - smallQty) / (commercialQty - smallQty);
-    pctOfUpper = Math.round(ratio * 100);
-    sentenceDays = Math.round((1 + ratio * 9) * 365);
-    fine = Math.round(10000 + ratio * 90000);
-  }
-  return { sentenceDays, fine, type, pctOfUpper, section };
-}
+// Calculation moved to Dataverse custom API. Front-end calls the configured
+// API endpoint (`window.API_CALC_ENDPOINT` or `/api/calculate`) to receive
+// the base sentence/fine. The client keeps only formatting helpers.
 
 function daysToYMD(days) {
   if (!days) return { y: 0, m: 0, d: 0 };
@@ -313,7 +287,7 @@ function Spec({ k, v }) {
   );
 }
 
-function FabBar({ active, setActive }) {
+function FabBar({ active, setActive, onHome }) {
   const Icon = ({ name }) => {
     const paths = {
       up:   <path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round"/>,
@@ -327,7 +301,7 @@ function FabBar({ active, setActive }) {
   return (
     <div className="fab-bar">
       <button className="fab" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}><Icon name="up" /></button>
-      <button className={"fab " + (active === "home" ? "active" : "")} onClick={() => setActive("home")}><Icon name="home" /></button>
+      <button className={"fab " + (active === "home" ? "active" : "")} onClick={onHome || (() => setActive("home"))}><Icon name="home" /></button>
       <button className={"fab " + (active === "stats" ? "active" : "")} onClick={() => setActive("stats")}><Icon name="bars" /></button>
       <button className={"fab " + (active === "report" ? "active" : "")} onClick={() => setActive("report")}><Icon name="book" /></button>
       <button className={"fab " + (active === "info" ? "active" : "")} onClick={() => setActive("info")}><Icon name="info" /></button>
@@ -339,7 +313,7 @@ function FabBar({ active, setActive }) {
 // App
 // ────────────────────────────────────────────────────────────────────────────
 
-function App() {
+function App({ onBackToLanding }) {
   const [propState, setPropState] = useState({ substance: "Heroin (Diacetylmorphine)", qty: "50", unit: "Gram", date: "" });
   const [discState, setDiscState] = useState({ inc: 0, dec: 0 });
   const [aggravFactors, setAggravFactors] = useState(window.AGGRAVATING);
@@ -360,7 +334,30 @@ function App() {
     return n * (window.UNITS[propState.unit] || 1);
   }, [propState.qty, propState.unit]);
 
-  const base = useMemo(() => computeProportional(substance, qtyInGrams), [substance, qtyInGrams]);
+  const [base, setBase] = useState({ sentenceDays: 0, fine: 0, type: "NA", pctOfUpper: 0, section: "NA" });
+
+  async function fetchBase(sub, qty) {
+    const endpoint = window.API_CALC_ENDPOINT || "/api/calculate";
+    try {
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ substanceName: sub?.name, qty }),
+      });
+      if (!res.ok) throw new Error("Calculation API error");
+      const data = await res.json();
+      setBase(data);
+      return data;
+    } catch (err) {
+      console.error("Calc API failed:", err);
+      return null;
+    }
+  }
+
+  useEffect(() => {
+    // Fetch base calculation when substance or quantity changes (keeps UI in sync).
+    fetchBase(substance, qtyInGrams);
+  }, [substance, qtyInGrams]);
 
   const discretion = useMemo(() => {
     const net = (discState.inc - discState.dec) / 100;
@@ -413,7 +410,7 @@ function App() {
           <ProportionalCalc
             state={propState} setState={setPropState}
             base={base} calculated={calculated}
-            onCalc={() => { setCalculated(true); toast("Proportional calculation updated"); }}
+            onCalc={async () => { await fetchBase(substance, qtyInGrams); setCalculated(true); toast("Proportional calculation updated"); }}
           />
           <ReportCard substance={substance} base={base} discretion={discretion} final={final} tab={reportTab} setTab={setReportTab} onCopy={copyReport} />
         </div>
@@ -435,7 +432,7 @@ function App() {
         </div>
       </div>
 
-      <FabBar active={fabActive} setActive={setFabActive} />
+      <FabBar active={fabActive} setActive={setFabActive} onHome={onBackToLanding} />
 
       <footer className="site">
         <div className="pip">Justice Anoop Chitkara <span style={{ opacity: 0.7 }}>©</span></div>
@@ -448,4 +445,30 @@ function App() {
   );
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+// ────────────────────────────────────────────────────────────────────────────
+// Root — manages navigation between the landing page and the calculator
+// ────────────────────────────────────────────────────────────────────────────
+
+function Root() {
+  const [page, setPage] = useState("landing");
+
+  // Show/hide the static app header (defined in index.html) based on current page.
+  useEffect(() => {
+    const header = document.getElementById("app-header");
+    if (header) header.style.display = page === "landing" ? "none" : "";
+  }, [page]);
+
+  function handleNavigate(to) {
+    if (to === "comparison") { window.location.href = "comparison.html"; return; }
+    if (to === "about")      { window.location.href = "about.html";      return; }
+    setPage(to);
+  }
+
+  if (page === "landing") {
+    return <LandingPage onNavigate={handleNavigate} />;
+  }
+
+  return <App onBackToLanding={() => setPage("landing")} />;
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<Root />);
