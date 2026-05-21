@@ -1,7 +1,7 @@
-const { useState, useMemo, useEffect, useRef } = React;
-
-// LandingPage is defined in LandingPage.jsx (loaded before this file).
-const LandingPage = window.LandingPage;
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import ReactDOM from 'react-dom/client';
+import LandingPage from './LandingPage';
+import { SUBSTANCES, UNITS, AGGRAVATING, MITIGATING } from './data';
 
 // ────────────────────────────────────────────────────────────────────────────
 // Calculation helpers
@@ -37,7 +37,7 @@ function fmtYMD({ y, m, d }) {
 // ────────────────────────────────────────────────────────────────────────────
 
 function ProportionalCalc({ state, setState, base, onCalc, calculated }) {
-  const subs = window.SUBSTANCES;
+  const subs = SUBSTANCES;
   const sub = subs.find(s => s.name === state.substance);
 
   return (
@@ -59,7 +59,7 @@ function ProportionalCalc({ state, setState, base, onCalc, calculated }) {
           <div className="input-group">
             <input className="input num" placeholder="0" value={state.qty} onChange={e => setState({ ...state, qty: e.target.value.replace(/[^\d.]/g, "") })} />
             <select className="select" value={state.unit} onChange={e => setState({ ...state, unit: e.target.value })}>
-              {Object.keys(window.UNITS).map(u => <option key={u} value={u}>{u}</option>)}
+              {Object.keys(UNITS).map(u => <option key={u} value={u}>{u}</option>)}
             </select>
           </div>
         </div>
@@ -223,7 +223,7 @@ function ReportCard({ substance, base, discretion, final, tab, setTab, onCopy })
           <Spec k="Notification Link" v={sub ? sub.notifLink : na} />
           <Spec k="Notification No." v={sub ? sub.notif : na} />
           <Spec k="Dated" v={sub ? sub.notifDate : "01-01-1970"} />
-          <Spec k="SR. No." v={sub ? String(window.SUBSTANCES.indexOf(sub) + 1) : na} />
+          <Spec k="SR. No." v={sub ? String(SUBSTANCES.indexOf(sub) + 1) : na} />
           <Spec k="Common Name (Name of Narcotic Drug and Psychotropic Substance — International non-proprietary name (INN))" v={sub ? sub.common : na} />
           <Spec k="Other Non-proprietary Name" v={sub ? sub.otherName : na} />
           <Spec k="Chemical Name" v={sub ? sub.chemical : na} />
@@ -236,7 +236,7 @@ function ReportCard({ substance, base, discretion, final, tab, setTab, onCopy })
           <Spec k="Notification Link" v={sub ? sub.notifLink : na} />
           <Spec k="Notification No." v={sub ? sub.notif : na} />
           <Spec k="Dated" v={sub ? sub.notifDate : "—"} />
-          <Spec k="SR. No." v={sub ? String(window.SUBSTANCES.indexOf(sub) + 1) : na} />
+          <Spec k="SR. No." v={sub ? String(SUBSTANCES.indexOf(sub) + 1) : na} />
           <Spec k="Common Name (Name of Narcotic Drug and Psychotropic Substance — International non-proprietary name (INN))" v={sub ? sub.common : na} />
           <Spec k="Other Non-proprietary Name" v={sub ? sub.otherName : na} />
           <Spec k="Chemical Name" v={sub ? sub.chemical : na} />
@@ -316,22 +316,22 @@ function FabBar({ active, setActive, onHome }) {
 function App({ onBackToLanding }) {
   const [propState, setPropState] = useState({ substance: "Heroin (Diacetylmorphine)", qty: "50", unit: "Gram", date: "" });
   const [discState, setDiscState] = useState({ inc: 0, dec: 0 });
-  const [aggravFactors, setAggravFactors] = useState(window.AGGRAVATING);
-  const [mitigFactors, setMitigFactors] = useState(window.MITIGATING);
+  const [aggravFactors, setAggravFactors] = useState(AGGRAVATING);
+  const [mitigFactors, setMitigFactors] = useState(MITIGATING);
   const [calculated, setCalculated] = useState(true);
   const [discCalculated, setDiscCalculated] = useState(true);
   const [reportTab, setReportTab] = useState("sentence");
   const [fabActive, setFabActive] = useState("home");
 
   const substance = useMemo(() =>
-    window.SUBSTANCES.find(s => s.name === propState.substance),
+    SUBSTANCES.find(s => s.name === propState.substance),
     [propState.substance]
   );
 
   const qtyInGrams = useMemo(() => {
     const n = parseFloat(propState.qty);
     if (!isFinite(n)) return 0;
-    return n * (window.UNITS[propState.unit] || 1);
+    return n * (UNITS[propState.unit] || 1);
   }, [propState.qty, propState.unit]);
 
   const [base, setBase] = useState({ sentenceDays: 0, fine: 0, type: "NA", pctOfUpper: 0, section: "NA" });

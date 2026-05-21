@@ -204,5 +204,4 @@ function LandingPage({ onNavigate }) {
   );
 }
 
-// Register globally so app.jsx (loaded after this file) can reference it.
-window.LandingPage = LandingPage;
+export default LandingPage;

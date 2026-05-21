@@ -139,4 +139,4 @@ const MITIGATING = [
   { id: "m10", label: "Family obligations / dependents.", sentence: 0, fine: 0, avg: 7 },
 ];
 
-Object.assign(window, { SUBSTANCES, UNITS, AGGRAVATING, MITIGATING });
+export { SUBSTANCES, UNITS, AGGRAVATING, MITIGATING };
