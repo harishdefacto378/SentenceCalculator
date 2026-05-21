@@ -11,4 +11,9 @@ export default defineConfig({
   html: {
     template: './index.html',
   },
+  server: {
+    proxy: {
+      '/api': 'http://localhost:3001',
+    },
+  },
 });

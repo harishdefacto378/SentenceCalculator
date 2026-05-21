@@ -45,5 +45,5 @@ app.post('/api/calculate', (req, res) => {
   res.json(result);
 });
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 app.listen(port, () => console.log(`Calc stub listening on http://localhost:${port}`));
