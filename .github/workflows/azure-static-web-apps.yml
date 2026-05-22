@@ -45,7 +45,7 @@ jobs:
           app_location: '/'
           # api_location is intentionally empty: api/ is a plain Express server,
           # not Azure Functions, so it cannot be deployed via Static Web Apps.
-          api_location: ''
+          api_location: '/'
           output_location: 'dist'
           skip_app_build: true
           ###### End of Repository/Build Configurations ######
