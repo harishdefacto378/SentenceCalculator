@@ -18,9 +18,13 @@ export default defineConfig({
   output: {
     distPath: {
       root: 'build',
+      assets: 'assets',
     },
   },
   server: {
+    publicDir: {
+      name: 'public',
+    },
     proxy: {
       '/api': devApiTarget,
     },

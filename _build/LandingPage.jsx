@@ -48,7 +48,7 @@ function AboutThumbSvg() {
 function LandingHero() {
   return (
     <div className="lp-hero">
-      <img className="lp-seal" src="assets/logo.png" alt="" />
+      <img className="lp-seal" src="/assets/logo.png" alt="" />
       <div>
         <h1>Sentence Calculator</h1>
         <div className="lp-actname">
