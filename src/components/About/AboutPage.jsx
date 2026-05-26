@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import logoUrl from '../../../assets/logo.png';
+import YouTubePlayer from './YouTubePlayer';
 import './AboutPage.css';
 
 export default function AboutPage() {
@@ -37,59 +38,42 @@ export default function AboutPage() {
 
           <h2 className="page-title">About calculator</h2>
 
+
          
-         {/* User videos */}
-<section className="sec">
-  <h3>User videos</h3>
-  <div className="video-grid">
 
-    {/* English */}
-    <div className="video-card">
-      <div className="video-lang">English</div>
-      <div className="video-frame">
-        <iframe
-          src="https://www.youtube.com/embed/kLSAzAuhBps"
-          title="English walkthrough"
-          frameBorder="0"
-          allowFullScreen
-          style={{ width: "100%", height: "200px", borderRadius: "var(--r-md)" }}
-        ></iframe>
-       
-      </div>
-    </div>
 
-    {/* Hindi */}
-    <div className="video-card">
-      <div className="video-lang">Hindi · हिन्दी</div>
-      <div className="video-frame">
-        <iframe
-          src="https://www.youtube.com/embed/_nogx00NBUI"
-          title="Hindi demo"
-          frameBorder="0"
-          allowFullScreen
-          style={{ width: "100%", height: "200px", borderRadius: "var(--r-md)" }}
-        ></iframe>
-       
-      </div>
-    </div>
-
-    {/* Punjabi */}
-    <div className="video-card">
-      <div className="video-lang">Punjabi · ਪੰਜਾਬੀ</div>
-      <div className="video-frame">
-        <iframe
-          src="https://www.youtube.com/embed/pglI1bHJYbs"
-          title="Punjabi guide"
-          frameBorder="0"
-          allowFullScreen
-          style={{ width: "100%", height: "200px", borderRadius: "var(--r-md)" }}
-        ></iframe>
-      
-      </div>
-    </div>
-
-  </div>
-</section>
+          {/* User videos */}
+          <section className="sec">
+            <h3>User videos</h3>
+            <div className="video-grid">
+              <div className="video-card">
+                <div className="video-lang">English</div>
+                <YouTubePlayer
+                  videoId="kLSAzAuhBps"
+                  title="Sentence Calculator — English walkthrough"
+                />
+                <div className="video-caption">A complete tour — proportional, discretion, factors.</div>
+              </div>
+              <div className="video-card">
+                <div className="video-lang">Hindi · हिन्दी</div>
+                <YouTubePlayer
+                  videoId="_nogx00NBUI"
+                  title="Sentence Calculator — Hindi walkthrough · सम्पूर्ण मार्गदर्शिका"
+                />
+                <div className="video-caption">हिन्दी में पूरा डेमो।</div>
+              </div>
+              <div className="video-card">
+                <div className="video-lang">Punjabi · ਪੰਜਾਬੀ</div>
+                <div className="video-wrapper video-wrapper--soon">
+                  <div className="video-coming-soon">
+                    <span className="video-coming-soon-icon">🎬</span>
+                    <span>Coming soon</span>
+                  </div>
+                </div>
+                <div className="video-caption">ਪੰਜਾਬੀ ਵਿੱਚ ਕਦਮ-ਦਰ-ਕਦਮ ਜਾਣ-ਪਛਾਣ।</div>
+              </div>
+            </div>
+          </section>
 
 
           {/* Support */}
