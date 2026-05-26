@@ -3,8 +3,48 @@ import { useNavigate } from 'react-router-dom';
 import logoUrl from '../../../assets/logo.png';
 import './AboutPage.css';
 
+const videos = [
+  {
+    id: 'kLSAzAuhBps',
+    lang: 'English',
+    title: 'English User Guide',
+    description: 'Desktop Version - Sentence Calculator',
+    url: 'https://www.youtube.com/watch?v=kLSAzAuhBps',
+  },
+  {
+    id: '_nogx00NBUI',
+    lang: 'Hindi · हिन्दी',
+    title: 'हिन्दी गाइड',
+    description: 'सम्पूर्ण मार्गदर्शिका',
+    url: 'https://www.youtube.com/watch?v=_nogx00NBUI',
+  },
+  {
+    id: 'pglI1bHJYbs',
+    lang: 'Punjabi · ਪੰਜਾਬੀ',
+    title: 'ਪੰਜਾਬੀ ਗਾਈਡ',
+    description: 'ਪੂਰੀ ਗਾਈਡ',
+    url: 'https://www.youtube.com/watch?v=pglI1bHJYbs',
+  },
+];
+
 export default function AboutPage() {
   const navigate = useNavigate();
+  const [selectedVideo, setSelectedVideo] = React.useState(null);
+
+  const openVideo = (video) => {
+    setSelectedVideo(video);
+  };
+
+  const closeModal = () => {
+    setSelectedVideo(null);
+  };
+
+  const handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget) {
+      closeModal();
+    }
+  };
+
   return (
     <div className="ab-page">
       <header className="header">
@@ -38,41 +78,35 @@ export default function AboutPage() {
           <h2 className="page-title">About calculator</h2>
 
           {/* User videos */}
-          <section className="sec">
-            <h3>User videos</h3>
-            <div className="video-grid">
-              <div className="video-card">
-                <div className="video-lang">English</div>
-                <div className="video-frame" tabIndex={0} role="button" aria-label="Play English walkthrough">
-                  <div className="thumb"></div>
-                  <div className="meta"><span>SENTENCE CALCULATOR — walkthrough</span><span>HD</span></div>
-                  <div className="play"></div>
-                  <div className="duration">5:42</div>
-                  <div className="caption">A complete tour — proportional, discretion, factors.</div>
-                </div>
-              </div>
-              <div className="video-card">
-                <div className="video-lang">Hindi · हिन्दी</div>
-                <div className="video-frame" tabIndex={0} role="button">
-                  <div className="thumb"></div>
-                  <div className="meta"><span>सम्पूर्ण मार्गदर्शिका</span><span>HD</span></div>
-                  <div className="play"></div>
-                  <div className="duration">6:18</div>
-                  <div className="caption">हिन्दी में पूरा डेमो।</div>
-                </div>
-              </div>
-              <div className="video-card">
-                <div className="video-lang">Punjabi · ਪੰਜਾਬੀ</div>
-                <div className="video-frame" tabIndex={0} role="button">
-                  <div className="thumb"></div>
-                  <div className="meta"><span>ਪੂਰੀ ਗਾਈਡ</span><span>HD</span></div>
-                  <div className="play"></div>
-                  <div className="duration">5:55</div>
-                  <div className="caption">ਪੰਜਾਬੀ ਵਿੱਚ ਕਦਮ-ਦਰ-ਕਦਮ ਜਾਣ-ਪਛਾਣ।</div>
-                </div>
-              </div>
-            </div>
-          </section>
+<section className="sec">
+  <h3>User videos</h3>
+  <div className="video-grid">
+    {videos.map((video) => (
+      <div key={video.id} className="video-card">
+        <div className="video-lang">{video.lang}</div>
+        <a
+          onClick={() => openVideo(video)}
+          className="video-thumbnail"
+          title={video.title}
+          role="button"
+          tabIndex={0}
+        >
+          <img
+            src={`https://img.youtube.com/vi/${video.id}/maxresdefault.jpg`}
+            alt={video.title}
+            onError={(e) => {
+              e.target.src = `https://img.youtube.com/vi/${video.id}/hqdefault.jpg`;
+            }}
+          />
+          <div className="play-btn">▶</div>
+        </a>
+        <div className="video-title">{video.title}</div>
+        <div className="video-desc">{video.description}</div>
+      </div>
+    ))}
+  </div>
+</section>
+
 
           {/* Support */}
           <section className="sec">
@@ -164,6 +198,54 @@ export default function AboutPage() {
 
         </div>
       </div>
+
+      {/* Video Modal */}
+      {selectedVideo && (
+        <div className="video-modal-backdrop" onClick={handleBackdropClick}>
+          <div className="video-modal">
+            <button className="modal-close" onClick={closeModal} aria-label="Close">
+              ✕
+            </button>
+            <div className="modal-content">
+              <div className="modal-header">
+                <h3>{selectedVideo.title}</h3>
+                <p>{selectedVideo.lang}</p>
+              </div>
+              <div className="modal-video-container">
+                <iframe
+                  src={`https://www.youtube.com/embed/${selectedVideo.id}?autoplay=1`}
+                  title={selectedVideo.title}
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  className="modal-iframe"
+                  onError={() => {
+                    setSelectedVideo((prev) =>
+                      prev ? { ...prev, embedError: true } : null
+                    );
+                  }}
+                ></iframe>
+                {selectedVideo.embedError && (
+                  <div className="embed-fallback">
+                    <p>This video cannot be embedded. Watch on YouTube instead:</p>
+                    <a
+                      href={selectedVideo.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-youtube"
+                    >
+                      Watch on YouTube →
+                    </a>
+                  </div>
+                )}
+              </div>
+              <div className="modal-description">
+                <p>{selectedVideo.description}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <footer className="site">
         <div className="pip">Justice Anoop Chitkara <span style={{ opacity: 0.7 }}>©</span></div>
