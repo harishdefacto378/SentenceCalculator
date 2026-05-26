@@ -54,14 +54,7 @@ export default function AboutPage() {
           allowFullScreen
           style={{ width: "100%", height: "200px", borderRadius: "var(--r-md)" }}
         ></iframe>
-        <div className="meta">
-          <span>SENTENCE CALCULATOR — walkthrough</span>
-          <span>HD</span>
-        </div>
-        <div className="duration">5:42</div>
-        <div className="caption">
-          A complete tour — proportional, discretion, factors.
-        </div>
+       
       </div>
     </div>
 
@@ -76,14 +69,7 @@ export default function AboutPage() {
           allowFullScreen
           style={{ width: "100%", height: "200px", borderRadius: "var(--r-md)" }}
         ></iframe>
-        <div className="meta">
-          <span>सम्पूर्ण मार्गदर्शिका</span>
-          <span>HD</span>
-        </div>
-        <div className="duration">6:18</div>
-        <div className="caption">
-          हिन्दी में पूरा डेमो।
-        </div>
+       
       </div>
     </div>
 
@@ -98,14 +84,7 @@ export default function AboutPage() {
           allowFullScreen
           style={{ width: "100%", height: "200px", borderRadius: "var(--r-md)" }}
         ></iframe>
-        <div className="meta">
-          <span>ਪੂਰੀ ਗਾਈਡ</span>
-          <span>HD</span>
-        </div>
-        <div className="duration">5:55</div>
-        <div className="caption">
-          ਪੰਜਾਬੀ ਵਿੱਚ ਕਦਮ-ਦਰ-ਕਦਮ ਜਾਣ-ਪਛਾਣ।
-        </div>
+      
       </div>
     </div>
 
