@@ -1,4 +1,4 @@
-const API_BASE = 'https://sentenceapi-hydnhnhmdreaexgu.eastasia-01.azurewebsites.net';
+const API_BASE = 'https://orge31c15cd.api.crm8.dynamics.com';
 const PREFETCH_STORAGE_KEY = 'sc_prefetched_data';
 
 /**
