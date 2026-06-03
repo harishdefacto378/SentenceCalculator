@@ -46,16 +46,14 @@ export const THUMB_ICONS = {
   about: <AboutThumbSvg />,
 };
 
-export default function ToolCard({ thumbClass, svgIcon, title, description, features, openLabel, metaItems, onClick, loading = false, disabled = false }) {
-  const isInactive = loading || disabled;
-
+export default function ToolCard({ thumbClass, svgIcon, title, description, features, openLabel, metaItems, onClick }) {
   return (
     <div
       className="lp-card"
       role="button"
       tabIndex={0}
-      onClick={!isInactive ? onClick : undefined}
-      onKeyDown={e => e.key === 'Enter' && !isInactive && onClick()}
+      onClick={onClick}
+      onKeyDown={e => e.key === 'Enter' && onClick()}
     >
       <div className={`lp-thumb ${thumbClass}`}>{svgIcon}</div>
 
@@ -64,18 +62,10 @@ export default function ToolCard({ thumbClass, svgIcon, title, description, feat
         <p>{description}</p>
         <p className="lp-feature-list">{features}</p>
         <button
-          className={`lp-open${loading ? ' lp-open--loading' : ''}`}
-          disabled={isInactive}
-          onClick={e => { e.stopPropagation(); if (!isInactive) onClick(); }}
+          className="lp-open"
+          onClick={e => { e.stopPropagation(); onClick(); }}
         >
-          {loading ? (
-            <>
-              <span className="lp-spinner" aria-hidden="true" />
-              Loading…
-            </>
-          ) : (
-            <>{openLabel} →</>
-          )}
+          {openLabel} →
         </button>
       </div>
 
