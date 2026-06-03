@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 function CalcThumbSvg() {
@@ -76,4 +75,3 @@ export default function ToolCard({ thumbClass, svgIcon, title, description, feat
     </div>
   );
 }
-
