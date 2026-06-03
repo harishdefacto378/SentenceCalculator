@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ToolCard, { THUMB_ICONS } from './ToolCard';
 import { fetchAndStoreToken } from '../../services/auth.js';
+import { prefetchAll } from '../../services/dataService.js';
 
 const TOOLS = [
   {
@@ -42,12 +43,17 @@ export default function ToolsGrid() {
   const [loadingTarget, setLoadingTarget] = useState(null);
 
   async function handleOpen(tool) {
+    if (loadingTarget) {
+      return;
+    }
+
     if (tool.requiresAuth) {
       setLoadingTarget(tool.target);
       try {
-        await fetchAndStoreToken();
+        const token = await fetchAndStoreToken();
+        await prefetchAll(token);
       } catch (err) {
-        console.error('Auth token fetch failed:', err);
+        console.error('Pre-flight data fetch failed:', err);
       } finally {
         setLoadingTarget(null);
       }
@@ -67,10 +73,11 @@ export default function ToolsGrid() {
             title={tool.title}
             description={tool.description}
             features={tool.features}
-            openLabel={loadingTarget === tool.target ? 'Opening…' : tool.openLabel}
+            openLabel={tool.openLabel}
             metaItems={tool.metaItems}
             onClick={() => handleOpen(tool)}
-            disabled={loadingTarget !== null}
+            loading={loadingTarget === tool.target}
+            disabled={loadingTarget !== null && loadingTarget !== tool.target}
           />
         ))}
       </div>

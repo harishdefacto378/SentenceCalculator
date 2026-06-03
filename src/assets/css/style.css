@@ -199,6 +199,29 @@
   border-color: var(--brand-40, #5b2c8e);
 }
 
+.lp-open--loading,
+.lp-open:disabled {
+  background: var(--brand-70, #9760cd);
+  border-color: var(--brand-70, #9760cd);
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+@keyframes lp-spin {
+  to { transform: rotate(360deg); }
+}
+
+.lp-spinner {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: lp-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
 /* ── Card meta strip ───────────────────────────────────────────────────────── */
 
 .lp-meta {
