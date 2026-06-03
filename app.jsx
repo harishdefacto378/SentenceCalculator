@@ -6,7 +6,7 @@ import LandingPage from './src/components/Landing/LandingPage';
 import ComparisonPage from './src/components/Comparison/ComparisonPage';
 import AboutPage from './src/components/About/AboutPage';
 import { SUBSTANCES, UNITS, AGGRAVATING, MITIGATING } from './data';
-
+import { fetchAndStoreToken } from "./src/services/authService";
 // ────────────────────────────────────────────────────────────────────────────
 // Calculation helpers
 // ────────────────────────────────────────────────────────────────────────────
@@ -344,6 +344,7 @@ function App() {
   async function fetchBase(sub, qty) {
     const endpoint = `${ENV.API_BASE_URL}/api/calculate`;
     try {
+      console.log("FETCHBASE TRIGGERED");
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -359,10 +360,6 @@ function App() {
     }
   }
 
-  useEffect(() => {
-    // Fetch base calculation when substance or quantity changes (keeps UI in sync).
-    fetchBase(substance, qtyInGrams);
-  }, [substance, qtyInGrams]);
 
   const discretion = useMemo(() => {
     const net = (discState.inc - discState.dec) / 100;
@@ -407,7 +404,6 @@ function App() {
     navigator.clipboard?.writeText(lines.join("\n"));
     toast("Report copied to clipboard");
   }
-
   return (
     <>
       <div className="shell">

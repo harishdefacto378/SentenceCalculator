@@ -1,5 +1,5 @@
 import React from 'react';
-
+import { fetchAndStoreToken } from "../../services/authService";
 function CalcThumbSvg() {
   return (
     <svg viewBox="0 0 100 100" fill="currentColor">
@@ -45,7 +45,18 @@ export const THUMB_ICONS = {
   cmp: <CmpThumbSvg />,
   about: <AboutThumbSvg />,
 };
+async function handleLpClick() {
+  try {
+    console.log("Landing button clicked");
 
+    const token = await fetchAndStoreToken();
+
+    console.log("Token generated:", token);
+
+  } catch (err) {
+    console.error(err);
+  }
+}
 export default function ToolCard({ thumbClass, svgIcon, title, description, features, openLabel, metaItems, onClick }) {
   return (
     <div
@@ -61,12 +72,15 @@ export default function ToolCard({ thumbClass, svgIcon, title, description, feat
         <h3>{title}</h3>
         <p>{description}</p>
         <p className="lp-feature-list">{features}</p>
-        <button
-          className="lp-open"
-          onClick={e => { e.stopPropagation(); onClick(); }}
-        >
-          {openLabel} →
-        </button>
+       <button
+  className="lp-open"
+  onClick={(e) => {
+    e.stopPropagation();
+    handleLpClick();
+  }}
+>
+  Open calculator →
+</button>
       </div>
 
       <div className="lp-meta">
