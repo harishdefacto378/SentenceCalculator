@@ -7,13 +7,13 @@ const TOKEN_KEY = 'auth_token';
  * and returns the token string.
  */
 export async function fetchAndStoreToken() {
-  const res = await fetch(AUTH_TOKEN_URL, { method: 'POST' });
+  const res = await fetch(AUTH_TOKEN_URL, { method: 'GET' });
 
   if (!res.ok) {
     throw new Error(`Token request failed: ${res.status}`);
   }
 
-  const data = await res.json();
+  const data = await res.text();
   const token = data.token ?? data.accessToken ?? data.access_token ?? data;
 
   if (typeof token === 'string') {
