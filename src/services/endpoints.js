@@ -11,8 +11,7 @@ export const ENDPOINTS = {
   drugList: `${DATA_API_BASE}/api_getdruglist`,
   averageFactors: `${DATA_API_BASE}/api_getaveragefactors`,
   marqueeSetting: `${DATA_API_BASE}/api_getmarqueesetting`,
-  factors: `${DATA_API_BASE}/api_getfactors`,
-  calculate: `${DATA_API_BASE}/calculate`, // if applicable
+  factors: `${DATA_API_BASE}/api_getfactors`
 };
 
 export default ENDPOINTS;
