@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ToolCard, { THUMB_ICONS } from './ToolCard';
+import { fetchAndStoreToken } from '../../services/auth.js';
 
 const TOOLS = [
   {
@@ -12,6 +13,7 @@ const TOOLS = [
     openLabel: 'Open calculator',
     metaItems: ['📐 Section 21(c), 20(b)(ii), 17(c), 22(c)', '⚖ NDPS Act 1985'],
     target: 'calculator',
+    requiresAuth: true,
   },
   {
     thumbClass: 'lp-thumb-cmp',
@@ -37,6 +39,22 @@ const TOOLS = [
 
 export default function ToolsGrid() {
   const navigate = useNavigate();
+  const [loadingTarget, setLoadingTarget] = useState(null);
+
+  async function handleOpen(tool) {
+    if (tool.requiresAuth) {
+      setLoadingTarget(tool.target);
+      try {
+        await fetchAndStoreToken();
+      } catch (err) {
+        console.error('Auth token fetch failed:', err);
+      } finally {
+        setLoadingTarget(null);
+      }
+    }
+    navigate('/' + tool.target);
+  }
+
   return (
     <>
       <h2 className="lp-section-heading">Choose a tool</h2>
@@ -49,9 +67,10 @@ export default function ToolsGrid() {
             title={tool.title}
             description={tool.description}
             features={tool.features}
-            openLabel={tool.openLabel}
+            openLabel={loadingTarget === tool.target ? 'Opening…' : tool.openLabel}
             metaItems={tool.metaItems}
-            onClick={() => navigate('/' + tool.target)}
+            onClick={() => handleOpen(tool)}
+            disabled={loadingTarget !== null}
           />
         ))}
       </div>

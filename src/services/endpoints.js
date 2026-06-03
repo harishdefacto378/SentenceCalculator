@@ -4,4 +4,7 @@ export const ENDPOINTS = {
   comparison: '/api/comparison',
 };
 
+export const AUTH_TOKEN_URL =
+  'https://sentenceapi-hydnhnhmdreaexgu.eastasia-01.azurewebsites.net/api/Auth/token';
+
 export default ENDPOINTS;

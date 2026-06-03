@@ -46,14 +46,14 @@ export const THUMB_ICONS = {
   about: <AboutThumbSvg />,
 };
 
-export default function ToolCard({ thumbClass, svgIcon, title, description, features, openLabel, metaItems, onClick }) {
+export default function ToolCard({ thumbClass, svgIcon, title, description, features, openLabel, metaItems, onClick, disabled }) {
   return (
     <div
       className="lp-card"
       role="button"
       tabIndex={0}
-      onClick={onClick}
-      onKeyDown={e => e.key === 'Enter' && onClick()}
+      onClick={!disabled ? onClick : undefined}
+      onKeyDown={e => e.key === 'Enter' && !disabled && onClick()}
     >
       <div className={`lp-thumb ${thumbClass}`}>{svgIcon}</div>
 
@@ -64,6 +64,7 @@ export default function ToolCard({ thumbClass, svgIcon, title, description, feat
         <button
           className="lp-open"
           onClick={e => { e.stopPropagation(); onClick(); }}
+          disabled={disabled}
         >
           {openLabel} →
         </button>
