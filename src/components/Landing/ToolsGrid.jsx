@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import ToolCard, { THUMB_ICONS } from './ToolCard';
+import { fetchAndStoreToken } from '../../services/tokenService.js';
 
 const TOOLS = [
   {
@@ -37,6 +38,12 @@ const TOOLS = [
 
 export default function ToolsGrid() {
   const navigate = useNavigate();
+
+  async function handleCalculatorOpen() {
+    await fetchAndStoreToken();
+    navigate('/calculator');
+  }
+
   return (
     <>
       <h2 className="lp-section-heading">Choose a tool</h2>
@@ -51,7 +58,7 @@ export default function ToolsGrid() {
             features={tool.features}
             openLabel={tool.openLabel}
             metaItems={tool.metaItems}
-            onClick={() => navigate('/' + tool.target)}
+            onClick={tool.target === 'calculator' ? handleCalculatorOpen : () => navigate('/' + tool.target)}
           />
         ))}
       </div>
