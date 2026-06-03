@@ -1,6 +1,6 @@
 const configs = {
   development: {
-    API_BASE_URL: 'http://localhost:3001',
+    API_BASE_URL: 'http://localhost:3000',
     TIMEOUT: 10000,
   },
   staging: {
