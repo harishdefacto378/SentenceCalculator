@@ -47,11 +47,7 @@ export const THUMB_ICONS = {
 };
 async function handleLpClick() {
   try {
-    console.log("Landing button clicked");
-
     const token = await fetchAndStoreToken();
-
-    console.log("Token generated:", token);
 
   } catch (err) {
     console.error(err);
