@@ -57,10 +57,11 @@ async function handleLpClick() {
     console.error(err);
   }
 }
-export default function ToolCard({ thumbClass, svgIcon, title, description, features, openLabel, metaItems, onClick }) {
+export default function ToolCard({ thumbClass, svgIcon, title, description, features, openLabel, isCalculator,metaItems, onClick }) {
   return (
     <div
       className="lp-card"
+      
       role="button"
       tabIndex={0}
       onClick={onClick}
@@ -72,14 +73,19 @@ export default function ToolCard({ thumbClass, svgIcon, title, description, feat
         <h3>{title}</h3>
         <p>{description}</p>
         <p className="lp-feature-list">{features}</p>
-       <button
+    <button
   className="lp-open"
-  onClick={(e) => {
+  onClick={async (e) => {
     e.stopPropagation();
-    handleLpClick();
+
+    if (isCalculator) {
+      await handleLpClick();
+    }
+
+    onClick(); // always navigate
   }}
 >
-  Open calculator →
+  {openLabel} →
 </button>
       </div>
 

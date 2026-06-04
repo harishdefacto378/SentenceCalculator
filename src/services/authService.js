@@ -29,8 +29,6 @@ export async function fetchAndStoreToken() {
       ? data
       : data?.token || data?.accessToken || data?.access_token;
 
-  console.log("🔐 Token Response:", data);
-  console.log("🔑 Extracted Token:", token);
 
   if (!token || typeof token !== "string") {
     throw new Error("Invalid token format received");

@@ -50,6 +50,7 @@ export default function ToolsGrid() {
             description={tool.description}
             features={tool.features}
             openLabel={tool.openLabel}
+            isCalculator={tool.target === 'calculator'} 
             metaItems={tool.metaItems}
             onClick={() => navigate('/' + tool.target)}
           />
