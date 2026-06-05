@@ -9,10 +9,14 @@
     "dev": "nodemon server.js"
   },
   "dependencies": {
-    "express": "^4.19.2",
-    "cors": "^2.8.5"
+    "cors": "^2.8.6",
+    "express": "^4.22.2",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "nodemon": "^3.0.0"
-  }
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }

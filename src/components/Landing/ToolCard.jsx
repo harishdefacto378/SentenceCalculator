@@ -46,35 +46,7 @@ export const THUMB_ICONS = {
   cmp: <CmpThumbSvg />,
   about: <AboutThumbSvg />,
 };
-export async function handleLpClick() {
-  try {
-    console.log("Calling backend API...");
 
-    // 👇 token localStorage se lo (ya jahan store hai)
-    const token = localStorage.getItem("TOKEN_KEY");
-
-    const response = await fetch("http://localhost:5000/api/getdruglist", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`   // 🔥 MOST IMPORTANT
-      },
-      body: JSON.stringify({})
-    });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error("Server Error:", errText);
-      throw new Error("API failed");
-    }
-
-    const data = await response.json();
-    console.log("Final Data:", data);
-
-  } catch (err) {
-    console.error("Error:", err);
-  }
-}
 export default function ToolCard({ thumbClass, svgIcon, title, description, features, openLabel, isCalculator,metaItems, onClick }) {
   return (
     <div
@@ -91,16 +63,20 @@ export default function ToolCard({ thumbClass, svgIcon, title, description, feat
         <h3>{title}</h3>
         <p>{description}</p>
         <p className="lp-feature-list">{features}</p>
-    <button
+   <button
   className="lp-open"
   onClick={async (e) => {
     e.stopPropagation();
+
+    console.log("🟢 Button clicked");
 
     if (isCalculator) {
       await handleLpClick();
     }
 
-    onClick(); // always navigate
+    if (typeof onClick === "function") {
+      onClick();
+    }
   }}
 >
   {openLabel} →
