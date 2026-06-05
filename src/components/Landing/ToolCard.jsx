@@ -1,5 +1,6 @@
 import React from 'react';
 import { fetchAndStoreToken } from "../../services/authService";
+import { prefetchAll } from "../../services/dataService";
 function CalcThumbSvg() {
   return (
     <svg viewBox="0 0 100 100" fill="currentColor">
@@ -45,9 +46,16 @@ export const THUMB_ICONS = {
   cmp: <CmpThumbSvg />,
   about: <AboutThumbSvg />,
 };
-async function handleLpClick() {
-  try {
+export async function handleLpClick() {
+  try 
+  {
+    // ✅ Step 1: Token lo
     const token = await fetchAndStoreToken();
+    console.log("Token:", token);
+
+     // ✅ Step 2: Token pass karke APIs call karo
+    const data = await prefetchAll(token);
+    console.log("Prefetched Data:", data);
 
   } catch (err) {
     console.error(err);
