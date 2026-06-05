@@ -40,7 +40,36 @@ function AboutThumbSvg() {
     </svg>
   );
 }
+export async function handleLpClick() {
+  try {
+    console.log("🟢 FRONTEND API CALL START");
 
+    const response = await fetch(
+      "http://localhost:5000/api/getdruglist",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({}),
+      }
+    );
+
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`API Error ${response.status}: ${errText}`);
+    }
+
+    const data = await response.json();
+
+    console.log("✅ FINAL DATA:", data);
+
+    return data;
+  } catch (err) {
+    console.error("❌ handleLpClick error:", err.message);
+  }
+}
 export const THUMB_ICONS = {
   calc: <CalcThumbSvg />,
   cmp: <CmpThumbSvg />,
