@@ -47,18 +47,32 @@ export const THUMB_ICONS = {
   about: <AboutThumbSvg />,
 };
 export async function handleLpClick() {
-  try 
-  {
-    // ✅ Step 1: Token lo
-    const token = await fetchAndStoreToken();
-    console.log("Token:", token);
+  try {
+    console.log("Calling backend API...");
 
-     // ✅ Step 2: Token pass karke APIs call karo
-    const data = await prefetchAll(token);
-    console.log("Prefetched Data:", data);
+    // 👇 token localStorage se lo (ya jahan store hai)
+    const token = localStorage.getItem("TOKEN_KEY");
+
+    const response = await fetch("http://localhost:5000/api/getdruglist", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`   // 🔥 MOST IMPORTANT
+      },
+      body: JSON.stringify({})
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error("Server Error:", errText);
+      throw new Error("API failed");
+    }
+
+    const data = await response.json();
+    console.log("Final Data:", data);
 
   } catch (err) {
-    console.error(err);
+    console.error("Error:", err);
   }
 }
 export default function ToolCard({ thumbClass, svgIcon, title, description, features, openLabel, isCalculator,metaItems, onClick }) {
