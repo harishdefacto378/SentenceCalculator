@@ -41,22 +41,69 @@ function fmtYMD({ y, m, d }) {
 // ────────────────────────────────────────────────────────────────────────────
 
 function ProportionalCalc({ state, setState, base, onCalc, calculated }) {
-  const subs = SUBSTANCES;
-  const sub = subs.find(s => s.name === state.substance);
+  const subs = ['SECBUTABARBITAL', 'PARACETAMOL', 'ASPIRIN', 'IBUPROFEN', 'MORPHINE'];
+  const [substanceInput, setSubstanceInput] = useState(state.substance || "");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const filtered = substanceInput.trim()
+    ? subs.filter(s => s.toLowerCase().includes(substanceInput.toLowerCase()))
+    : subs;
+
+  function handleSubstanceChange(e) {
+    const val = e.target.value;
+    setSubstanceInput(val);
+    setState({ ...state, substance: "" });
+    setShowSuggestions(true);
+  }
+
+  function selectSuggestion(name) {
+    setSubstanceInput(name);
+    setState({ ...state, substance: name });
+    setShowSuggestions(false);
+  }
 
   return (
     <div className="card">
       <div className="card-head">
         <h2>Proportional Calculation</h2>
-        <div className="actions"><button className="btn ghost" onClick={() => setState({ substance: "", qty: "", unit: "Gram", date: "" })}>Reset</button></div>
+        <div className="actions"><button className="btn ghost" onClick={() => { setState({ substance: "", qty: "", unit: "Gram", date: "" }); setSubstanceInput(""); setShowSuggestions(false); }}>Reset</button></div>
       </div>
       <div className="card-body">
         <div className="form-row">
           <label>Substance Name</label>
-          <select className="select" style={{ width: 220 }} value={state.substance} onChange={e => setState({ ...state, substance: e.target.value })}>
-            <option value="">Select…</option>
-            {subs.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
-          </select>
+          <div style={{ position: "relative", width: 220 }}>
+            <input
+              className="input"
+              style={{ width: "100%" }}
+              placeholder="Search substance…"
+              value={substanceInput}
+              onChange={handleSubstanceChange}
+              onFocus={() => setShowSuggestions(true)}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+              autoComplete="off"
+            />
+            {showSuggestions && filtered.length > 0 && (
+              <ul style={{
+                position: "absolute", top: "100%", left: 0, right: 0,
+                margin: 0, padding: 0, listStyle: "none",
+                border: "1px solid #ccc", background: "#fff",
+                zIndex: 100, maxHeight: 200, overflowY: "auto",
+                borderRadius: "0 0 4px 4px", boxShadow: "0 4px 8px rgba(0,0,0,0.1)"
+              }}>
+                {filtered.map(name => (
+                  <li
+                    key={name}
+                    onMouseDown={() => selectSuggestion(name)}
+                    style={{ padding: "8px 12px", cursor: "pointer", fontSize: 14 }}
+                    onMouseEnter={e => e.currentTarget.style.background = "#f0f4ff"}
+                    onMouseLeave={e => e.currentTarget.style.background = "#fff"}
+                  >
+                    {name}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
         <div className="form-row">
           <label>Quantity Detained</label>
