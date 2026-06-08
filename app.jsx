@@ -41,24 +41,45 @@ function fmtYMD({ y, m, d }) {
 // ────────────────────────────────────────────────────────────────────────────
 
 function ProportionalCalc({ state, setState, base, onCalc, calculated }) {
-  const subs = ['SECBUTABARBITAL', 'PARACETAMOL', 'ASPIRIN', 'IBUPROFEN', 'MORPHINE'];
+  const [subs, setSubs] = useState([]);
   const [substanceInput, setSubstanceInput] = useState(state.substance || "");
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
+  const [filtered, setFiltered] = useState([]);
 
-  const filtered = substanceInput.trim()
-    ? subs.filter(s => s.toLowerCase().includes(substanceInput.toLowerCase()))
-    : subs;
+  useEffect(() => {
+    fetch("http://localhost:5000/api/getdruglist", { method: "POST" })
+      .then(res => res.json())
+      .then(data => {
+        const mapped = (data.value || [])
+          .filter(item => item.cr3e9_df_drugidentifier && item.cr3e9_df_drugid)
+          .map(item => ({ name: item.cr3e9_df_drugidentifier, id: item.cr3e9_df_drugid }));
+        console.log("Drug list from API:", mapped);
+        setSubs(mapped);
+        setFiltered(mapped);
+      })
+      .catch(err => console.error("Failed to fetch drug list:", err));
+  }, []);
+
+  useEffect(() => {
+    const results = substanceInput.trim()
+      ? subs.filter(s => s.name.toLowerCase().includes(substanceInput.toLowerCase()))
+      : subs;
+    setFiltered(results);
+  }, [substanceInput, subs]);
 
   function handleSubstanceChange(e) {
     const val = e.target.value;
     setSubstanceInput(val);
+    setSelectedId(null);
     setState({ ...state, substance: "" });
     setShowSuggestions(true);
   }
 
-  function selectSuggestion(name) {
-    setSubstanceInput(name);
-    setState({ ...state, substance: name });
+  function selectSuggestion(item) {
+    setSubstanceInput(item.name);
+    setSelectedId(item.id);
+    setState({ ...state, substance: item.name });
     setShowSuggestions(false);
   }
 
@@ -90,15 +111,15 @@ function ProportionalCalc({ state, setState, base, onCalc, calculated }) {
                 zIndex: 100, maxHeight: 200, overflowY: "auto",
                 borderRadius: "0 0 4px 4px", boxShadow: "0 4px 8px rgba(0,0,0,0.1)"
               }}>
-                {filtered.map(name => (
+                {filtered.map(item => (
                   <li
-                    key={name}
-                    onMouseDown={() => selectSuggestion(name)}
+                    key={item.id}
+                    onMouseDown={() => selectSuggestion(item)}
                     style={{ padding: "8px 12px", cursor: "pointer", fontSize: 14 }}
                     onMouseEnter={e => e.currentTarget.style.background = "#f0f4ff"}
                     onMouseLeave={e => e.currentTarget.style.background = "#fff"}
                   >
-                    {name}
+                    {item.name}
                   </li>
                 ))}
               </ul>
