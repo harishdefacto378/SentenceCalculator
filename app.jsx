@@ -366,7 +366,7 @@ function FabBar({ active, setActive, onHome }) {
 
 function App() {
   const navigate = useNavigate();
-  const [propState, setPropState] = useState({ substance: "Heroin (Diacetylmorphine)", qty: "50", unit: "Gram", date: "" });
+  const [propState, setPropState] = useState({ substance: "", qty: "50", unit: "Gram", date: "" });
   const [discState, setDiscState] = useState({ inc: 0, dec: 0 });
   const [aggravFactors, setAggravFactors] = useState(AGGRAVATING);
   const [mitigFactors, setMitigFactors] = useState(MITIGATING);
