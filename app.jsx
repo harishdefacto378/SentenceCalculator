@@ -47,16 +47,36 @@ function ProportionalCalc({ state, setState, base, onCalc, calculated }) {
   const [selectedId, setSelectedId] = useState(null);
   const [filtered, setFiltered] = useState([]);
 
+  const DRUG_LIST_CACHE_KEY = "drugList";
+
   useEffect(() => {
+    const cached = localStorage.getItem(DRUG_LIST_CACHE_KEY);
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          console.log("Using cached data");
+          setSubs(parsed);
+          setFiltered(parsed);
+          return;
+        }
+      } catch {
+        // corrupted cache — fall through to API call
+      }
+    }
+
+    console.log("Calling API...");
     fetch("http://localhost:5000/api/getdruglist", { method: "POST" })
       .then(res => res.json())
       .then(data => {
         const mapped = (data.value || [])
           .filter(item => item.cr3e9_df_drugidentifier && item.cr3e9_df_drugid)
           .map(item => ({ name: item.cr3e9_df_drugidentifier, id: item.cr3e9_df_drugid }));
-        console.log("Drug list from API:", mapped);
         setSubs(mapped);
         setFiltered(mapped);
+        if (mapped.length > 0) {
+          localStorage.setItem(DRUG_LIST_CACHE_KEY, JSON.stringify(mapped));
+        }
       })
       .catch(err => console.error("Failed to fetch drug list:", err));
   }, []);

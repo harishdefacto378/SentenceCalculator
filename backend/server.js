@@ -18,8 +18,7 @@ app.post("/api/getdruglist", async (req, res) => {
     console.log("🔥 API HIT");
 
     const token = await fetchAndStoreToken();
-    console.log("🔐 TOKEN LENGTH:", token?.length);
-    console.log("🔐 TOKEN LENGTH:", token);
+    
     const response = await fetchFn(`${BASE_URL}${API_PATH}`, {
       method: "POST",
       headers: {
@@ -35,8 +34,8 @@ app.post("/api/getdruglist", async (req, res) => {
 
     const text = await response.text();
 
-    console.log("📡 STATUS:", response.status);
-    console.log("📦 RAW RESPONSE:", text);
+    //console.log("📡 STATUS:", response.status);
+    //console.log("📦 RAW RESPONSE:", text);
 
     if (!text) {
       return res.status(500).json({
