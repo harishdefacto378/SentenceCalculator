@@ -44,7 +44,12 @@ export async function handleLpClick() {
   try {
     console.log("🟢 FRONTEND API CALL START");
   
-    const API_URL = process.env.REACT_APP_API_URL;
+    //const API_URL = "http://localhost:5000"; // Adjust if your backend runs on a different port
+
+
+    const API_URL = import.meta.env.VITE_API_URL;
+    console.log(import.meta.env);
+    console.log(import.meta.env.VITE_API_URL);
 
     const response = await fetch(
       `${API_URL}/api/getdruglist`,
