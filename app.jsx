@@ -18,9 +18,9 @@ import { fetchAndStoreToken } from "./src/services/authService";
 function daysToYMD(days) {
   if (!days) return { y: 0, m: 0, d: 0 };
   const y = Math.floor(days / 365);
-  const r = days - y * 365;
-  const m = Math.floor(r / 30);
-  const d = r - m * 30;
+  const rem = days % 365;
+  const m = Math.floor(rem / 30.42);
+  const d = Math.floor(rem % 30.42);
   return { y, m, d };
 }
 
@@ -37,77 +37,220 @@ function fmtYMD({ y, m, d }) {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
+// Client-side sentence calculation from Dataverse drug record
+// ────────────────────────────────────────────────────────────────────────────
+
+const EMPTY_BASE = {
+  section: "NA",
+  sentenceDays: 0,
+  sentenceInYearsMonthsDays: "0 year(s) 0 month(s) 0 day(s)",
+  fine: "₹0.00",
+  quantityType: "NA",
+  quantityPercent: "0.00",
+  _fineNum: 0,
+};
+
+function calculateSentence(drugRecord, quantityGrams) {
+  if (!drugRecord) return { ...EMPTY_BASE };
+
+  const safeNum = v => { const n = parseFloat(v); return isFinite(n) ? n : 0; };
+
+  // Slab boundaries
+  const smallQty      = safeNum(drugRecord.cr3e9_df_smallquantitygram);
+  const commercialQty = safeNum(drugRecord.cr3e9_df_commercialquantitygram);
+  const qty           = Math.max(0, safeNum(quantityGrams));
+
+  // Commercial upper bound: if API provides it, use it; otherwise double commercial as fallback
+  const commercialMaxQty = safeNum(drugRecord.cr3e9_df_commercialmaxquantitygram) || commercialQty * 2;
+
+  // Sentence field helpers
+  const sent = {
+    smallMin:  safeNum(drugRecord.cr3e9_df_smallminsent),
+    smallMax:  safeNum(drugRecord.cr3e9_df_smallmaxsent),
+    interMin:  safeNum(drugRecord.cr3e9_df_interminsent),
+    interMax:  safeNum(drugRecord.cr3e9_df_intermaxsent),
+    commMin:   safeNum(drugRecord.cr3e9_df_commminsent),
+    commMax:   safeNum(drugRecord.cr3e9_df_commmaxsent),
+  };
+  const fine = {
+    smallMin:  safeNum(drugRecord.cr3e9_df_smallminfine),
+    smallMax:  safeNum(drugRecord.cr3e9_df_smallmaxfine),
+    interMin:  safeNum(drugRecord.cr3e9_df_interminfine),
+    interMax:  safeNum(drugRecord.cr3e9_df_intermaxfine),
+    commMin:   safeNum(drugRecord.cr3e9_df_commminfine),
+    commMax:   safeNum(drugRecord.cr3e9_df_commmaxfine),
+  };
+
+  // Sentence rounding: decimal < 0.5 → floor, else ceil
+  const roundSent = v => (v % 1 < 0.5) ? Math.floor(v) : Math.ceil(v);
+  // Fine rounding: nearest 1000
+  const roundFine = v => Math.round(v / 1000) * 1000;
+
+  let type, section, rawSent, rawFine;
+
+  if (qty < smallQty) {
+    // ── SMALL ──────────────────────────────────────────────────────────────
+    type    = "Small";
+    section = drugRecord.cr3e9_df_punishableundersectionsmall        || "NA";
+
+    const ratio = smallQty > 0 ? qty / smallQty : 0;
+    rawSent = sent.smallMin + (sent.smallMax - sent.smallMin) * ratio;
+    rawFine = smallQty > 0
+      ? fine.smallMin + ((fine.smallMax - fine.smallMin) / smallQty) * qty
+      : fine.smallMin;
+
+  } else if (qty <= commercialQty) {
+    // ── INTERMEDIATE ───────────────────────────────────────────────────────
+    type    = "Intermediate";
+    section = drugRecord.cr3e9_df_punishableundersectionintermediate || "NA";
+
+    const interQty = commercialQty - smallQty;
+    const ratio    = interQty > 0 ? (qty - smallQty) / interQty : 0;
+    rawSent = sent.interMin + (sent.interMax - sent.interMin) * ratio;
+    rawFine = interQty > 0
+      ? fine.interMin + ((fine.interMax - fine.interMin) / interQty) * (qty - smallQty)
+      : fine.interMin;
+
+  } else {
+    // ── COMMERCIAL ─────────────────────────────────────────────────────────
+    type    = "Commercial";
+    section = drugRecord.cr3e9_df_punishableundersectioncommercial   || "NA";
+
+    const commQty = commercialMaxQty - commercialQty;
+    const ratio   = commQty > 0 ? (qty - commercialQty) / commQty : 0;
+    rawSent = sent.commMin + (sent.commMax - sent.commMin) * ratio;
+    rawFine = commQty > 0
+      ? fine.commMin + ((fine.commMax - fine.commMin) / commQty) * (qty - commercialQty)
+      : fine.commMin;
+  }
+
+  // Clamp to [min, max] before rounding
+  const clampedSent = Math.max(
+    type === "Small" ? sent.smallMin : type === "Intermediate" ? sent.interMin : sent.commMin,
+    Math.min(
+      type === "Small" ? sent.smallMax : type === "Intermediate" ? sent.interMax : sent.commMax,
+      rawSent
+    )
+  );
+  const clampedFine = Math.max(
+    type === "Small" ? fine.smallMin : type === "Intermediate" ? fine.interMin : fine.commMin,
+    Math.min(
+      type === "Small" ? fine.smallMax : type === "Intermediate" ? fine.interMax : fine.commMax,
+      rawFine
+    )
+  );
+
+  const sentenceDays              = Math.max(0, roundSent(clampedSent));
+  const _fineNum                  = Math.max(0, roundFine(clampedFine));
+  const sentenceInYearsMonthsDays = fmtYMD(daysToYMD(sentenceDays));
+  const fineFormatted             = fmtRupees(_fineNum);
+
+  // Percentage: quantity vs commercial upper limit
+  const quantityPercent = commercialQty > 0
+    ? ((qty / commercialQty) * 100).toFixed(2)
+    : "0.00";
+
+  return {
+    section,
+    sentenceDays,
+    sentenceInYearsMonthsDays,
+    fine: fineFormatted,
+    quantityType: type,
+    quantityPercent,
+    _fineNum,
+  };
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 // Components
 // ────────────────────────────────────────────────────────────────────────────
 
 function ProportionalCalc({ state, setState, base, onCalc, calculated }) {
-  const [subs, setSubs] = useState([]);
+  const [drugsData, setDrugsData]           = useState([]);
+  const [subs, setSubs]                     = useState([]);
   const [substanceInput, setSubstanceInput] = useState(state.substance || "");
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [selectedId, setSelectedId] = useState(null);
-  const [filtered, setFiltered] = useState([]);
+  const [selectedRecord, setSelectedRecord] = useState(null);
+  const [filtered, setFiltered]             = useState([]);
 
-  const DRUG_LIST_CACHE_KEY = "drugList";
+  const DRUG_CACHE_KEY = "drugsData";
+  const CACHE_EXPIRY   = 60 * 60 * 1000; // 1 hour
 
   useEffect(() => {
-    const cached = localStorage.getItem(DRUG_LIST_CACHE_KEY);
+    // Check localStorage cache with expiry
+    const cached = localStorage.getItem(DRUG_CACHE_KEY);
     if (cached) {
       try {
-        const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          console.log("Using cached data");
-          setSubs(parsed);
-          setFiltered(parsed);
+        const { data, timestamp } = JSON.parse(cached);
+        if (Date.now() - timestamp < CACHE_EXPIRY && Array.isArray(data) && data.length > 0) {
+          console.log("Using cached drug data");
+          const mapped = data.map(d => ({ name: d.cr3e9_df_drugidentifier, id: d.cr3e9_df_drugidentifier }));
+          setDrugsData(data);
+          setSubs(mapped);
+          setFiltered(mapped);
           return;
         }
-      } catch {
-        // corrupted cache — fall through to API call
-      }
+      } catch { /* corrupted cache — fall through */ }
     }
 
-    console.log("Calling API...");
-    fetch("http://localhost:5000/api/getdruglist", { method: "POST" })
+    const apiUrl = import.meta.env.VITE_API_URL;
+    console.log("Fetching drug list from API...");
+    fetch(`${apiUrl}/api/getdruglist`, { method: "POST" })
       .then(res => res.json())
-      .then(data => {
-        const mapped = (data.value || [])
-          .filter(item => item.cr3e9_df_drugidentifier && item.cr3e9_df_drugid)
-          .map(item => ({ name: item.cr3e9_df_drugidentifier, id: item.cr3e9_df_drugid }));
+      .then(json => {
+        const data   = (json.value || []).filter(d => d.cr3e9_df_drugidentifier);
+        const mapped = data.map(d => ({ name: d.cr3e9_df_drugidentifier, id: d.cr3e9_df_drugidentifier }));
+        setDrugsData(data);
         setSubs(mapped);
         setFiltered(mapped);
-        if (mapped.length > 0) {
-          localStorage.setItem(DRUG_LIST_CACHE_KEY, JSON.stringify(mapped));
+        if (data.length > 0) {
+          localStorage.setItem(DRUG_CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
         }
       })
       .catch(err => console.error("Failed to fetch drug list:", err));
   }, []);
 
   useEffect(() => {
-    const results = substanceInput.trim()
-      ? subs.filter(s => s.name.toLowerCase().includes(substanceInput.toLowerCase()))
-      : subs;
-    setFiltered(results);
+    const q = substanceInput.trim().toLowerCase();
+    setFiltered(q ? subs.filter(s => s.name.toLowerCase().includes(q)) : subs);
   }, [substanceInput, subs]);
 
   function handleSubstanceChange(e) {
     const val = e.target.value;
     setSubstanceInput(val);
-    setSelectedId(null);
+    setSelectedRecord(null);
     setState({ ...state, substance: "" });
     setShowSuggestions(true);
   }
 
   function selectSuggestion(item) {
     setSubstanceInput(item.name);
-    setSelectedId(item.id);
+    const record = drugsData.find(d =>
+      (d.cr3e9_df_drugidentifier || "").toLowerCase() === item.name.toLowerCase()
+    );
+    setSelectedRecord(record || null);
     setState({ ...state, substance: item.name });
     setShowSuggestions(false);
+  }
+
+  function handleCalculate() {
+    if (!selectedRecord || !state.qty) return;
+    const qty = parseFloat(state.qty) || 0;
+    onCalc(calculateSentence(selectedRecord, qty));
   }
 
   return (
     <div className="card">
       <div className="card-head">
         <h2>Proportional Calculation</h2>
-        <div className="actions"><button className="btn ghost" onClick={() => { setState({ substance: "", qty: "", unit: "Gram", date: "" }); setSubstanceInput(""); setShowSuggestions(false); }}>Reset</button></div>
+        <div className="actions">
+          <button className="btn ghost" onClick={() => {
+            setState({ substance: "", qty: "", unit: "Gram", date: "" });
+            setSubstanceInput("");
+            setSelectedRecord(null);
+            setShowSuggestions(false);
+          }}>Reset</button>
+        </div>
       </div>
       <div className="card-body">
         <div className="form-row">
@@ -160,16 +303,16 @@ function ProportionalCalc({ state, setState, base, onCalc, calculated }) {
           <input className="input" type="date" style={{ width: 160 }} value={state.date} onChange={e => setState({ ...state, date: e.target.value })} />
         </div>
         <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
-          <button className="btn" disabled={!state.substance || !state.qty} onClick={onCalc}>Calculate</button>
+          <button className="btn" disabled={!state.substance || !state.qty} onClick={handleCalculate}>Calculate</button>
         </div>
 
         <div className="results">
           <div className="result-row"><span>Punishable Under Section:</span><span className="v">{calculated ? base.section : "NA"}</span></div>
-          <div className="result-row"><span>SENTENCE in day(s):</span><span className="v big">{calculated ? fmtNum(base.sentenceDays) + " days" : "0 days"}</span></div>
-          <div className="result-row"><span>SENTENCE in year(s), month(s) and day(s):</span><span className="v">{calculated ? fmtYMD(daysToYMD(base.sentenceDays)) : "0 year(s) 0 month(s) 0 day(s)"}</span></div>
-          <div className="result-row"><span>FINE (in Rupees):</span><span className="v big">{calculated ? fmtRupees(base.fine) : "₹0.00"}</span></div>
-          <div className="result-row"><span>Quantity Type:</span><span className="v">{calculated ? base.type : "NA"}</span></div>
-          <div className="result-row"><span>Drug Quantity in % to Upper Limit of Intermediate:</span><span className="v">{calculated ? base.pctOfUpper + "%" : "—"}</span></div>
+          <div className="result-row"><span>Sentence in day(s):</span><span className="v big">{calculated ? base.sentenceDays : "0"}</span></div>
+          <div className="result-row"><span>Sentence in year(s), month(s) and day(s):</span><span className="v">{calculated ? base.sentenceInYearsMonthsDays : "0 year(s) 0 month(s) 0 day(s)"}</span></div>
+          <div className="result-row"><span>Fine (in Rupees):</span><span className="v big">{calculated ? base.fine : "₹0.00"}</span></div>
+          <div className="result-row"><span>Quantity Type:</span><span className="v">{calculated ? base.quantityType : "NA"}</span></div>
+          <div className="result-row"><span>Drug Quantity in % to Upper Limit of Intermediate:</span><span className="v">{calculated ? base.quantityPercent + "%" : "0%"}</span></div>
         </div>
       </div>
     </div>
@@ -351,9 +494,9 @@ function ReportCard({ substance, base, discretion, final, tab, setTab, onCopy })
           <div className="report-section">
             <h3>Computed Sentence Summary</h3>
             <Spec k="Punishable Under Section" v={base.section} />
-            <Spec k="Quantity Type" v={base.type} />
-            <Spec k="Base Sentence" v={fmtYMD(daysToYMD(base.sentenceDays))} />
-            <Spec k="Base Fine" v={fmtRupees(base.fine)} />
+            <Spec k="Quantity Type" v={base.quantityType} />
+            <Spec k="Base Sentence" v={base.sentenceInYearsMonthsDays} />
+            <Spec k="Base Fine" v={base.fine} />
             <Spec k="After Discretion (Sentence)" v={fmtYMD(daysToYMD(discretion.sentenceDays))} />
             <Spec k="After Discretion (Fine)" v={fmtRupees(discretion.fine)} />
             {tab === "factors" && (
@@ -427,33 +570,13 @@ function App() {
     return n * (UNITS[propState.unit] || 1);
   }, [propState.qty, propState.unit]);
 
-  const [base, setBase] = useState({ sentenceDays: 0, fine: 0, type: "NA", pctOfUpper: 0, section: "NA" });
-
-  async function fetchBase(sub, qty) {
-    const endpoint = `${ENV.API_BASE_URL}/api/calculate`;
-    try {
-      console.log("FETCHBASE TRIGGERED");
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ substanceName: sub?.name, qty }),
-      });
-      if (!res.ok) throw new Error("Calculation API error");
-      const data = await res.json();
-      setBase(data);
-      return data;
-    } catch (err) {
-      console.error("Calc API failed:", err);
-      return null;
-    }
-  }
-
+  const [base, setBase] = useState({ ...EMPTY_BASE });
 
   const discretion = useMemo(() => {
     const net = (discState.inc - discState.dec) / 100;
     return {
       sentenceDays: Math.max(0, Math.round(base.sentenceDays * (1 + net))),
-      fine: Math.max(0, Math.round(base.fine * (1 + net))),
+      fine:         Math.max(0, Math.round(base._fineNum    * (1 + net))),
     };
   }, [base, discState]);
 
@@ -483,9 +606,9 @@ function App() {
       `Substance: ${substance?.name || "—"}`,
       `Quantity: ${propState.qty} ${propState.unit}`,
       `Section: ${base.section}`,
-      `Quantity Type: ${base.type}`,
-      `Base Sentence: ${fmtYMD(daysToYMD(base.sentenceDays))}`,
-      `Base Fine: ${fmtRupees(base.fine)}`,
+      `Quantity Type: ${base.quantityType}`,
+      `Base Sentence: ${base.sentenceInYearsMonthsDays}`,
+      `Base Fine: ${base.fine}`,
       `After Discretion: ${fmtYMD(daysToYMD(discretion.sentenceDays))} · ${fmtRupees(discretion.fine)}`,
       `Final (w/ Factors): ${fmtYMD(daysToYMD(final.sentenceDays))} · ${fmtRupees(final.fine)}`,
     ];
@@ -499,7 +622,7 @@ function App() {
           <ProportionalCalc
             state={propState} setState={setPropState}
             base={base} calculated={calculated}
-            onCalc={async () => { await fetchBase(substance, qtyInGrams); setCalculated(true); toast("Proportional calculation updated"); }}
+            onCalc={(result) => { setBase(result); setCalculated(true); toast("Proportional calculation updated"); }}
           />
           <ReportCard substance={substance} base={base} discretion={discretion} final={final} tab={reportTab} setTab={setReportTab} onCopy={copyReport} />
         </div>
