@@ -175,3 +175,17 @@
 .cmp-page .kpi.brand .v { color: var(--brand-fg-2); }
 
 .cmp-page .empty { padding: 40px 24px; text-align: center; color: var(--ink-3); font-size: 13px; }
+
+/* ── ≤ 600px — mobile ────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .cmp-page .shell { padding: 0 10px; margin-top: 12px; }
+  .cmp-page .card-body { padding: 12px; }
+  .cmp-page .kpis { grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 12px; }
+  .cmp-page .kpi .v { font-size: 18px; }
+  .cmp-page .builder { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .cmp-page .page-title { font-size: 18px; }
+  .cmp-page .ct thead th.metric { min-width: 160px; }
+  .cmp-page .ct thead th.col { min-width: 140px; }
+  .cmp-page .h-chart .row { grid-template-columns: 110px 1fr; }
+  .cmp-page .chart-row { gap: 16px; }
+}

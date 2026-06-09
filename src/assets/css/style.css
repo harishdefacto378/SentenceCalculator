@@ -89,7 +89,7 @@
 
 @media (max-width: 800px) {
   .lp-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .lp-hero {
@@ -99,6 +99,42 @@
 
   .lp-pill {
     display: none;
+  }
+}
+
+@media (max-width: 540px) {
+  .lp-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lp-shell {
+    padding: 20px 14px 48px;
+  }
+
+  .lp-hero {
+    grid-template-columns: 40px 1fr;
+    gap: 12px;
+    padding: 18px 16px;
+  }
+
+  .lp-hero h1 {
+    font-size: 20px;
+    line-height: 26px;
+  }
+
+  .lp-section-heading {
+    margin: 24px 0 10px;
+  }
+
+  .lp-info {
+    padding: 16px 18px;
+  }
+
+  .lp-footer {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
   }
 }
 
