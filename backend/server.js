@@ -34,8 +34,8 @@ app.post("/api/getdruglist", async (req, res) => {
 
     const text = await response.text();
 
-    //console.log("📡 STATUS:", response.status);
-    //console.log("📦 RAW RESPONSE:", text);
+    console.log("📡 STATUS:", response.status);
+    console.log("📦 RAW RESPONSE:", text);
 
     if (!text) {
       return res.status(500).json({
