@@ -37,6 +37,9 @@ app.post("/api/getdruglist", async (req, res) => {
     console.log("📡 STATUS:", response.status);
     console.log("📦 RAW RESPONSE:", text);
 
+     // 💾 SAVE TO LOCAL STORAGE
+     localStorage.setItem("drugsData", JSON.stringify(drugs));
+
     if (!text) {
       return res.status(500).json({
         error: "Empty response from Dataverse",
