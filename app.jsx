@@ -166,32 +166,17 @@ function calculateSentence(drugRecord, quantityGrams) {
 // Components
 // ────────────────────────────────────────────────────────────────────────────
 
-function ProportionalCalc({ state, setState, base, onCalc, calculated }) {
-  const [drugsData, setDrugsData]           = useState([]);
-  const [subs, setSubs]                     = useState([]);
-  const [substanceInput, setSubstanceInput] = useState(state.substance || "");
+function ProportionalCalc({ state, setState, base, onCalc, calculated, drugsData }) {
+  const subs                                  = drugsData.map(d => ({ name: d.cr3e9_df_drugidentifier, id: d.cr3e9_df_drugidentifier }));
+  const [substanceInput, setSubstanceInput]   = useState(state.substance || "");
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState(null);
-  const [filtered, setFiltered]             = useState([]);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetchDrugList()
-      .then(data => {
-        if (cancelled) return;
-        const mapped = data.map(d => ({ name: d.cr3e9_df_drugidentifier, id: d.cr3e9_df_drugidentifier }));
-        setDrugsData(data);
-        setSubs(mapped);
-        setFiltered(mapped);
-      })
-      .catch(err => console.error("Failed to load drug list:", err.message));
-    return () => { cancelled = true; };
-  }, []);
+  const [selectedRecord, setSelectedRecord]   = useState(null);
+  const [filtered, setFiltered]               = useState(subs);
 
   useEffect(() => {
     const q = substanceInput.trim().toLowerCase();
     setFiltered(q ? subs.filter(s => s.name.toLowerCase().includes(q)) : subs);
-  }, [substanceInput, subs]);
+  }, [substanceInput, drugsData]);
 
   function handleSubstanceChange(e) {
     const val = e.target.value;
@@ -528,14 +513,24 @@ function FabBar({ active, setActive, onHome }) {
 
 function App() {
   const navigate = useNavigate();
+
+  // Drug list loaded ONCE at page mount — not inside calculation logic
+  const [drugsData, setDrugsData] = useState([]);
+  useEffect(() => {
+    let cancelled = false;
+    fetchDrugList()
+      .then(data => { if (!cancelled) setDrugsData(data); })
+      .catch(err => console.error("Failed to load drug list:", err.message));
+    return () => { cancelled = true; };
+  }, []);
+
   const [propState, setPropState] = useState({ substance: "", qty: "", unit: "Gram", date: new Date().toISOString().split('T')[0] });
   const [discState, setDiscState] = useState({ inc: 0, dec: 0 });
   const [aggravFactors, setAggravFactors] = useState(AGGRAVATING);
   const [mitigFactors, setMitigFactors] = useState(MITIGATING);
   const [calculated, setCalculated] = useState(true);
-  const [discCalculated, setDiscCalculated] = useState(true);
-  const [reportTab, setReportTab] = useState("sentence");
-  const [fabActive, setFabActive] = useState("home");
+  const [reportTab, setReportTab]   = useState("sentence");
+  const [fabActive, setFabActive]   = useState("home");
 
   const substance = useMemo(() =>
     SUBSTANCES.find(s => s.name === propState.substance),
@@ -550,13 +545,47 @@ function App() {
 
   const [base, setBase] = useState({ ...EMPTY_BASE });
 
-  const discretion = useMemo(() => {
-    const net = (discState.inc - discState.dec) / 100;
-    return {
-      sentenceDays: Math.max(0, Math.round(base.sentenceDays * (1 + net))),
-      fine:         Math.max(0, Math.round(base._fineNum    * (1 + net))),
-    };
-  }, [base, discState]);
+  const [discretion, setDiscretion] = useState({ sentenceDays: 0, fine: 0 });
+
+  function handleCourtCalc() {
+    const { sentenceDays, _fineNum } = base;
+
+    // Validation: base must be populated from a proportional calculation
+    if (!sentenceDays && !_fineNum) {
+      alert("Please run the Proportional Calculation first.");
+      return;
+    }
+
+    const inc = Number(discState.inc) || 0;
+    const dec = Number(discState.dec) || 0;
+
+    // Validation: both cannot be active at the same time
+    if (inc > 0 && dec > 0) {
+      alert("Please enter either an Increase % or a Decrease % — not both.");
+      return;
+    }
+
+    let newDays, newFine;
+
+    if (inc > 0) {
+      newDays = sentenceDays + (sentenceDays * inc / 100);
+      newFine = _fineNum    + (_fineNum    * inc / 100);
+    } else if (dec > 0) {
+      newDays = sentenceDays - (sentenceDays * dec / 100);
+      newFine = _fineNum    - (_fineNum    * dec / 100);
+    } else {
+      // Both 0 — return base values unchanged
+      newDays = sentenceDays;
+      newFine = _fineNum;
+    }
+
+    setDiscretion({
+      sentenceDays: Math.round(newDays),
+      fine:         Math.round(newFine),
+    });
+
+    toast("Discretion applied");
+  }
 
   const aggSentTotal = useMemo(() => Math.min(100, aggravFactors.reduce((a, f) => a + (+f.sentence || 0), 0)), [aggravFactors]);
   const aggFineTotal = useMemo(() => Math.min(100, aggravFactors.reduce((a, f) => a + (+f.fine || 0), 0)), [aggravFactors]);
@@ -600,6 +629,7 @@ function App() {
           <ProportionalCalc
             state={propState} setState={setPropState}
             base={base} calculated={calculated}
+            drugsData={drugsData}
             onCalc={(result) => { setBase(result); setCalculated(true); toast("Proportional calculation updated"); }}
           />
           <ReportCard substance={substance} base={base} discretion={discretion} final={final} tab={reportTab} setTab={setReportTab} onCopy={copyReport} />
@@ -609,7 +639,7 @@ function App() {
           <DiscretionCalc
             state={discState} setState={setDiscState}
             base={base} discretion={discretion}
-            calculated={calculated} onCalc={() => { setDiscCalculated(true); toast("Discretion applied"); }}
+            calculated={calculated} onCalc={handleCourtCalc}
           />
           <FactorSummary
             aggSentTotal={aggSentTotal} aggFineTotal={aggFineTotal}
