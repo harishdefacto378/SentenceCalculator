@@ -206,6 +206,24 @@ function ProportionalCalc({ state, setState, base, onCalc, calculated, drugsData
   function handleCalculateClick() {
     if (!selectedRecord || !state.qty) return;
     const qty = parseFloat(state.qty) || 0;
+    const qtyInGrams = qty * (UNITS[state.unit] || 1);
+
+    if (qtyInGrams > 500) {
+      alert("This calculator is designed only for small and intermediate quantities. In commercial quantities the minimum sentence that the courts can impose is imprisonment for 10 years and fine of rupees 100000.");
+      const commercialMsg = "As per discretion of the Court, however, minimum sentence is 10 years";
+      onCalc({
+        section:                    "S.22(c) of NDPS Act, 1985",
+        sentenceDays:               commercialMsg,
+        sentenceInYearsMonthsDays:  commercialMsg,
+        fine:                       "As per discretion of the Court, however, minimum fine is 1,00,000/-",
+        quantityType:               "Commercial",
+        quantityPercent:            "100.20",
+        _fineNum:                   0,
+      });
+      onSelect(selectedRecord);
+      return;
+    }
+
     onCalc(calculateSentence(selectedRecord, qty));   // existing — untouched
     onSelect(selectedRecord);                          // maps API record → ReportCard shape
   }
@@ -410,6 +428,12 @@ function FactorTable({ kind, factors, setFactors, totalSent, totalFine }) {
   );
 }
 
+function notifLinkNode(url) {
+  if (!url || url === "—" || url === "NA") return "NA";
+  const fileName = decodeURIComponent(url.split("/").pop() || url);
+  return <a href={url} target="_blank" rel="noopener noreferrer">📄 {fileName}</a>;
+}
+
 function ReportCard({ substance, base, discretion, final, tab, setTab, onCopy }) {
   const sub = substance;
   const na = "NA";
@@ -427,7 +451,7 @@ function ReportCard({ substance, base, discretion, final, tab, setTab, onCopy })
       <div className="report-body">
         <div className="report-section">
           <h3>Specified as Small &amp; Commercial in S.2(viia) &amp; 2(xxiiia) NDPS Act, 1985</h3>
-          <Spec k="Notification Link" v={sub?.cr3e9_df_notificationlink || na} />
+          <Spec k="Notification Link" v={notifLinkNode(sub?.cr3e9_df_notificationlink)} />
           <Spec k="Notification No." v={sub?.cr3e9_df_notificationno_under_viia_xxiiia_of_s2 || na} />
           <Spec k="Dated" v={sub?.cr3e9_df_notificationdate_under_viia_xxiiia_of_s2 || "01-01-1970"} />
           <Spec k="SR. No." v={sub?.cr3e9_df_slno != null ? String(sub.cr3e9_df_slno) : na} />
@@ -440,7 +464,7 @@ function ReportCard({ substance, base, discretion, final, tab, setTab, onCopy })
 
         <div className="report-section">
           <h3>Declared as punishable under NDPS Act and as per schedule defined in S.2(viia) &amp; 2(xxiiia) NDPS Act, 1985</h3>
-          <Spec k="Notification Link" v={sub?.cr3e9_df_notificationlink2 || na} />
+          <Spec k="Notification Link" v={notifLinkNode(sub?.cr3e9_df_notificationlink2)} />
           <Spec k="Notification No." v={sub?.cr3e9_df_notification_under_s2xxiii || na} />
           <Spec k="Dated" v={sub?.cr3e9_df_notificationdate_under_s2xxiii || "—"} />
           <Spec k="SR. No." v={sub?.cr3e9_df_ndpsact_srno != null ? String(sub.cr3e9_df_ndpsact_srno) : na} />
@@ -457,7 +481,7 @@ function ReportCard({ substance, base, discretion, final, tab, setTab, onCopy })
         <div className="report-section">
           <h3>Drug's Small &amp; Commercial Qty. suggested by Committee Report</h3>
           <Spec k="Notification No. &amp; Date" v={sub?.cr3e9_df_notificationreportanddate || na} />
-          <Spec k="Notification Link" v={sub?.cr3e9_df_notificationcommitteereport || na} />
+          <Spec k="Notification Link" v={notifLinkNode(sub?.cr3e9_df_notificationcommitteereport)} />
           <Spec k="IUPAC — Weblink" v={sub?.cr3e9_df_iupaclink || "—"} />
           <Spec k="IUPAC Name" v={sub?.cr3e9_df_iupacname || na} />
         </div>
