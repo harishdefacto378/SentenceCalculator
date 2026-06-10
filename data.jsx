@@ -109,7 +109,21 @@ const SUBSTANCES = [
   },
 ];
 
-const UNITS = { Gram: 1, Kilogram: 1000, Milligram: 0.001 };
+const UNITS = {
+  "kg": 1000,    // Kilogram
+  "g":  1,       // Gram
+  "dg": 0.1,     // Decigram
+  "cg": 0.01,    // Centigram
+  "mg": 0.001,   // Milligram
+};
+
+const UNIT_LABELS = {
+  "kg": "Kilogram (kg)",
+  "g":  "Gram (g)",
+  "dg": "Decigram (dg)",
+  "cg": "Centigram (cg)",
+  "mg": "Milligram (mg)",
+};
 
 // Aggravating factors (illustrative survey-suggested averages)
 const AGGRAVATING = [
@@ -139,4 +153,4 @@ const MITIGATING = [
   { id: "m10", label: "Family obligations / dependents.", sentence: 0, fine: 0, avg: 7 },
 ];
 
-export { SUBSTANCES, UNITS, AGGRAVATING, MITIGATING };
+export { SUBSTANCES, UNITS, UNIT_LABELS, AGGRAVATING, MITIGATING };

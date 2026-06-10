@@ -5,7 +5,7 @@ import ENV from './src/config/env';
 import LandingPage from './src/components/Landing/LandingPage';
 import ComparisonPage from './src/components/Comparison/ComparisonPage';
 import AboutPage from './src/components/About/AboutPage';
-import { SUBSTANCES, UNITS, AGGRAVATING, MITIGATING } from './data';
+import { SUBSTANCES, UNITS, UNIT_LABELS, AGGRAVATING, MITIGATING } from './data';
 import { fetchAndStoreToken } from "./src/services/authService";
 import { fetchDrugList } from "./src/services/drugListService";
 // ────────────────────────────────────────────────────────────────────────────
@@ -166,12 +166,53 @@ function calculateSentence(drugRecord, quantityGrams) {
 // Components
 // ────────────────────────────────────────────────────────────────────────────
 
+function WarningModal({ open, onClose }) {
+  if (!open) return null;
+  return (
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 1000,
+      background: "rgba(0,0,0,0.45)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+    }}>
+      <div style={{
+        background: "#fff", borderRadius: 12, maxWidth: 480, width: "90%",
+        boxShadow: "0 8px 32px rgba(91,44,142,0.22)",
+        overflow: "hidden",
+      }}>
+        <div style={{
+          background: "linear-gradient(135deg,#5b2c8e 0%,#8146bf 100%)",
+          padding: "16px 24px", display: "flex", alignItems: "center", gap: 10,
+        }}>
+          <span style={{ fontSize: 22 }}>⚠️</span>
+          <span style={{ color: "#fff", fontWeight: 600, fontSize: 17 }}>Commercial Quantity Warning</span>
+        </div>
+        <div style={{ padding: "20px 24px", fontSize: 14, lineHeight: 1.6, color: "#333" }}>
+          This calculator is designed only for small and intermediate quantities. In commercial quantities
+          the minimum sentence that the courts can impose is imprisonment for <strong>10 years</strong> and
+          fine of rupees <strong>1,00,000</strong>.
+        </div>
+        <div style={{ padding: "0 24px 20px", display: "flex", justifyContent: "flex-end" }}>
+          <button
+            onClick={onClose}
+            style={{
+              background: "linear-gradient(135deg,#5b2c8e 0%,#8146bf 100%)",
+              color: "#fff", border: "none", borderRadius: 6,
+              padding: "8px 28px", fontSize: 14, fontWeight: 600, cursor: "pointer",
+            }}
+          >OK</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ProportionalCalc({ state, setState, base, onCalc, calculated, drugsData, onSelect }) {
   const subs                                  = drugsData.map(d => ({ name: d.cr3e9_df_drugidentifier, id: d.cr3e9_df_drugidentifier }));
   const [substanceInput, setSubstanceInput]   = useState(state.substance || "");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedRecord, setSelectedRecord]   = useState(null);
   const [filtered, setFiltered]               = useState(subs);
+  const [showWarning, setShowWarning]         = useState(false);
 
   useEffect(() => {
     const q = substanceInput.trim().toLowerCase();
@@ -209,7 +250,6 @@ function ProportionalCalc({ state, setState, base, onCalc, calculated, drugsData
     const qtyInGrams = qty * (UNITS[state.unit] || 1);
 
     if (qtyInGrams > 500) {
-      alert("This calculator is designed only for small and intermediate quantities. In commercial quantities the minimum sentence that the courts can impose is imprisonment for 10 years and fine of rupees 100000.");
       const commercialMsg = "As per discretion of the Court, however, minimum sentence is 10 years";
       onCalc({
         section:                    "S.22(c) of NDPS Act, 1985",
@@ -221,25 +261,28 @@ function ProportionalCalc({ state, setState, base, onCalc, calculated, drugsData
         _fineNum:                   0,
       });
       onSelect(selectedRecord);
+      setShowWarning(true);
       return;
     }
 
-    onCalc(calculateSentence(selectedRecord, qty));   // existing — untouched
-    onSelect(selectedRecord);                          // maps API record → ReportCard shape
+    onCalc(calculateSentence(selectedRecord, qtyInGrams)); // use gram-converted value
+    onSelect(selectedRecord);                               // maps API record → ReportCard shape
   }
 
   return (
-    <div className="card">
-      <div className="card-head">
-        <h2>Proportional Calculation</h2>
-        <div className="actions">
-          <button className="btn ghost" onClick={() => {
-            setState({ substance: "", qty: "", unit: "Gram", date: "" });
-            setSubstanceInput("");
-            setSelectedRecord(null);
-            setShowSuggestions(false);
-            onSelect(null);
-          }}>Reset</button>
+    <>
+      <WarningModal open={showWarning} onClose={() => setShowWarning(false)} />
+      <div className="card">
+        <div className="card-head">
+          <h2>Proportional Calculation</h2>
+          <div className="actions">
+            <button className="btn ghost" onClick={() => {
+            setState({ substance: "", qty: "", unit: "g", date: "" });
+              setSubstanceInput("");
+              setSelectedRecord(null);
+              setShowSuggestions(false);
+              onSelect(null);
+            }}>Reset</button>
         </div>
       </div>
       <div className="card-body">
@@ -284,7 +327,7 @@ function ProportionalCalc({ state, setState, base, onCalc, calculated, drugsData
           <div className="input-group">
             <input className="input num" placeholder="0" value={state.qty} onChange={e => setState({ ...state, qty: e.target.value.replace(/[^\d.]/g, "") })} />
             <select className="select" value={state.unit} onChange={e => setState({ ...state, unit: e.target.value })}>
-              {Object.keys(UNITS).map(u => <option key={u} value={u}>{u}</option>)}
+              {Object.keys(UNITS).map(u => <option key={u} value={u}>{UNIT_LABELS[u]}</option>)}
             </select>
           </div>
         </div>
@@ -306,6 +349,7 @@ function ProportionalCalc({ state, setState, base, onCalc, calculated, drugsData
         </div>
       </div>
     </div>
+    </>
   );
 }
 
@@ -578,7 +622,7 @@ function App() {
     return () => { cancelled = true; };
   }, []);
 
-  const [propState, setPropState] = useState({ substance: "", qty: "", unit: "Gram", date: new Date().toISOString().split('T')[0] });
+  const [propState, setPropState] = useState({ substance: "", qty: "", unit: "g", date: new Date().toISOString().split('T')[0] });
   const [discState, setDiscState] = useState({ inc: 0, dec: 0 });
   const [aggravFactors, setAggravFactors] = useState(AGGRAVATING);
   const [mitigFactors, setMitigFactors] = useState(MITIGATING);
