@@ -7,6 +7,7 @@ import ComparisonPage from './src/components/Comparison/ComparisonPage';
 import AboutPage from './src/components/About/AboutPage';
 import { SUBSTANCES, UNITS, AGGRAVATING, MITIGATING } from './data';
 import { fetchAndStoreToken } from "./src/services/authService";
+import { fetchDrugList } from "./src/services/drugListService";
 // ────────────────────────────────────────────────────────────────────────────
 // Calculation helpers
 // ────────────────────────────────────────────────────────────────────────────
@@ -173,41 +174,18 @@ function ProportionalCalc({ state, setState, base, onCalc, calculated }) {
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [filtered, setFiltered]             = useState([]);
 
-  const DRUG_CACHE_KEY = "drugsData";
-  const CACHE_EXPIRY   = 60 * 60 * 1000; // 1 hour
-
   useEffect(() => {
-    // Check localStorage cache with expiry
-    const cached = localStorage.getItem(DRUG_CACHE_KEY);
-    if (cached) {
-      try {
-        const { data, timestamp } = JSON.parse(cached);
-        if (Date.now() - timestamp < CACHE_EXPIRY && Array.isArray(data) && data.length > 0) {
-          console.log("Using cached drug data");
-          const mapped = data.map(d => ({ name: d.cr3e9_df_drugidentifier, id: d.cr3e9_df_drugidentifier }));
-          setDrugsData(data);
-          setSubs(mapped);
-          setFiltered(mapped);
-          return;
-        }
-      } catch { /* corrupted cache — fall through */ }
-    }
-
-    const apiUrl = import.meta.env.VITE_API_URL;
-    console.log("Fetching drug list from API...");
-    fetch(`${apiUrl}/api/getdruglist`, { method: "POST" })
-      .then(res => res.json())
-      .then(json => {
-        const data   = (json.value || []).filter(d => d.cr3e9_df_drugidentifier);
+    let cancelled = false;
+    fetchDrugList()
+      .then(data => {
+        if (cancelled) return;
         const mapped = data.map(d => ({ name: d.cr3e9_df_drugidentifier, id: d.cr3e9_df_drugidentifier }));
         setDrugsData(data);
         setSubs(mapped);
         setFiltered(mapped);
-        if (data.length > 0) {
-          localStorage.setItem(DRUG_CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
-        }
       })
-      .catch(err => console.error("Failed to fetch drug list:", err));
+      .catch(err => console.error("Failed to load drug list:", err.message));
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {

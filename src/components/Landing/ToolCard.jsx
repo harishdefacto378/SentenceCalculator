@@ -1,6 +1,5 @@
 import React from 'react';
-import { fetchAndStoreToken } from "../../services/authService";
-import { prefetchAll } from "../../services/dataService";
+import { fetchDrugList } from "../../services/drugListService";
 function CalcThumbSvg() {
   return (
     <svg viewBox="0 0 100 100" fill="currentColor">
@@ -42,36 +41,8 @@ function AboutThumbSvg() {
 }
 export async function handleLpClick() {
   try {
-    console.log("🟢 FRONTEND API CALL START");
-  
-    //const API_URL = "http://localhost:5000"; // Adjust if your backend runs on a different port
-
-
-    const API_URL = import.meta.env.VITE_API_URL;
-    console.log(import.meta.env);
-    console.log(import.meta.env.VITE_API_URL);
-
-    const response = await fetch(
-      `${API_URL}/api/getdruglist`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({}),
-      }
-    );
-
-    if (!response.ok) {
-      const errText = await response.text();
-      throw new Error(`API Error ${response.status}: ${errText}`);
-    }
-
-    const data = await response.json();
-
-    console.log("✅ FINAL DATA:", data);
-
+    const data = await fetchDrugList();
+    console.log("✅ Drug list ready:", data.length, "records");
     return data;
   } catch (err) {
     console.error("❌ handleLpClick error:", err.message);
