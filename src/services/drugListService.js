@@ -34,6 +34,7 @@ export async function fetchDrugList() {
   const cached = getCachedDrugList();
   if (cached) {
     console.log("[drugListService] Using cached drug data");
+    console.log(JSON.parse(localStorage.getItem(DRUG_CACHE_KEY)))
     return cached;
   }
 

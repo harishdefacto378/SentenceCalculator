@@ -166,7 +166,7 @@ function calculateSentence(drugRecord, quantityGrams) {
 // Components
 // ────────────────────────────────────────────────────────────────────────────
 
-function ProportionalCalc({ state, setState, base, onCalc, calculated, drugsData }) {
+function ProportionalCalc({ state, setState, base, onCalc, calculated, drugsData, onSelect }) {
   const subs                                  = drugsData.map(d => ({ name: d.cr3e9_df_drugidentifier, id: d.cr3e9_df_drugidentifier }));
   const [substanceInput, setSubstanceInput]   = useState(state.substance || "");
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -202,6 +202,14 @@ function ProportionalCalc({ state, setState, base, onCalc, calculated, drugsData
     onCalc(calculateSentence(selectedRecord, qty));
   }
 
+  // ── New: orchestrates both existing + new logic on button click ─────────────
+  function handleCalculateClick() {
+    if (!selectedRecord || !state.qty) return;
+    const qty = parseFloat(state.qty) || 0;
+    onCalc(calculateSentence(selectedRecord, qty));   // existing — untouched
+    onSelect(selectedRecord);                          // maps API record → ReportCard shape
+  }
+
   return (
     <div className="card">
       <div className="card-head">
@@ -212,6 +220,7 @@ function ProportionalCalc({ state, setState, base, onCalc, calculated, drugsData
             setSubstanceInput("");
             setSelectedRecord(null);
             setShowSuggestions(false);
+            onSelect(null);
           }}>Reset</button>
         </div>
       </div>
@@ -266,7 +275,7 @@ function ProportionalCalc({ state, setState, base, onCalc, calculated, drugsData
           <input className="input" type="date" style={{ width: 160 }} value={state.date} onChange={e => setState({ ...state, date: e.target.value })} />
         </div>
         <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
-          <button className="btn" disabled={!state.substance || !state.qty} onClick={handleCalculate}>Calculate</button>
+          <button className="btn" disabled={!state.substance || !state.qty} onClick={handleCalculateClick}>Calculate</button>
         </div>
 
         <div className="results">
@@ -418,26 +427,26 @@ function ReportCard({ substance, base, discretion, final, tab, setTab, onCopy })
       <div className="report-body">
         <div className="report-section">
           <h3>Specified as Small &amp; Commercial in S.2(viia) &amp; 2(xxiiia) NDPS Act, 1985</h3>
-          <Spec k="Notification Link" v={sub ? sub.notifLink : na} />
-          <Spec k="Notification No." v={sub ? sub.notif : na} />
-          <Spec k="Dated" v={sub ? sub.notifDate : "01-01-1970"} />
-          <Spec k="SR. No." v={sub ? String(SUBSTANCES.indexOf(sub) + 1) : na} />
-          <Spec k="Common Name (Name of Narcotic Drug and Psychotropic Substance — International non-proprietary name (INN))" v={sub ? sub.common : na} />
-          <Spec k="Other Non-proprietary Name" v={sub ? sub.otherName : na} />
-          <Spec k="Chemical Name" v={sub ? sub.chemical : na} />
-          <Spec k="Small Quantity" v={sub ? `≤ ${sub.smallQty} ${sub.unit}` : "< 0 Gram"} />
-          <Spec k="Commercial Quantity" v={sub ? `≥ ${sub.commercialQty} ${sub.unit}` : "> 0 Gram"} />
+          <Spec k="Notification Link" v={sub?.cr3e9_df_notificationlink || na} />
+          <Spec k="Notification No." v={sub?.cr3e9_df_notificationno_under_viia_xxiiia_of_s2 || na} />
+          <Spec k="Dated" v={sub?.cr3e9_df_notificationdate_under_viia_xxiiia_of_s2 || "01-01-1970"} />
+          <Spec k="SR. No." v={sub?.cr3e9_df_slno != null ? String(sub.cr3e9_df_slno) : na} />
+          <Spec k="Common Name (Name of Narcotic Drug and Psychotropic Substance — International non-proprietary name (INN))" v={sub?.cr3e9_df_drugtype || na} />
+          <Spec k="Other Non-proprietary Name" v={sub?.cr3e9_df_othername_defined_in_s2xxiii || na} />
+          <Spec k="Chemical Name" v={sub?.cr3e9_df_chemicalname_defined_in_s2xxiii || na} />
+          <Spec k="Small Quantity" v={sub ? `≤ ${sub.cr3e9_df_smallquantitygram} Gram` : "< 0 Gram"} />
+          <Spec k="Commercial Quantity" v={sub ? `≥ ${sub.cr3e9_df_commercialquantitygram} Gram` : "> 0 Gram"} />
         </div>
 
         <div className="report-section">
           <h3>Declared as punishable under NDPS Act and as per schedule defined in S.2(viia) &amp; 2(xxiiia) NDPS Act, 1985</h3>
-          <Spec k="Notification Link" v={sub ? sub.notifLink : na} />
-          <Spec k="Notification No." v={sub ? sub.notif : na} />
-          <Spec k="Dated" v={sub ? sub.notifDate : "—"} />
-          <Spec k="SR. No." v={sub ? String(SUBSTANCES.indexOf(sub) + 1) : na} />
-          <Spec k="Common Name (Name of Narcotic Drug and Psychotropic Substance — International non-proprietary name (INN))" v={sub ? sub.common : na} />
-          <Spec k="Other Non-proprietary Name" v={sub ? sub.otherName : na} />
-          <Spec k="Chemical Name" v={sub ? sub.chemical : na} />
+          <Spec k="Notification Link" v={sub?.cr3e9_df_notificationlink2 || na} />
+          <Spec k="Notification No." v={sub?.cr3e9_df_notification_under_s2xxiii || na} />
+          <Spec k="Dated" v={sub?.cr3e9_df_notificationdate_under_s2xxiii || "—"} />
+          <Spec k="SR. No." v={sub?.cr3e9_df_ndpsact_srno != null ? String(sub.cr3e9_df_ndpsact_srno) : na} />
+          <Spec k="Common Name (Name of Narcotic Drug and Psychotropic Substance — International non-proprietary name (INN))" v={sub?.cr3e9_df_drugtype || na} />
+          <Spec k="Other Non-proprietary Name" v={sub?.cr3e9_df_otherpropname_under_s2viia_xxiiia || na} />
+          <Spec k="Chemical Name" v={sub?.cr3e9_df_chemicalname_under_s2viia_xxiiia || na} />
 
           <div className="disclaimer-box">
             <span className="ic">⚠</span>
@@ -447,10 +456,10 @@ function ReportCard({ substance, base, discretion, final, tab, setTab, onCopy })
 
         <div className="report-section">
           <h3>Drug's Small &amp; Commercial Qty. suggested by Committee Report</h3>
-          <Spec k="Notification No. &amp; Date" v={sub ? `${sub.notif} · ${sub.notifDate}` : na} />
-          <Spec k="Notification Link" v={sub ? sub.notifLink : na} />
-          <Spec k="IUPAC — Weblink" v={sub ? sub.iupacWeb : "—"} />
-          <Spec k="IUPAC Name" v={sub ? sub.iupacName : na} />
+          <Spec k="Notification No. &amp; Date" v={sub?.cr3e9_df_notificationreportanddate || na} />
+          <Spec k="Notification Link" v={sub?.cr3e9_df_notificationcommitteereport || na} />
+          <Spec k="IUPAC — Weblink" v={sub?.cr3e9_df_iupaclink || "—"} />
+          <Spec k="IUPAC Name" v={sub?.cr3e9_df_iupacname || na} />
         </div>
 
         {sub && tab !== "basic" && (
@@ -511,6 +520,27 @@ function FabBar({ active, setActive, onHome }) {
 // App
 // ────────────────────────────────────────────────────────────────────────────
 
+// ────────────────────────────────────────────────────────────────────────────
+// Maps API drug record fields → shape expected by ReportCard / Spec rows
+// ────────────────────────────────────────────────────────────────────────────
+
+function mapRecordToSubstance(record) {
+  if (!record) return null;
+  return {
+    common:        record.cr3e9_df_drugidentifier                                || "—",
+    otherName:     record.cr3e9_df_otherproprietaryname                          || "—",
+    chemical:      record.cr3e9_df_chemicalname                                  || "—",
+    smallQty:      record.cr3e9_df_smallquantitygram      ?? "—",
+    commercialQty: record.cr3e9_df_commercialquantitygram ?? "—",
+    unit:          "Gram",
+    notif:         record.cr3e9_df_notificationno_under_viia_xxiiia_of_s2        || "—",
+    notifDate:     record.cr3e9_df_notificationdate                              || "—",
+    notifLink:     record.cr3e9_df_notificationlink                              || "—",
+    iupacName:     record.cr3e9_df_iupacname                                     || "—",
+    iupacWeb:      record.cr3e9_df_iupaclink                                     || "—",
+  };
+}
+
 function App() {
   const navigate = useNavigate();
 
@@ -532,10 +562,7 @@ function App() {
   const [reportTab, setReportTab]   = useState("sentence");
   const [fabActive, setFabActive]   = useState("home");
 
-  const substance = useMemo(() =>
-    SUBSTANCES.find(s => s.name === propState.substance),
-    [propState.substance]
-  );
+  const [substance, setSubstance] = useState(null);
 
   const qtyInGrams = useMemo(() => {
     const n = parseFloat(propState.qty);
@@ -610,7 +637,7 @@ function App() {
 
   function copyReport() {
     const lines = [
-      `Substance: ${substance?.name || "—"}`,
+      `Substance: ${substance?.cr3e9_df_drugtype || "—"}`,
       `Quantity: ${propState.qty} ${propState.unit}`,
       `Section: ${base.section}`,
       `Quantity Type: ${base.quantityType}`,
@@ -631,6 +658,7 @@ function App() {
             base={base} calculated={calculated}
             drugsData={drugsData}
             onCalc={(result) => { setBase(result); setCalculated(true); toast("Proportional calculation updated"); }}
+            onSelect={(record) => setSubstance(record)}
           />
           <ReportCard substance={substance} base={base} discretion={discretion} final={final} tab={reportTab} setTab={setReportTab} onCopy={copyReport} />
         </div>
