@@ -16,16 +16,34 @@ import { fetchDrugList } from "./src/services/drugListService";
 // API endpoint (`window.API_CALC_ENDPOINT` or `/api/calculate`) to receive
 // the base sentence/fine. The client keeps only formatting helpers.
 
-function daysToYMD(days) {
-  if (!days || days <= 0) return { y: 0, m: 0, d: 0 };
+// function daysToYMD(days) {
+//   if (!days || days <= 0) return { y: 0, m: 0, d: 0 };
 
-  // ✅ OLD SYSTEM: always floor (or assume integer input)
+//   // ✅ OLD SYSTEM: always floor (or assume integer input)
+//   const totalDays = Math.floor(days);
+
+//   const y = Math.floor(totalDays / 365);
+//   const rem = totalDays % 365;
+//   const m = Math.floor(rem / 30.42);
+//   const d = Math.floor(rem % 30.42);
+
+//   return { y, m, d };
+// }
+
+function daysToYMD(days) {
+  if (!days || isNaN(days)) {
+    return { y: 0, m: 0, d: 0 };
+  }
+
   const totalDays = Math.floor(days);
 
   const y = Math.floor(totalDays / 365);
-  const rem = totalDays % 365;
-  const m = Math.floor(rem / 30.42);
-  const d = Math.floor(rem % 30.42);
+
+  const remAfterYears = totalDays % 365;
+
+  const m = Math.floor(remAfterYears / 30);
+
+  const d = remAfterYears % 30;
 
   return { y, m, d };
 }
@@ -648,104 +666,165 @@ function App() {
   const [discretion, setDiscretion] = useState({ sentenceDays: 0, fine: 0 });
 
   function handleCourtCalc() {
-    const { sentenceDays, _fineNum, quantityType } = base;
+  const { sentenceDays, _fineNum, quantityType } = base;
+  const substanceData = substance;
 
-    // Validation: base must be populated from a proportional calculation
-    if (!sentenceDays && !_fineNum) {
-      alert("Please run the Proportional Calculation first.");
-      return;
-    }
-
-    const inc = Number(discState.inc) || 0;
-    const dec = Number(discState.dec) || 0;
-
-    // Validation: both cannot be active at the same time
-    if (inc > 0 && dec > 0) {
-      alert("Please enter either an Increase % or a Decrease % — not both.");
-      return;
-    }
-
-    // Net % change (positive = increase, negative = decrease)
-    const netPct = inc - dec;
-
-    // STEP 1: SENTENCE — apply % change, ceil, then clamp
-    let adjustedSentence = Math.floor(sentenceDays * (1 + netPct / 100));
-
-    const clampSentence = (days, type) => {
-      if (type === 'Small')        return Math.min(Math.max(days, 1), 365);
-      if (type === 'Intermediate') return Math.min(Math.max(days, 1), 3652);
-      if (type === 'Commercial')   return Math.min(Math.max(days, 3653), 7305);
-      return days;
-    };
-    adjustedSentence = clampSentence(adjustedSentence, quantityType);
-
-    // STEP 2: FINE — dynamic calculation from API min/max + quantity scaling
-    let adjustedFine = 0;
-    const safeNum = v => { const n = parseFloat(v); return isFinite(n) ? n : 0; };
-
-    if (substance) {
-      const smallQty      = safeNum(substance.cr3e9_df_smallquantitygram);
-      const commercialQty = safeNum(substance.cr3e9_df_commercialquantitygram);
-      const commercialMaxQty = safeNum(substance.cr3e9_df_commercialmaxquantitygram) || commercialQty * 2;
-      const qty = qtyInGrams;
-
-      const fineRange = {
-        smallMin: safeNum(substance.cr3e9_df_smallminfine),
-        smallMax: safeNum(substance.cr3e9_df_smallmaxfine),
-        interMin: safeNum(substance.cr3e9_df_interminfine),
-        interMax: safeNum(substance.cr3e9_df_intermaxfine),
-        commMin:  safeNum(substance.cr3e9_df_commminfine),
-        commMax:  safeNum(substance.cr3e9_df_commmaxfine),
-      };
-
-      // Proportional fine based on quantity position within slab
-      let rawFine;
-      if (qty < smallQty) {
-        rawFine = smallQty > 0
-          ? fineRange.smallMin + ((fineRange.smallMax - fineRange.smallMin) / smallQty) * qty
-          : fineRange.smallMin;
-      } else if (qty <= commercialQty) {
-        const interQty = commercialQty - smallQty;
-        rawFine = interQty > 0
-          ? fineRange.interMin + ((fineRange.interMax - fineRange.interMin) / interQty) * (qty - smallQty)
-          : fineRange.interMin;
-      } else {
-        const commQty = commercialMaxQty - commercialQty;
-        rawFine = commQty > 0
-          ? fineRange.commMin + ((fineRange.commMax - fineRange.commMin) / commQty) * (qty - commercialQty)
-          : fineRange.commMin;
-      }
-
-      // Apply % change
-      const fineAfterChange = (rawFine * (100 + netPct)) / 100;
-
-      // Clamp to legal range per quantity type
-      let clampedFine;
-      if (quantityType === 'Small') {
-        clampedFine = Math.min(Math.max(fineAfterChange, 1000), 10000);
-      } else if (quantityType === 'Intermediate') {
-        clampedFine = Math.min(Math.max(fineAfterChange, 10000), 100000);
-      } else {
-        clampedFine = Math.min(Math.max(fineAfterChange, 100000), 200000);
-      }
-
-      // Round to nearest 1000
-      adjustedFine = Math.round(clampedFine / 1000) * 1000;
-    } else {
-      // Fallback: apply % change to base fine if drug record is unavailable
-      adjustedFine = Math.round((_fineNum * (100 + netPct)) / 100 / 1000) * 1000;
-    }
-
-    const ymd = daysToYMD(adjustedSentence);
-
-    setDiscretion({
-      sentenceDays: adjustedSentence,
-      fine: adjustedFine,
-      ymd,
-    });
-
-    toast("Discretion applied");
+  if (!sentenceDays && !_fineNum) {
+    alert("Please run the Proportional Calculation first.");
+    return;
   }
+
+  const inc = Number(discState.inc) || 0;
+  const dec = Number(discState.dec) || 0;
+
+  const safeNum = v => {
+    const n = parseFloat(v);
+    return isFinite(n) ? n : 0;
+  };
+
+  const baseSentence = Number(sentenceDays);
+  const baseFine = Number(_fineNum) || 0;
+
+  // =========================
+  // SENTENCE CALCULATION
+  // =========================
+  let sentence = baseSentence;
+
+  if (inc > 0) {
+    sentence = sentence * (1 + inc / 100);
+  }
+
+  if (dec > 0) {
+    sentence = sentence * (1 - dec / 100);
+  }
+
+  sentence = Math.round(sentence);
+  if (sentence < 1) sentence = 1;
+
+  // API DRIVEN CLAMP (NO HARDCODE)
+  const clampSentence = (val, type, data) => {
+    if (!data) return val;
+
+    const min =
+      type === "Small"
+        ? safeNum(data.cr3e9_df_smallminsent)
+        : type === "Intermediate"
+        ? safeNum(data.cr3e9_df_interminsent)
+        : safeNum(data.cr3e9_df_commminsent);
+
+    const max =
+      type === "Small"
+        ? safeNum(data.cr3e9_df_smallmaxsent)
+        : type === "Intermediate"
+        ? safeNum(data.cr3e9_df_intermaxsent)
+        : safeNum(data.cr3e9_df_commmaxsent);
+
+    return Math.min(Math.max(val, min), max);
+  };
+
+  sentence = clampSentence(sentence, quantityType, substanceData);
+
+  // =========================
+  // FINE CALCULATION
+  // =========================
+  let fine = 0;
+
+  if (substanceData) {
+    const smallQty = safeNum(substanceData.cr3e9_df_smallquantitygram);
+    const commercialQty = safeNum(substanceData.cr3e9_df_commercialquantitygram);
+    const commercialMaxQty =
+      safeNum(substanceData.cr3e9_df_commercialmaxquantitygram) ||
+      commercialQty * 2;
+
+    const qty = qtyInGrams;
+
+    const fineRange = {
+      smallMin: safeNum(substanceData.cr3e9_df_smallminfine),
+      smallMax: safeNum(substanceData.cr3e9_df_smallmaxfine),
+      interMin: safeNum(substanceData.cr3e9_df_interminfine),
+      interMax: safeNum(substanceData.cr3e9_df_intermaxfine),
+      commMin: safeNum(substanceData.cr3e9_df_commminfine),
+      commMax: safeNum(substanceData.cr3e9_df_commmaxfine),
+    };
+
+    let rawFine;
+
+    if (qty < smallQty) {
+      rawFine =
+        smallQty > 0
+          ? fineRange.smallMin +
+            ((fineRange.smallMax - fineRange.smallMin) / smallQty) * qty
+          : fineRange.smallMin;
+    } else if (qty <= commercialQty) {
+      const interQty = commercialQty - smallQty;
+      rawFine =
+        interQty > 0
+          ? fineRange.interMin +
+            ((fineRange.interMax - fineRange.interMin) / interQty) *
+              (qty - smallQty)
+          : fineRange.interMin;
+    } else {
+      const commQty = commercialMaxQty - commercialQty;
+      rawFine =
+        commQty > 0
+          ? fineRange.commMin +
+            ((fineRange.commMax - fineRange.commMin) / commQty) *
+              (qty - commercialQty)
+          : fineRange.commMin;
+    }
+
+    // APPLY INC + DEC SEPARATELY (NO NET BUG)
+    let fineValue = rawFine;
+
+    if (inc > 0) {
+      fineValue = fineValue * (1 + inc / 100);
+    }
+
+    if (dec > 0) {
+      fineValue = fineValue * (1 - dec / 100);
+    }
+
+    // CLAMP (API DRIVEN)
+    const limits =
+      quantityType === "Small"
+        ? { min: fineRange.smallMin, max: fineRange.smallMax }
+        : quantityType === "Intermediate"
+        ? { min: fineRange.interMin, max: fineRange.interMax }
+        : { min: fineRange.commMin, max: fineRange.commMax };
+
+    fineValue = Math.min(Math.max(fineValue, limits.min), limits.max);
+
+    fine = Math.round(fineValue / 1000) * 1000;
+  } else {
+    let fineValue = baseFine;
+
+    if (inc > 0) {
+      fineValue = fineValue * (1 + inc / 100);
+    }
+
+    if (dec > 0) {
+      fineValue = fineValue * (1 - dec / 100);
+    }
+
+    fine = Math.round(fineValue / 1000) * 1000;
+  }
+
+  // =========================
+  // YMD CONVERSION
+  // =========================
+  const ymd = daysToYMD(sentence);
+
+  // =========================
+  // OUTPUT
+  // =========================
+  setDiscretion({
+    sentenceDays: sentence,
+    fine: fine,
+    ymd,
+  });
+
+  toast("Discretion applied");
+}
 
   const aggSentTotal = useMemo(() => Math.min(100, aggravFactors.reduce((a, f) => a + (+f.sentence || 0), 0)), [aggravFactors]);
   const aggFineTotal = useMemo(() => Math.min(100, aggravFactors.reduce((a, f) => a + (+f.fine || 0), 0)), [aggravFactors]);
