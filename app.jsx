@@ -20,8 +20,8 @@ function daysToYMD(days) {
   if (!days) return { y: 0, m: 0, d: 0 };
   const y = Math.floor(days / 365);
   const rem = days % 365;
-  const m = Math.floor(rem / 30.42);
-  const d = Math.floor(rem % 30.42);
+  const m = Math.floor(rem / 30);
+  const d = rem % 30;
   return { y, m, d };
 }
 
