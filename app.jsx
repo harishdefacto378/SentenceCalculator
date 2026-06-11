@@ -17,19 +17,15 @@ import { fetchDrugList } from "./src/services/drugListService";
 // the base sentence/fine. The client keeps only formatting helpers.
 
 function daysToYMD(days) {
-  if (!days) return { y: 0, m: 0, d: 0 };
+  if (!days || days <= 0) return { y: 0, m: 0, d: 0 };
 
-  let totalDays = Math.ceil(days);
-
-  // 🔥 OLD SYSTEM MATCH FIX
-  if (totalDays > 0) {
-    totalDays = totalDays - 1;
-  }
+  // ✅ OLD SYSTEM: always floor (or assume integer input)
+  const totalDays = Math.floor(days);
 
   const y = Math.floor(totalDays / 365);
   const rem = totalDays % 365;
-  const m = Math.floor(rem / 30);
-  const d = rem % 30;
+  const m = Math.floor(rem / 30.42);
+  const d = Math.floor(rem % 30.42);
 
   return { y, m, d };
 }
@@ -673,7 +669,7 @@ function App() {
     const netPct = inc - dec;
 
     // STEP 1: SENTENCE — apply % change, ceil, then clamp
-    let adjustedSentence = Math.ceil(sentenceDays * (1 + netPct / 100));
+    let adjustedSentence = Math.floor(sentenceDays * (1 + netPct / 100));
 
     const clampSentence = (days, type) => {
       if (type === 'Small')        return Math.min(Math.max(days, 1), 365);
