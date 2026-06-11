@@ -18,10 +18,19 @@ import { fetchDrugList } from "./src/services/drugListService";
 
 function daysToYMD(days) {
   if (!days) return { y: 0, m: 0, d: 0 };
-  const y = Math.floor(days / 365);
-  const rem = days % 365;
+
+  let totalDays = Math.ceil(days);
+
+  // 🔥 OLD SYSTEM MATCH FIX
+  if (totalDays > 0) {
+    totalDays = totalDays - 1;
+  }
+
+  const y = Math.floor(totalDays / 365);
+  const rem = totalDays % 365;
   const m = Math.floor(rem / 30);
   const d = rem % 30;
+
   return { y, m, d };
 }
 
@@ -375,7 +384,7 @@ function DiscretionCalc({ state, setState, base, discretion, onCalc, calculated 
         </div>
         <div className="results">
           <div className="result-row"><span>SENTENCE in day(s):</span><span className="v big">{discretion ? fmtNum(discretion.sentenceDays) + " days" : "0 days"}</span></div>
-          <div className="result-row"><span>SENTENCE in year(s), month(s) and day(s):</span><span className="v">{discretion ? fmtYMD(daysToYMD(discretion.sentenceDays)) : "0 year(s) 0 month(s) 0 day(s)"}</span></div>
+          <div className="result-row"><span>SENTENCE in year(s), month(s) and day(s):</span><span className="v">{discretion?.ymd ? fmtYMD(discretion.ymd) : "0 year(s) 0 month(s) 0 day(s)"}</span></div>
           <div className="result-row"><span>FINE (in Rupees):</span><span className="v big">{discretion ? fmtRupees(discretion.fine) : "₹0.00"}</span></div>
         </div>
       </div>
@@ -660,43 +669,83 @@ function App() {
       return;
     }
 
-    // CORE RULE: unified factor (inc = sentenceChangePct, dec = fineChangePct)
-    const factor = 1 + (inc - dec) / 100;
+    // Net % change (positive = increase, negative = decrease)
+    const netPct = inc - dec;
 
-    // STEP 1: SENTENCE CALCULATION
-    let adjustedSentence = sentenceDays * factor;
+    // STEP 1: SENTENCE — apply % change, ceil, then clamp
+    let adjustedSentence = Math.ceil(sentenceDays * (1 + netPct / 100));
 
-    // // Rounding (court style)
-    // adjustedSentence = adjustedSentence % 1 < 0.5
-    //   ? Math.floor(adjustedSentence)
-    //   : Math.ceil(adjustedSentence);
-
-     // Rounding (court style)
-    adjustedSentence = Math.ceil(adjustedSentence);
-    
-    // STEP 2: CLAMP (OLD SYSTEM BOUNDARIES)
     const clampSentence = (days, type) => {
       if (type === 'Small')        return Math.min(Math.max(days, 1), 365);
       if (type === 'Intermediate') return Math.min(Math.max(days, 1), 3652);
       if (type === 'Commercial')   return Math.min(Math.max(days, 3653), 7305);
       return days;
     };
-
     adjustedSentence = clampSentence(adjustedSentence, quantityType);
 
-    // STEP 3 & 4: FINE — slab based on final sentence days (overrides multiplication)
-    const getFineSlab = (days) => {
-      if (days >= 1  && days <= 31)  return 2000;
-      if (days >= 32 && days <= 84)  return 3000;
-      if (days >= 85 && days <= 100) return 4000;
-      return 4000;
-    };
+    // STEP 2: FINE — dynamic calculation from API min/max + quantity scaling
+    let adjustedFine = 0;
+    const safeNum = v => { const n = parseFloat(v); return isFinite(n) ? n : 0; };
 
-    const adjustedFine = getFineSlab(adjustedSentence);
+    if (substance) {
+      const smallQty      = safeNum(substance.cr3e9_df_smallquantitygram);
+      const commercialQty = safeNum(substance.cr3e9_df_commercialquantitygram);
+      const commercialMaxQty = safeNum(substance.cr3e9_df_commercialmaxquantitygram) || commercialQty * 2;
+      const qty = qtyInGrams;
+
+      const fineRange = {
+        smallMin: safeNum(substance.cr3e9_df_smallminfine),
+        smallMax: safeNum(substance.cr3e9_df_smallmaxfine),
+        interMin: safeNum(substance.cr3e9_df_interminfine),
+        interMax: safeNum(substance.cr3e9_df_intermaxfine),
+        commMin:  safeNum(substance.cr3e9_df_commminfine),
+        commMax:  safeNum(substance.cr3e9_df_commmaxfine),
+      };
+
+      // Proportional fine based on quantity position within slab
+      let rawFine;
+      if (qty < smallQty) {
+        rawFine = smallQty > 0
+          ? fineRange.smallMin + ((fineRange.smallMax - fineRange.smallMin) / smallQty) * qty
+          : fineRange.smallMin;
+      } else if (qty <= commercialQty) {
+        const interQty = commercialQty - smallQty;
+        rawFine = interQty > 0
+          ? fineRange.interMin + ((fineRange.interMax - fineRange.interMin) / interQty) * (qty - smallQty)
+          : fineRange.interMin;
+      } else {
+        const commQty = commercialMaxQty - commercialQty;
+        rawFine = commQty > 0
+          ? fineRange.commMin + ((fineRange.commMax - fineRange.commMin) / commQty) * (qty - commercialQty)
+          : fineRange.commMin;
+      }
+
+      // Apply % change
+      const fineAfterChange = (rawFine * (100 + netPct)) / 100;
+
+      // Clamp to legal range per quantity type
+      let clampedFine;
+      if (quantityType === 'Small') {
+        clampedFine = Math.min(Math.max(fineAfterChange, 1000), 10000);
+      } else if (quantityType === 'Intermediate') {
+        clampedFine = Math.min(Math.max(fineAfterChange, 10000), 100000);
+      } else {
+        clampedFine = Math.min(Math.max(fineAfterChange, 100000), 200000);
+      }
+
+      // Round to nearest 1000
+      adjustedFine = Math.round(clampedFine / 1000) * 1000;
+    } else {
+      // Fallback: apply % change to base fine if drug record is unavailable
+      adjustedFine = Math.round((_fineNum * (100 + netPct)) / 100 / 1000) * 1000;
+    }
+
+    const ymd = daysToYMD(adjustedSentence);
 
     setDiscretion({
       sentenceDays: adjustedSentence,
-      fine:         adjustedFine,
+      fine: adjustedFine,
+      ymd,
     });
 
     toast("Discretion applied");
