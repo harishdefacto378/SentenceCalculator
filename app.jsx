@@ -643,7 +643,7 @@ function App() {
   const [discretion, setDiscretion] = useState({ sentenceDays: 0, fine: 0 });
 
   function handleCourtCalc() {
-    const { sentenceDays, _fineNum } = base;
+    const { sentenceDays, _fineNum, quantityType } = base;
 
     // Validation: base must be populated from a proportional calculation
     if (!sentenceDays && !_fineNum) {
@@ -660,23 +660,43 @@ function App() {
       return;
     }
 
-    let newDays, newFine;
+    // CORE RULE: unified factor (inc = sentenceChangePct, dec = fineChangePct)
+    const factor = 1 + (inc - dec) / 100;
 
-    if (inc > 0) {
-      newDays = sentenceDays + (sentenceDays * inc / 100);
-      newFine = _fineNum    + (_fineNum    * inc / 100);
-    } else if (dec > 0) {
-      newDays = sentenceDays - (sentenceDays * dec / 100);
-      newFine = _fineNum    - (_fineNum    * dec / 100);
-    } else {
-      // Both 0 — return base values unchanged
-      newDays = sentenceDays;
-      newFine = _fineNum;
-    }
+    // STEP 1: SENTENCE CALCULATION
+    let adjustedSentence = sentenceDays * factor;
+
+    // // Rounding (court style)
+    // adjustedSentence = adjustedSentence % 1 < 0.5
+    //   ? Math.floor(adjustedSentence)
+    //   : Math.ceil(adjustedSentence);
+
+     // Rounding (court style)
+    adjustedSentence = Math.ceil(adjustedSentence);
+    
+    // STEP 2: CLAMP (OLD SYSTEM BOUNDARIES)
+    const clampSentence = (days, type) => {
+      if (type === 'Small')        return Math.min(Math.max(days, 1), 365);
+      if (type === 'Intermediate') return Math.min(Math.max(days, 1), 3652);
+      if (type === 'Commercial')   return Math.min(Math.max(days, 3653), 7305);
+      return days;
+    };
+
+    adjustedSentence = clampSentence(adjustedSentence, quantityType);
+
+    // STEP 3 & 4: FINE — slab based on final sentence days (overrides multiplication)
+    const getFineSlab = (days) => {
+      if (days >= 1  && days <= 31)  return 2000;
+      if (days >= 32 && days <= 84)  return 3000;
+      if (days >= 85 && days <= 100) return 4000;
+      return 4000;
+    };
+
+    const adjustedFine = getFineSlab(adjustedSentence);
 
     setDiscretion({
-      sentenceDays: Math.round(newDays),
-      fine:         Math.round(newFine),
+      sentenceDays: adjustedSentence,
+      fine:         adjustedFine,
     });
 
     toast("Discretion applied");
