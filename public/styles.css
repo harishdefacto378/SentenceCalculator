@@ -1,9 +1,12 @@
 /* ══════════════════════════════════════════════════════════════════════════════
    Sentence Calculator — Calculator Page Styles
-   Extracted from index.html
+   calculator.css — organized component-wise
    ══════════════════════════════════════════════════════════════════════════════ */
 
-/* ── Design tokens ──────────────────────────────────────────────────────── */
+
+/* ════════════════════════════════════════════════════════════════════════════
+   1. DESIGN TOKENS
+════════════════════════════════════════════════════════════════════════════ */
 :root {
   --bg: #f5f5f5;
   --paper: #ffffff;
@@ -60,7 +63,10 @@
   --font-mono: "Cascadia Code", "Consolas", ui-monospace, monospace;
 }
 
-/* ── Reset ──────────────────────────────────────────────────────────────── */
+
+/* ════════════════════════════════════════════════════════════════════════════
+   2. RESET & BASE
+════════════════════════════════════════════════════════════════════════════ */
 *, *::before, *::after { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
 body {
@@ -77,44 +83,10 @@ button { font-family: inherit; cursor: pointer; }
 input, select { font-family: inherit; }
 .mono { font-family: var(--font-mono); }
 
-/* ── Header navigation ───────────────────────────────────────────────────── */
-.header-nav {
-  display: flex;
-  gap: 14px;
-  align-items: center;
-  font-size: 13px;
-}
-.header-nav-mobile {
-  display: none;
-  padding: 8px 16px 4px;
-  border-top: 1px solid var(--rule);
-  gap: 16px;
-  align-items: center;
-  font-size: 13px;
-  font-weight: 500;
-}
-.header-nav-mobile a {
-  color: var(--brand-fg);
-  text-decoration: none;
-  padding: 6px 0;
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-}
 
-/* ── Nav link — extracted from inline style ─────────────────────────────── */
-.header-nav-link {
-  color: var(--brand-fg);
-  text-decoration: none;
-  font-weight: 500;
-}
-
-/* ── App header — extracted from style="display:none" ───────────────────── */
-.app-header-hidden {
-  display: none;
-}
-
-/* ── Header ─────────────────────────────────────────────────────────────── */
+/* ════════════════════════════════════════════════════════════════════════════
+   3. HEADER
+════════════════════════════════════════════════════════════════════════════ */
 .header {
   background: var(--paper);
   border-bottom: 1px solid var(--rule);
@@ -144,6 +116,46 @@ input, select { font-family: inherit; }
   margin-top: 2px;
   font-weight: 400;
 }
+.disclaimer-strip {
+  max-width: 1340px;
+  margin: 6px auto 0;
+  padding: 0 4px;
+  color: var(--ink-3);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+/* Header — navigation */
+.header-nav {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  font-size: 13px;
+}
+.header-nav-link {
+  color: var(--brand-fg);
+  text-decoration: none;
+  font-weight: 500;
+}
+.header-nav-mobile {
+  display: none;
+  padding: 8px 16px 4px;
+  border-top: 1px solid var(--rule);
+  gap: 16px;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 500;
+}
+.header-nav-mobile a {
+  color: var(--brand-fg);
+  text-decoration: none;
+  padding: 6px 0;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Header — warning pill */
 .pill-warn {
   display: inline-flex;
   align-items: center;
@@ -169,16 +181,11 @@ input, select { font-family: inherit; }
   color: var(--warn);
   font-size: 12px;
 }
-.disclaimer-strip {
-  max-width: 1340px;
-  margin: 6px auto 0;
-  padding: 0 4px;
-  color: var(--ink-3);
-  font-size: 12px;
-  line-height: 16px;
-}
 
-/* ── Shell / layout ──────────────────────────────────────────────────────── */
+
+/* ════════════════════════════════════════════════════════════════════════════
+   4. LAYOUT — Shell & Columns
+════════════════════════════════════════════════════════════════════════════ */
 .shell {
   max-width: 1340px;
   margin: 16px auto 0;
@@ -189,7 +196,10 @@ input, select { font-family: inherit; }
 }
 .col { display: flex; flex-direction: column; gap: 16px; }
 
-/* ── Cards ───────────────────────────────────────────────────────────────── */
+
+/* ════════════════════════════════════════════════════════════════════════════
+   5. CARDS — shared across all sections
+════════════════════════════════════════════════════════════════════════════ */
 .card {
   background: var(--paper);
   border: 1px solid var(--rule);
@@ -214,14 +224,115 @@ input, select { font-family: inherit; }
   line-height: 20px;
   letter-spacing: -0.005em;
 }
+/* Aggravating section card head */
 .card-head.aggrav { background: var(--danger-bg); border-bottom-color: var(--danger-border); }
 .card-head.aggrav h2 { color: var(--danger); }
+/* Mitigating section card head */
 .card-head.mitig { background: var(--success-bg); border-bottom-color: var(--success-border); }
 .card-head.mitig h2 { color: var(--success); }
+
 .card-head .actions { display: flex; gap: 8px; }
 .card-body { padding: 16px; }
 
-/* ── Buttons ─────────────────────────────────────────────────────────────── */
+
+/* ════════════════════════════════════════════════════════════════════════════
+   6. FORMS — inputs, labels, selects, form rows
+════════════════════════════════════════════════════════════════════════════ */
+
+/* Form row layout */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 0;
+}
+.form-row + .form-row { border-top: 1px solid var(--rule); }
+.form-row label { font-size: 14px; color: var(--ink); font-weight: 400; }
+.form-row .sub-label {
+  display: block;
+  font-size: 12px;
+  color: var(--ink-3);
+  margin-top: 2px;
+  font-style: normal;
+}
+
+/* Text / date inputs */
+.input {
+  border: 1px solid var(--rule-2);
+  border-bottom-color: var(--ink-3);
+  background: var(--paper);
+  border-radius: var(--r-md) var(--r-md) 0 0;
+  padding: 5px 10px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--ink);
+  width: 200px;
+  max-width: 100%;
+  min-height: 44px;
+  transition: border-color 0.1s, box-shadow 0.1s;
+  touch-action: manipulation;
+}
+.input:hover { border-color: var(--rule-strong); border-bottom-color: var(--ink); }
+.input:focus { outline: none; border-color: var(--rule-2); border-bottom: 2px solid var(--brand); padding-bottom: 4px; }
+.input.num { width: 96px; text-align: right; font-family: var(--font-mono); font-size: 13px; }
+.input.sm { width: 64px; padding: 5px 8px; font-size: 13px; text-align: right; font-family: var(--font-mono); min-height: 36px; }
+
+/* Substance search wrapper */
+.substance-wrap { width: 220px; max-width: 100%; }
+
+/* Date input */
+.input.date-input { width: 160px; }
+
+/* Input group (number + unit select side by side) */
+.input-group { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+/* Select / dropdown */
+.select {
+  border: 1px solid var(--rule-2);
+  border-bottom-color: var(--ink-3);
+  background: var(--paper);
+  border-radius: var(--r-md) var(--r-md) 0 0;
+  padding: 5px 28px 5px 10px;
+  font-size: 14px;
+  line-height: 20px;
+  min-height: 44px;
+  color: var(--ink);
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' stroke='%23424242' stroke-width='1.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.select:hover { border-color: var(--rule-strong); border-bottom-color: var(--ink); }
+
+/* Custom factor input row */
+.custom-row {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--paper-2);
+  border-top: 1px solid var(--rule);
+  flex-wrap: wrap;
+}
+.custom-row input {
+  flex: 1;
+  min-width: 160px;
+  border: 1px solid var(--rule-2);
+  border-bottom-color: var(--ink-3);
+  border-radius: var(--r-md) var(--r-md) 0 0;
+  padding: 5px 10px;
+  font-size: 14px;
+  min-height: 44px;
+  touch-action: manipulation;
+}
+.custom-row input:focus { outline: none; border-bottom: 2px solid var(--brand); padding-bottom: 4px; }
+
+
+/* ════════════════════════════════════════════════════════════════════════════
+   7. BUTTONS
+════════════════════════════════════════════════════════════════════════════ */
 .btn {
   background: var(--brand);
   color: #fff;
@@ -259,65 +370,13 @@ input, select { font-family: inherit; }
 .btn.tab:hover { background: var(--paper-hover); color: var(--ink); }
 .btn.tab.active { background: var(--brand-bg-tint); color: var(--brand-fg); border-color: var(--brand-fg); font-weight: 600; }
 
-/* ── Form rows ───────────────────────────────────────────────────────────── */
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  gap: 16px;
-  padding: 10px 0;
-}
-.form-row + .form-row { border-top: 1px solid var(--rule); }
-.form-row label { font-size: 14px; color: var(--ink); font-weight: 400; }
-.form-row .sub-label {
-  display: block;
-  font-size: 12px;
-  color: var(--ink-3);
-  margin-top: 2px;
-  font-style: normal;
-}
+/* Calculate button wrapper */
+.calc-action { display: flex; justify-content: flex-end; margin-top: 8px; }
 
-/* ── Inputs ──────────────────────────────────────────────────────────────── */
-.input {
-  border: 1px solid var(--rule-2);
-  border-bottom-color: var(--ink-3);
-  background: var(--paper);
-  border-radius: var(--r-md) var(--r-md) 0 0;
-  padding: 5px 10px;
-  font-size: 14px;
-  line-height: 20px;
-  color: var(--ink);
-  width: 200px;
-  max-width: 100%;
-  min-height: 44px;
-  transition: border-color 0.1s, box-shadow 0.1s;
-  touch-action: manipulation;
-}
-.input:hover { border-color: var(--rule-strong); border-bottom-color: var(--ink); }
-.input:focus { outline: none; border-color: var(--rule-2); border-bottom: 2px solid var(--brand); padding-bottom: 4px; }
-.input.num { width: 96px; text-align: right; font-family: var(--font-mono); font-size: 13px; }
-.input.sm { width: 64px; padding: 5px 8px; font-size: 13px; text-align: right; font-family: var(--font-mono); min-height: 36px; }
-.input-group { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.select {
-  border: 1px solid var(--rule-2);
-  border-bottom-color: var(--ink-3);
-  background: var(--paper);
-  border-radius: var(--r-md) var(--r-md) 0 0;
-  padding: 5px 28px 5px 10px;
-  font-size: 14px;
-  line-height: 20px;
-  min-height: 44px;
-  color: var(--ink);
-  appearance: none;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' stroke='%23424242' stroke-width='1.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
-  background-repeat: no-repeat;
-  background-position: right 8px center;
-  cursor: pointer;
-  touch-action: manipulation;
-}
-.select:hover { border-color: var(--rule-strong); border-bottom-color: var(--ink); }
 
-/* ── Results ─────────────────────────────────────────────────────────────── */
+/* ════════════════════════════════════════════════════════════════════════════
+   8. PROPORTIONAL CALCULATION — results panel
+════════════════════════════════════════════════════════════════════════════ */
 .results {
   margin-top: 12px;
   background: var(--info-bg);
@@ -339,7 +398,10 @@ input, select { font-family: inherit; }
 .result-row .v { color: var(--ink); font-family: var(--font-mono); font-weight: 500; font-size: 13px; text-align: right; }
 .result-row .v.big { font-family: var(--font); font-weight: 600; font-size: 14px; }
 
-/* ── Banners ─────────────────────────────────────────────────────────────── */
+
+/* ════════════════════════════════════════════════════════════════════════════
+   9. COURT CALCULATION — banner & notice
+════════════════════════════════════════════════════════════════════════════ */
 .banner {
   margin: 12px 0 0;
   background: var(--brand-bg-tint);
@@ -358,10 +420,15 @@ input, select { font-family: inherit; }
 .banner.cap { background: var(--paper-2); color: var(--ink-2); border-color: var(--rule); }
 .banner.cap::before { content: "▣"; color: var(--ink-3); }
 
-/* ── Factor table ────────────────────────────────────────────────────────── */
+
+/* ════════════════════════════════════════════════════════════════════════════
+   10. AGGRAVATING & MITIGATING FACTORS — table
+════════════════════════════════════════════════════════════════════════════ */
+
+/* Scroll wrapper — keeps 480px-wide table inside the card */
 .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border-top: 1px solid var(--rule); }
-.substance-wrap { width: 220px; max-width: 100%; }
-.input.date-input { width: 160px; }
+
+/* Table header row */
 .table-head {
   display: grid;
   grid-template-columns: 30px 1fr 96px 96px 96px;
@@ -379,6 +446,8 @@ input, select { font-family: inherit; }
 }
 .table-head .num-col { text-align: center; font-size: 12px; line-height: 16px; }
 .table-head .num-col em { display: block; font-style: normal; font-weight: 400; color: var(--ink-3); font-size: 11px; margin-top: 2px; }
+
+/* Factor data row */
 .factor-row {
   display: grid;
   grid-template-columns: 30px 1fr 96px 96px 96px;
@@ -398,6 +467,8 @@ input, select { font-family: inherit; }
 .factor-row.mitig .arrow { color: var(--success); }
 .factor-row .label { color: var(--ink); }
 .factor-row .cell { text-align: right; }
+
+/* Table footer totals row */
 .table-foot {
   display: grid;
   grid-template-columns: 30px 1fr 96px 96px 96px;
@@ -413,29 +484,26 @@ input, select { font-family: inherit; }
 .table-foot .val { text-align: right; font-family: var(--font-mono); color: var(--ink); }
 .table-foot .val.aggrav { color: var(--danger); }
 .table-foot .val.mitig { color: var(--success); }
-.custom-row {
-  display: flex;
-  gap: 8px;
-  padding: 12px 16px;
-  background: var(--paper-2);
-  border-top: 1px solid var(--rule);
-  flex-wrap: wrap;
-}
-.custom-row input {
-  flex: 1;
-  min-width: 160px;
-  border: 1px solid var(--rule-2);
-  border-bottom-color: var(--ink-3);
-  border-radius: var(--r-md) var(--r-md) 0 0;
-  padding: 5px 10px;
-  font-size: 14px;
-  min-height: 44px;
-  touch-action: manipulation;
-}
-.custom-row input:focus { outline: none; border-bottom: 2px solid var(--brand); padding-bottom: 4px; }
-.calc-action { display: flex; justify-content: flex-end; margin-top: 8px; }
 
-/* ── Report ──────────────────────────────────────────────────────────────── */
+/* Factor summary totals */
+.summary-grid { display: grid; grid-template-columns: 1fr; gap: 0; }
+.summary-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 14px;
+  padding: 6px 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--ink-2);
+  align-items: baseline;
+}
+.summary-row .v { color: var(--ink); font-family: var(--font-mono); font-weight: 500; text-align: right; }
+.summary-row .v.big { font-family: var(--font); font-weight: 600; font-size: 14px; }
+
+
+/* ════════════════════════════════════════════════════════════════════════════
+   11. REPORT CARD
+════════════════════════════════════════════════════════════════════════════ */
 .report-head {
   display: flex;
   align-items: center;
@@ -479,22 +547,10 @@ input, select { font-family: inherit; }
 .disclaimer-box .body { color: var(--ink); }
 .disclaimer-box .body b { color: var(--warn); font-weight: 600; }
 
-/* ── Summary ─────────────────────────────────────────────────────────────── */
-.summary-grid { display: grid; grid-template-columns: 1fr; gap: 0; }
-.summary-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 14px;
-  padding: 6px 0;
-  font-size: 13px;
-  line-height: 18px;
-  color: var(--ink-2);
-  align-items: baseline;
-}
-.summary-row .v { color: var(--ink); font-family: var(--font-mono); font-weight: 500; text-align: right; }
-.summary-row .v.big { font-family: var(--font); font-weight: 600; font-size: 14px; }
 
-/* ── FAB ─────────────────────────────────────────────────────────────────── */
+/* ════════════════════════════════════════════════════════════════════════════
+   12. FAB — floating action bar
+════════════════════════════════════════════════════════════════════════════ */
 .fab-bar {
   position: fixed;
   bottom: 60px;
@@ -525,7 +581,10 @@ input, select { font-family: inherit; }
 .fab.active { background: var(--brand-bg-tint); color: var(--brand-fg); }
 .fab svg { width: 18px; height: 18px; }
 
-/* ── Site Footer ─────────────────────────────────────────────────────────── */
+
+/* ════════════════════════════════════════════════════════════════════════════
+   13. FOOTER
+════════════════════════════════════════════════════════════════════════════ */
 footer.site {
   position: fixed;
   bottom: 0;
@@ -549,7 +608,10 @@ footer.site a:hover { text-decoration: underline; }
 footer.site .pip { display: inline-flex; align-items: center; gap: 6px; }
 footer.site .survey a { font-weight: 600; }
 
-/* ── Toast ───────────────────────────────────────────────────────────────── */
+
+/* ════════════════════════════════════════════════════════════════════════════
+   14. TOAST NOTIFICATION
+════════════════════════════════════════════════════════════════════════════ */
 .row-flex { display: flex; align-items: center; gap: 8px; }
 .toast {
   position: fixed;
@@ -574,8 +636,9 @@ footer.site .survey a { font-weight: 600; }
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(-6px); }
 
+
 /* ════════════════════════════════════════════════════════════════════════════
-   RESPONSIVE BREAKPOINTS
+   15. RESPONSIVE BREAKPOINTS
 ════════════════════════════════════════════════════════════════════════════ */
 
 /* ── ≤ 1080px — single-column shell ─────────────────────────────────────── */
@@ -583,89 +646,124 @@ footer.site .survey a { font-weight: 600; }
   .shell { grid-template-columns: 1fr; }
 }
 
-/* ── ≤ 768px — tablet ───────────────────────────────────────────────────── */
+/* ── ≤ 768px — tablet & mobile ──────────────────────────────────────────── */
 @media (max-width: 768px) {
+  /* Header */
   .header { padding: 10px 16px; }
   .header-inner { grid-template-columns: 40px 1fr; gap: 10px; }
   .header-inner nav, .header-nav { display: none !important; }
   .header-nav-mobile { display: flex; }
   .disclaimer-strip { font-size: 11px; }
+
+  /* Layout */
   .shell { padding: 0 16px; margin-top: 12px; }
+
+  /* Cards */
+  .card { overflow: hidden; }
   .card-body { padding: 14px; }
+  .table-scroll { overflow-x: auto; max-width: 100%; }
+
+  /* Forms — stack label above control */
+  .form-row { grid-template-columns: 1fr; gap: 6px; }
+  .form-row > *:last-child { width: 100%; }
+
+  /* Inputs & selects full width */
+  .input:not(.num):not(.sm) { width: 100%; }
+  .input-group { width: 100%; justify-content: space-between; }
+  .select { flex: 1; }
+  .substance-wrap { width: 100%; }
+  .input.date-input { width: 100%; }
+
+  /* Buttons full width */
+  .calc-action { justify-content: stretch; }
+  .calc-action .btn { width: 100%; }
+
+  /* Footer */
   footer.site { padding: 8px 16px; font-size: 11px; justify-content: center; gap: 4px 14px; }
   footer.site .pip.survey { width: 100%; justify-content: center; }
 }
 
-/* ── ≤ 600px — form layout stacks ───────────────────────────────────────── */
+/* ── ≤ 600px — small tablets / large phones ──────────────────────────────── */
 @media (max-width: 600px) {
+  /* Layout */
   .shell { padding: 0 10px; margin-top: 8px; }
   .col { gap: 12px; }
   .card-head { padding: 10px 12px; }
   .card-body { padding: 12px; }
 
-  .form-row { grid-template-columns: 1fr; gap: 6px; }
-  .form-row > *:last-child { width: 100%; }
-
-  .input:not(.num):not(.sm) { width: 100%; }
-  .input-group { width: 100%; justify-content: space-between; }
-  .select { flex: 1; }
-
+  /* Proportional results */
   .result-row { grid-template-columns: 1fr; gap: 2px; padding: 7px 0; }
   .result-row + .result-row { border-top: 1px solid rgba(0,0,0,0.06); }
   .result-row .v { text-align: left; font-size: 14px; }
   .result-row .v.big { font-size: 15px; }
 
+  /* Report card */
   .report-head { flex-direction: column; align-items: flex-start; gap: 8px; }
   .report-tabs { gap: 4px; }
   .btn.tab { font-size: 11.5px; padding: 2px 8px; height: 26px; }
-
   .spec-row { grid-template-columns: 1fr; gap: 2px; }
   .spec-row .k { font-weight: 600; color: var(--ink); font-size: 12px; }
   .spec-row .v { padding-bottom: 4px; }
 
+  /* Factor summary */
   .summary-row { grid-template-columns: 1fr; gap: 2px; }
   .summary-row .v { text-align: left; }
-
-  .card { overflow-x: auto; }
-  .substance-wrap { width: 100%; }
-  .input.date-input { width: 100%; }
-
-  .calc-action { justify-content: stretch; }
-  .calc-action .btn { width: 100%; }
 }
 
 /* ── ≤ 480px — small phones ─────────────────────────────────────────────── */
 @media (max-width: 480px) {
   body { font-size: 13px; padding-bottom: 110px; }
+
+  /* Header */
   .header-title h1 { font-size: 16px; line-height: 22px; }
   .header-title .actname { font-size: 11px; }
   .disclaimer-strip { display: none; }
+
+  /* Layout */
   .shell { gap: 12px; }
+
+  /* Results */
   .results { padding: 10px 12px; }
+  .result-row .v { font-size: 13px; }
+  .result-row .v.big { font-size: 14px; }
+
+  /* Report */
+  .spec-row { grid-template-columns: 1fr; }
+  .spec-row .k { font-weight: 600; font-size: 11.5px; }
+
+  /* FAB */
   .fab-bar { bottom: 54px; gap: 0; }
   .fab { width: 40px; height: 40px; }
   .fab svg { width: 16px; height: 16px; }
+
+  /* Footer */
   footer.site { padding: 6px 12px; font-size: 10.5px; gap: 3px 10px; }
   footer.site a { word-break: break-all; }
+
+  /* Toast */
   .toast { font-size: 12px; padding: 8px 14px; }
+
+  /* Last button in card body */
   .card-body > div:last-of-type > .btn:not(.ghost) { width: 100%; }
-  .spec-row { grid-template-columns: 1fr; }
-  .spec-row .k { font-weight: 600; font-size: 11.5px; }
-  .result-row .v { font-size: 13px; }
-  .result-row .v.big { font-size: 14px; }
 }
 
 /* ── ≤ 360px — very small phones ────────────────────────────────────────── */
 @media (max-width: 360px) {
   body { font-size: 12.5px; padding-bottom: 100px; }
+
+  /* Header */
   .header { padding: 8px 10px; }
   .header-inner { gap: 8px; }
   .header-title h1 { font-size: 14px; line-height: 20px; }
   .header-title .actname { font-size: 10.5px; }
+
+  /* Layout */
   .shell { padding: 0 8px; margin-top: 6px; gap: 10px; }
   .card-head { padding: 8px 10px; }
   .card-body { padding: 10px; }
   .card-head h2 { font-size: 13px; }
+
+  /* Forms */
   .form-row { padding: 8px 0; gap: 4px; }
   .form-row label { font-size: 13px; }
   .input { font-size: 13px; min-height: 40px; }
@@ -673,21 +771,35 @@ footer.site .survey a { font-weight: 600; }
   .input.sm { width: 56px; min-height: 34px; }
   .select { font-size: 13px; min-height: 40px; padding: 4px 24px 4px 8px; }
   .btn { font-size: 13px; min-height: 40px; padding: 4px 10px; }
+
+  /* Results */
   .results { padding: 8px 10px; }
   .result-row { font-size: 12px; gap: 2px; }
   .result-row .v { font-size: 12.5px; }
   .result-row .v.big { font-size: 13.5px; }
+
+  /* Report */
   .report-body { padding: 12px; }
   .report-body h3 { font-size: 13px; }
   .spec-row { grid-template-columns: 1fr; gap: 1px; }
   .spec-row .k { font-size: 11px; }
   .spec-row .v { font-size: 11.5px; }
   .summary-row { font-size: 12px; }
+
+  /* Banner */
   .banner { font-size: 12px; padding: 6px 10px; }
+
+  /* FAB */
   .fab-bar { bottom: 48px; padding: 2px; }
   .fab { width: 36px; height: 36px; }
   .fab svg { width: 14px; height: 14px; }
+
+  /* Footer */
   footer.site { padding: 5px 10px; font-size: 10px; gap: 2px 8px; }
+
+  /* Toast */
   .toast { font-size: 11.5px; padding: 6px 12px; }
+
+  /* Calculate button */
   .calc-action .btn { font-size: 13px; }
 }
