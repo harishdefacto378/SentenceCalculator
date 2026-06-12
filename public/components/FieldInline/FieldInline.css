@@ -1,47 +1,35 @@
 /* ════════════════════════════════════════════════════════════════════════════
    FIELD INLINE — quantity + unit row.
-   ALWAYS inline, NEVER stacks. Owns its own layout entirely.
-   ❌ No global CSS may override .field-inline children.
+   ✔ ALWAYS inline, NEVER stacks — flex-locked by design.
+   ✔ clamp() makes the number input fluid. Zero breakpoints needed.
 ════════════════════════════════════════════════════════════════════════════ */
 
 .field-inline {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: nowrap;        /* Lock: never wraps regardless of screen width */
   gap: 10px;
   align-items: center;
   width: 100%;
   min-width: 0;
 }
 
-/* Numeric input: fixed width so the unit select gets the remaining space */
+/*
+ * Number input: fluid shrink from 80px down to 64px on very narrow screens.
+ * At 320px viewport → 64px (20vw = 64px, hits clamp floor).
+ * At 400px viewport → 80px (20vw = 80px, hits clamp ceil).
+ * flex: 0 0 ... prevents flex from growing/shrinking this beyond clamp range.
+ */
 .field-inline .input.num {
-  width: 80px;
-  flex: 0 0 80px;
-  min-width: 80px;
+  width: clamp(64px, 20vw, 80px);
+  flex: 0 0 clamp(64px, 20vw, 80px);
+  min-width: 0;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: clamp(12px, 3.2vw, 13px);
 }
 
-/* Unit select: fills remaining width */
+/* Unit select: flex-fill — takes all remaining space after the number input */
 .field-inline .select {
   flex: 1 1 auto;
   min-width: 0;
-}
-
-
-/* ── FieldInline responsive — per-component breakpoints ─────────────────── */
-
-/* Shrink number input on small screens; unit select fills the rest */
-@media (max-width: 480px) {
-  .field-inline .input.num {
-    width: 70px;
-    flex: 0 0 70px;
-    min-width: 70px;
-  }
-}
-
-@media (max-width: 320px) {
-  .field-inline .input.num {
-    width: 64px;
-    flex: 0 0 64px;
-    min-width: 64px;
-  }
 }

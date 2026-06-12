@@ -1,5 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════════════
-   CARD — shared card shell used across all sections
+   CARD — shared card shell.
+   ✔ Fully fluid via clamp(). Zero breakpoints.
 ════════════════════════════════════════════════════════════════════════════ */
 .card {
   background: var(--paper);
@@ -9,7 +10,8 @@
   overflow: hidden;
 }
 .card-head {
-  padding: 12px 16px;
+  /* Fluid: 8px/10px at 320px → 12px/16px at 500px+ */
+  padding: clamp(8px, 2.5vw, 12px) clamp(10px, 3.5vw, 16px);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -20,43 +22,16 @@
 .card-head h2 {
   margin: 0;
   color: var(--ink);
-  font-size: 14px;
+  font-size: clamp(12px, 3.5vw, 14px);
   font-weight: 600;
-  line-height: 20px;
+  line-height: 1.4;
   letter-spacing: -0.005em;
 }
-.card-head.aggrav { background: var(--danger-bg); border-bottom-color: var(--danger-border); }
+.card-head.aggrav { background: var(--danger-bg);  border-bottom-color: var(--danger-border); }
 .card-head.aggrav h2 { color: var(--danger); }
-.card-head.mitig { background: var(--success-bg); border-bottom-color: var(--success-border); }
+.card-head.mitig  { background: var(--success-bg); border-bottom-color: var(--success-border); }
 .card-head.mitig h2 { color: var(--success); }
 .card-head .actions { display: flex; gap: 8px; }
-.card-body { padding: 16px; }
 
-
-/* ── Card responsive ─────────────────────────────────────────────────────── */
-@media (max-width: 768px) {
-  .card { overflow: hidden; }
-  .card-body { padding: 14px; }
-}
-
-@media (max-width: 600px) {
-  .card-head { padding: 10px 12px; }
-  .card-body { padding: 12px; }
-}
-
-@media (max-width: 480px) {
-  .card-body { padding: 14px 16px; }
-  .card-head { padding: 12px 16px; }
-}
-
-@media (max-width: 360px) {
-  .card-head { padding: 8px 10px; }
-  .card-body { padding: 10px; }
-  .card-head h2 { font-size: 13px; }
-}
-
-@media (max-width: 320px) {
-  .card-head { padding: 6px 8px; }
-  .card-head h2 { font-size: 12px; }
-  .card-body { padding: 8px; }
-}
+/* Fluid: 10px at 320px → 16px at 460px+ */
+.card-body { padding: clamp(10px, 3.5vw, 16px); }

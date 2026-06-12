@@ -1,6 +1,7 @@
 /* ════════════════════════════════════════════════════════════════════════════
-   GLOBAL RESET & BASE — box model, body, element defaults only.
-   ❌ NO layout rules, NO width rules, NO component rules here.
+   GLOBAL RESET & BASE
+   ❌ NO layout, NO width, NO component rules.
+   ✔  font-size and padding-bottom are fluid via clamp().
 ════════════════════════════════════════════════════════════════════════════ */
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -15,18 +16,15 @@ body {
   background: var(--bg);
   color: var(--ink);
   font-family: var(--font);
-  font-size: clamp(13px, 2vw, 14px);
+  /* Fluid: 12px at 320px → 14px at 400px+ */
+  font-size: clamp(12px, 3.5vw, 14px);
   line-height: 20px;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
-  padding-bottom: 120px;
+  /* Fluid clearance above fixed footer + FAB — no breakpoints needed */
+  padding-bottom: clamp(120px, 38vw, 160px);
 }
 
 button { font-family: inherit; cursor: pointer; }
 input, select { font-family: inherit; }
 .mono { font-family: var(--font-mono); }
-
-/* Body padding-bottom adjusts per viewport to clear the fixed footer + FAB */
-@media (max-width: 480px) { body { font-size: 13px;   padding-bottom: 155px; } }
-@media (max-width: 360px) { body { font-size: 12.5px; padding-bottom: 144px; } }
-@media (max-width: 320px) { body { font-size: 12px;   padding-bottom: 132px; } }
