@@ -6,7 +6,7 @@ export default defineConfig({
 
   source: {
     entry: {
-      index: './app.jsx',
+      index: './src/main.jsx',
     },
 
     define: {

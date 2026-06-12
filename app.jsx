@@ -1,3 +1,7 @@
+// ⚠️  DEPRECATED — this file is no longer the app entry point.
+// Entry point: src/main.jsx
+// All components have been extracted to src/components/, src/hooks/, src/utils/
+// This file is kept as an archive only. Do not import from here.
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
@@ -958,3 +962,4 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     <AppRouter />
   </BrowserRouter>
 );
+

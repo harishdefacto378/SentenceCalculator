@@ -1,0 +1,25 @@
+import React from 'react';
+import { fmtNum, fmtRupees, fmtYMD, daysToYMD } from '../../utils/formatters';
+
+export function FactorSummary({ aggSentTotal, aggFineTotal, mitSentTotal, mitFineTotal, baseSentenceDays, baseFine, final }) {
+  const netSent = aggSentTotal - mitSentTotal;
+  const netFine = aggFineTotal - mitFineTotal;
+  return (
+    <div className="card">
+      <div className="card-head">
+        <h2>Calculation on the Basis of Aggravating &amp; Mitigating Factors</h2>
+        <div className="actions"><button className="btn ghost">Calculate</button></div>
+      </div>
+      <div className="card-body">
+        <div className="summary-grid">
+          <div className="summary-row"><span>%age Increase/Decrease in SENTENCE:</span><span className="v" style={{ color: netSent > 0 ? "var(--aggrav)" : netSent < 0 ? "var(--mitig)" : "var(--ink)" }}>{netSent > 0 ? "+" : ""}{netSent}%</span></div>
+          <div className="summary-row"><span>%age Increase/Decrease in FINE:</span><span className="v" style={{ color: netFine > 0 ? "var(--aggrav)" : netFine < 0 ? "var(--mitig)" : "var(--ink)" }}>{netFine > 0 ? "+" : ""}{netFine}%</span></div>
+          <div className="summary-row"><span>NEW SENTENCE in day(s):</span><span className="v big">{fmtNum(final.sentenceDays)} days</span></div>
+          <div className="summary-row"><span>NEW SENTENCE in year(s), month(s) and day(s):</span><span className="v">{fmtYMD(daysToYMD(final.sentenceDays))}</span></div>
+          <div className="summary-row"><span>NEW FINE (in Rupees):</span><span className="v big">{fmtRupees(final.fine)}</span></div>
+        </div>
+        <div className="banner cap">Default capped at 100%</div>
+      </div>
+    </div>
+  );
+}

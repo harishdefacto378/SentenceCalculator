@@ -1,0 +1,114 @@
+import { useState, useCallback } from 'react';
+import { daysToYMD } from '../utils/formatters';
+
+/**
+ * Owns discretion state and the court-calculation handler.
+ * Inputs come from CalculatorPage (base result, disc percentages,
+ * selected substance record, and the qty in grams).
+ */
+export function useCourtCalc({ base, discState, substance, qtyInGrams, showToast }) {
+  const [discretion, setDiscretion] = useState({ sentenceDays: 0, fine: 0 });
+
+  const handleCourtCalc = useCallback(() => {
+    const { sentenceDays, _fineNum, quantityType } = base;
+    const substanceData = substance;
+
+    if (!sentenceDays && !_fineNum) {
+      alert("Please run the Proportional Calculation first.");
+      return;
+    }
+
+    const inc = Number(discState.inc) || 0;
+    const dec = Number(discState.dec) || 0;
+
+    const safeNum = v => { const n = parseFloat(v); return isFinite(n) ? n : 0; };
+
+    const baseSentence = Number(sentenceDays);
+    const baseFine = Number(_fineNum) || 0;
+
+    // ── SENTENCE ──────────────────────────────────────────────────────────────
+    let sentence = baseSentence;
+    if (inc > 0) sentence = sentence * (1 + inc / 100);
+    if (dec > 0) sentence = sentence * (1 - dec / 100);
+    sentence = Math.round(sentence);
+    if (sentence < 1) sentence = 1;
+
+    const clampSentence = (val, type, data) => {
+      if (!data) return val;
+      const min = type === "Small"
+        ? safeNum(data.cr3e9_df_smallminsent)
+        : type === "Intermediate"
+        ? safeNum(data.cr3e9_df_interminsent)
+        : safeNum(data.cr3e9_df_commminsent);
+      const max = type === "Small"
+        ? safeNum(data.cr3e9_df_smallmaxsent)
+        : type === "Intermediate"
+        ? safeNum(data.cr3e9_df_intermaxsent)
+        : safeNum(data.cr3e9_df_commmaxsent);
+      return Math.min(Math.max(val, min), max);
+    };
+    sentence = clampSentence(sentence, quantityType, substanceData);
+
+    // ── FINE ──────────────────────────────────────────────────────────────────
+    let fine = 0;
+
+    if (substanceData) {
+      const smallQty      = safeNum(substanceData.cr3e9_df_smallquantitygram);
+      const commercialQty = safeNum(substanceData.cr3e9_df_commercialquantitygram);
+      const commercialMaxQty = safeNum(substanceData.cr3e9_df_commercialmaxquantitygram) || commercialQty * 2;
+      const qty = qtyInGrams;
+
+      const fineRange = {
+        smallMin: safeNum(substanceData.cr3e9_df_smallminfine),
+        smallMax: safeNum(substanceData.cr3e9_df_smallmaxfine),
+        interMin: safeNum(substanceData.cr3e9_df_interminfine),
+        interMax: safeNum(substanceData.cr3e9_df_intermaxfine),
+        commMin:  safeNum(substanceData.cr3e9_df_commminfine),
+        commMax:  safeNum(substanceData.cr3e9_df_commmaxfine),
+      };
+
+      let rawFine;
+      if (qty < smallQty) {
+        rawFine = smallQty > 0
+          ? fineRange.smallMin + ((fineRange.smallMax - fineRange.smallMin) / smallQty) * qty
+          : fineRange.smallMin;
+      } else if (qty <= commercialQty) {
+        const interQty = commercialQty - smallQty;
+        rawFine = interQty > 0
+          ? fineRange.interMin + ((fineRange.interMax - fineRange.interMin) / interQty) * (qty - smallQty)
+          : fineRange.interMin;
+      } else {
+        const commQty = commercialMaxQty - commercialQty;
+        rawFine = commQty > 0
+          ? fineRange.commMin + ((fineRange.commMax - fineRange.commMin) / commQty) * (qty - commercialQty)
+          : fineRange.commMin;
+      }
+
+      // Apply inc + dec separately (preserves original logic, avoids net-% bug)
+      let fineValue = rawFine;
+      if (inc > 0) fineValue = fineValue * (1 + inc / 100);
+      if (dec > 0) fineValue = fineValue * (1 - dec / 100);
+
+      const limits = quantityType === "Small"
+        ? { min: fineRange.smallMin, max: fineRange.smallMax }
+        : quantityType === "Intermediate"
+        ? { min: fineRange.interMin, max: fineRange.interMax }
+        : { min: fineRange.commMin,  max: fineRange.commMax };
+
+      fineValue = Math.min(Math.max(fineValue, limits.min), limits.max);
+      fine = Math.round(fineValue / 1000) * 1000;
+
+    } else {
+      let fineValue = baseFine;
+      if (inc > 0) fineValue = fineValue * (1 + inc / 100);
+      if (dec > 0) fineValue = fineValue * (1 - dec / 100);
+      fine = Math.round(fineValue / 1000) * 1000;
+    }
+
+    setDiscretion({ sentenceDays: sentence, fine, ymd: daysToYMD(sentence) });
+    showToast("Discretion applied");
+
+  }, [base, discState, substance, qtyInGrams, showToast]);
+
+  return { discretion, handleCourtCalc };
+}
