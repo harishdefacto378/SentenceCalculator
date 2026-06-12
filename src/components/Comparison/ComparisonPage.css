@@ -307,3 +307,23 @@
   .cmp-page .chart-card { padding: 10px; }
   .cmp-page .bar-cell .num { min-width: 48px; font-size: 10.5px; }
 }
+
+/* ── ≤ 320px — Galaxy Fold & ultra-narrow ────────────────────────────────── */
+@media (max-width: 320px) {
+  .cmp-page .shell { padding: 0 4px; }
+  .cmp-page .card-body { padding: 8px; }
+  .cmp-page .header-inner { gap: 6px; }
+  .cmp-page .kpis { gap: 3px; padding: 6px; }
+  .cmp-page .kpi { padding: 6px 8px; }
+  .cmp-page .kpi .v { font-size: 13px; }
+  .cmp-page .kpi .k { font-size: 9px; }
+  .cmp-page .page-title { font-size: 13px; }
+  .cmp-page .toolbar .btn { font-size: 11.5px; padding: 2px 6px; min-height: 36px; }
+  .cmp-page .chip-sw { font-size: 10.5px; }
+  .cmp-page .h-chart .row { grid-template-columns: 52px 1fr; gap: 4px; }
+  .cmp-page .h-chart .row .lbl { font-size: 10px; }
+  .cmp-page .bar-cell .num { min-width: 40px; font-size: 10px; }
+  .cmp-page .builder-group .input.num { width: 48px; }
+  .cmp-page .ct thead th.metric { min-width: 120px; }
+  .cmp-page .ct thead th.col { min-width: 110px; }
+}

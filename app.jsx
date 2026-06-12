@@ -347,7 +347,7 @@ function ProportionalCalc({ state, setState, base, onCalc, calculated, drugsData
         </div>
         <div className="form-row">
           <label>Quantity Detained</label>
-          <div className="input-group">
+          <div className="field-inline">
             <input className="input num" placeholder="0" value={state.qty} onChange={e => setState({ ...state, qty: e.target.value.replace(/[^\d.]/g, "") })} />
             <select className="select" value={state.unit} onChange={e => setState({ ...state, unit: e.target.value })}>
               {Object.keys(UNITS).map(u => <option key={u} value={u}>{UNIT_LABELS[u]}</option>)}

@@ -334,3 +334,27 @@
   .ab-page .group-label { font-size: 11px; margin: 16px 0 10px; }
   footer.site a { font-size: 10px; word-break: break-all; }
 }
+
+/* ── ≤ 320px — Galaxy Fold & ultra-narrow ────────────────────────────────── */
+@media (max-width: 320px) {
+  .ab-page .shell { padding: 0 4px; }
+  .ab-page .card { padding: 8px; }
+  .ab-page .page-title { font-size: 15px; margin-bottom: 10px; }
+  .ab-page .ticker { padding: 4px 10px; font-size: 10.5px; }
+  .ab-page .header-inner { gap: 6px; }
+  .ab-page .sec h3 { font-size: 13px; }
+  .ab-page .sec { margin-top: 12px; }
+  .ab-page .hours-card { padding: 10px; }
+  .ab-page .hours-card .day-row { grid-template-columns: 20px 1fr 40px; font-size: 10px; gap: 4px; }
+  .ab-page .avatar { width: 34px; height: 34px; font-size: 12px; }
+  .ab-page .people-hero .name { font-size: 13px; }
+  .ab-page .people-hero .role { font-size: 11.5px; }
+  .ab-page .roster-card { padding: 6px 8px; }
+  .ab-page .roster-card .name { font-size: 12px; }
+  .ab-page .chip { font-size: 11px; padding: 6px 8px; min-height: 36px; }
+  .ab-page .ceo-row { padding: 8px 10px; }
+  .ab-page .msgbar { font-size: 11px; padding: 6px 8px; }
+  .ab-page .group-label { font-size: 10.5px; }
+  .ab-page .support-list { font-size: 12px; }
+  .ab-page .video-grid { gap: 8px; }
+}
