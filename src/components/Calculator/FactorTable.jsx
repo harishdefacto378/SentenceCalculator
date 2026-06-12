@@ -20,14 +20,14 @@ export function FactorTable({ kind, factors, setFactors, totalSent, totalFine })
 
   return (
     <div className="card">
-      <div className="card-head" style={{ borderColor: "transparent" }}>
-        <h2 style={{ color: isAggrav ? "var(--aggrav)" : "var(--mitig)" }}>{heading}</h2>
+      <div className={"card-head card-head--no-border card-head--" + kind}>
+        <h2>{heading}</h2>
         <div className="actions"><button className="btn ghost" onClick={() => setFactors(factors.map(f => ({ ...f, sentence: 0, fine: 0 })))}>Reset</button></div>
       </div>
       <div className="table-scroll">
         <div className="table-head">
           <div></div>
-          <div style={{ textTransform: "none", letterSpacing: 0, fontSize: 12, fontWeight: 600, color: "var(--ink)" }}>{headLbl}</div>
+          <div className="table-head-label">{headLbl}</div>
           <div className="num-col">{sentColLbl}<em>(Please fill)</em></div>
           <div className="num-col">{fineColLbl}<em>(Please fill)</em></div>
           <div className="num-col">Average suggested by survey (%)</div>
@@ -39,9 +39,9 @@ export function FactorTable({ kind, factors, setFactors, totalSent, totalFine })
               <div className="label">
                 {f.label}
                 {f.options && (
-                  <div style={{ marginTop: 6, display: "flex", flexDirection: "column", gap: 4 }}>
+                  <div className="factor-option-list">
                     {f.options.map(o => (
-                      <label key={o} style={{ fontSize: 12, color: "var(--ink-2)", display: "flex", gap: 6, alignItems: "center" }}>
+                      <label key={o} className="factor-option-label">
                         <input type="radio" name={f.id} /> {o}
                       </label>
                     ))}
@@ -50,7 +50,7 @@ export function FactorTable({ kind, factors, setFactors, totalSent, totalFine })
               </div>
               <div className="cell"><input className="input sm" type="number" min="0" max="100" value={f.sentence} onChange={e => setField(f.id, "sentence", e.target.value)} /></div>
               <div className="cell"><input className="input sm" type="number" min="0" max="100" value={f.fine} onChange={e => setField(f.id, "fine", e.target.value)} /></div>
-              <div className="cell"><input className="input sm" readOnly value={f.avg + "%"} style={{ background: "#f5f6fa", color: "var(--ink-3)" }} /></div>
+              <div className="cell"><input className="input sm avg" readOnly value={f.avg + "%"} /></div>
             </div>
           ))}
         </div>

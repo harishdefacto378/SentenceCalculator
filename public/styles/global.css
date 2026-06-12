@@ -4,13 +4,16 @@
    ✔  font-size and padding-bottom are fluid via clamp().
 ════════════════════════════════════════════════════════════════════════════ */
 
-*, *::before, *::after { box-sizing: border-box; }
+/* min-width:0 on every element prevents flex children from overflowing their container */
+*, *::before, *::after { box-sizing: border-box; min-width: 0; }
 
 html, body {
   margin: 0;
   padding: 0;
-  overflow-x: hidden;
 }
+
+/* Clip overflow on the root element only — does NOT suppress .table-scroll's inner scrollbar */
+html { overflow-x: clip; }
 
 body {
   background: var(--bg);

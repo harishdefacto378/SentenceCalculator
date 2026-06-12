@@ -48,6 +48,12 @@
 /* Calculate button wrapper */
 .calc-action { display: flex; justify-content: flex-end; margin-top: 8px; }
 
+/* Variant: extra top spacing (DiscretionCalc) */
+.calc-action--top { margin-top: 10px; }
+
+/* Copyright symbol opacity in footer */
+.pip-copyright { opacity: 0.7; }
+
 
 /* ── ONE structural breakpoint: calc button fills full width on mobile ────── */
 @media (max-width: 640px) {

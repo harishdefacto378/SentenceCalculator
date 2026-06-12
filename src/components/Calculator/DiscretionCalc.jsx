@@ -18,7 +18,7 @@ export function DiscretionCalc({ state, setState, base, discretion, onCalc, calc
           <input className="input sm" type="number" min="0" max="100" value={state.dec} onChange={e => setState({ ...state, dec: Math.max(0, Math.min(100, +e.target.value || 0)) })} />
         </div>
         <div className="banner">We strongly recommend to decrease default to make median at 50%</div>
-        <div className="calc-action" style={{ marginTop: 10 }}>
+        <div className="calc-action calc-action--top">
           <button className="btn" disabled={!calculated} onClick={onCalc}>Calculate</button>
         </div>
         <div className="results">

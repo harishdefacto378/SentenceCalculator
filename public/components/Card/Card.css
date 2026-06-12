@@ -27,7 +27,12 @@
   line-height: 1.4;
   letter-spacing: -0.005em;
 }
-.card-head.aggrav { background: var(--danger-bg);  border-bottom-color: var(--danger-border); }
+/* Variant: transparent border (used by FactorTable card head) */
+.card-head--no-border { border-color: transparent; }
+
+/* Variant: aggravating / mitigating colored headings */
+.card-head--aggrav h2 { color: var(--aggrav); }
+.card-head--mitig  h2 { color: var(--mitig); }
 .card-head.aggrav h2 { color: var(--danger); }
 .card-head.mitig  { background: var(--success-bg); border-bottom-color: var(--success-border); }
 .card-head.mitig h2 { color: var(--success); }

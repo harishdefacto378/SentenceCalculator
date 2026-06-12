@@ -114,7 +114,7 @@ export function CalculatorPage() {
       <FabBar active={fabActive} setActive={setFabActive} />
 
       <footer className="site">
-        <div className="pip">Justice Anoop Chitkara <span style={{ opacity: 0.7 }}>©</span></div>
+        <div className="pip">Justice Anoop Chitkara <span className="pip-copyright">©</span></div>
         <div className="pip">Send feedback: <a href="mailto:sentencecalculator.in@gmail.com">sentencecalculator.in@gmail.com</a></div>
         <div className="pip survey"><a href="#">📊 Participate in Survey</a></div>
         <div className="pip">For any query: <a href="mailto:customer.support@defactoinfotech.com">customer.support@defactoinfotech.com</a></div>

@@ -81,10 +81,9 @@ export function ProportionalCalc({ state, setState, base, onCalc, calculated, dr
         <div className="card-body">
           <div className="form-row">
             <label>Substance Name</label>
-            <div className="substance-wrap" style={{ position: "relative" }}>
+            <div className="substance-wrap">
               <input
                 className="input"
-                style={{ width: "100%" }}
                 placeholder="Search substance…"
                 value={substanceInput}
                 onChange={handleSubstanceChange}
@@ -93,20 +92,11 @@ export function ProportionalCalc({ state, setState, base, onCalc, calculated, dr
                 autoComplete="off"
               />
               {showSuggestions && filtered.length > 0 && (
-                <ul style={{
-                  position: "absolute", top: "100%", left: 0, right: 0,
-                  margin: 0, padding: 0, listStyle: "none",
-                  border: "1px solid #ccc", background: "#fff",
-                  zIndex: 100, maxHeight: 200, overflowY: "auto",
-                  borderRadius: "0 0 4px 4px", boxShadow: "0 4px 8px rgba(0,0,0,0.1)"
-                }}>
+                <ul className="substance-suggestions">
                   {filtered.map(item => (
                     <li
                       key={item.id}
                       onMouseDown={() => selectSuggestion(item)}
-                      style={{ padding: "8px 12px", cursor: "pointer", fontSize: 14 }}
-                      onMouseEnter={e => e.currentTarget.style.background = "#f0f4ff"}
-                      onMouseLeave={e => e.currentTarget.style.background = "#fff"}
                     >
                       {item.name}
                     </li>

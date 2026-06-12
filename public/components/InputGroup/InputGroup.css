@@ -44,9 +44,6 @@
 /* Date input: fills up to 160px, then shrinks with container */
 .input.date-input { width: min(160px, 100%); }
 
-/* Substance search wrapper: fills up to 220px */
-.substance-wrap { width: min(220px, 100%); }
-
 /* Select / dropdown */
 .select {
   border: 1px solid var(--rule-2);
@@ -58,6 +55,7 @@
   line-height: 20px;
   min-height: clamp(38px, 11vw, 44px);
   color: var(--ink);
+  -webkit-appearance: none;  /* required for older Chrome/Edge/WebView on mobile */
   appearance: none;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' stroke='%23424242' stroke-width='1.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
   background-repeat: no-repeat;
@@ -77,3 +75,50 @@
   min-width: 0;
 }
 .input-group .select { flex: 1 1 auto; min-width: 0; }
+/* input inside flex row must also opt in to shrinking */
+.input-group .input  { min-width: 0; width: auto; flex: 0 0 clamp(64px, 22vw, 96px); }
+
+/* ── Substance search wrapper ────────────────────────────────────────────── */
+/* Full-width on all screens; position:relative anchors the suggestion dropdown */
+.substance-wrap {
+  width: 100%;   /* was min(220px,100%) — the 220px cap squeezed it on mobile */
+  min-width: 0;
+  position: relative;
+}
+
+/* Full-width input inside the substance wrapper */
+.substance-wrap .input {
+  width: 100%;  /* was inline style={{ width:"100%" }} */
+}
+
+/* ── Autocomplete suggestion dropdown ────────────────────────────────────── */
+.substance-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid #ccc;
+  background: var(--paper);
+  z-index: 100;
+  max-height: 200px;
+  overflow-y: auto;
+  border-radius: 0 0 var(--r-md) var(--r-md);
+  box-shadow: var(--shadow-4);
+}
+.substance-suggestions li {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: clamp(12px, 3.5vw, 14px);
+  line-height: 20px;
+}
+/* Pure CSS hover — replaces onMouseEnter/Leave JS style mutations */
+.substance-suggestions li:hover { background: #f0f4ff; }
+
+/* ── Readonly avg input inside factor table ──────────────────────────────── */
+.input.avg {
+  background: #f5f6fa;
+  color: var(--ink-3);
+}
