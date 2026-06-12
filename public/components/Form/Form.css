@@ -1,0 +1,71 @@
+/* ════════════════════════════════════════════════════════════════════════════
+   FORM — form row layout and custom factor input row.
+   ❌ Does NOT control input/select dimensions (→ InputGroup.css)
+   ❌ Does NOT control field-inline layout (→ FieldInline.css)
+════════════════════════════════════════════════════════════════════════════ */
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 0;
+}
+.form-row + .form-row { border-top: 1px solid var(--rule); }
+.form-row label { font-size: 14px; color: var(--ink); font-weight: 400; }
+.form-row .sub-label {
+  display: block;
+  font-size: 12px;
+  color: var(--ink-3);
+  margin-top: 2px;
+  font-style: normal;
+}
+
+/* Custom factor input row */
+.custom-row {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--paper-2);
+  border-top: 1px solid var(--rule);
+  flex-wrap: wrap;
+}
+.custom-row input {
+  flex: 1;
+  min-width: 160px;
+  border: 1px solid var(--rule-2);
+  border-bottom-color: var(--ink-3);
+  border-radius: var(--r-md) var(--r-md) 0 0;
+  padding: 5px 10px;
+  font-size: 14px;
+  min-height: 44px;
+  touch-action: manipulation;
+}
+.custom-row input:focus { outline: none; border-bottom: 2px solid var(--brand); padding-bottom: 4px; }
+
+
+/* ── Form responsive ─────────────────────────────────────────────────────── */
+
+/* Stack label above control on mobile */
+@media (max-width: 768px) {
+  .form-row { grid-template-columns: 1fr; gap: 6px; }
+  .form-row > *:last-child { width: 100%; }
+  .custom-row { flex-direction: column; }
+  .custom-row input { width: 100%; min-width: 0; }
+}
+
+@media (max-width: 480px) {
+  .form-row { padding: 12px 0; gap: 8px; }
+  .form-row label { font-size: 13.5px; font-weight: 500; }
+  .form-row .sub-label { font-size: 11.5px; margin-top: 3px; }
+}
+
+@media (max-width: 360px) {
+  .form-row { padding: 8px 0; gap: 4px; }
+  .form-row label { font-size: 13px; }
+}
+
+@media (max-width: 320px) {
+  .form-row { padding: 6px 0; gap: 3px; }
+  .form-row label { font-size: 12px; }
+}

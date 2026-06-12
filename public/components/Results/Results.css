@@ -1,0 +1,95 @@
+/* ════════════════════════════════════════════════════════════════════════════
+   RESULTS — proportional calculation results panel, banner notices,
+             and disclaimer box.
+════════════════════════════════════════════════════════════════════════════ */
+
+/* Results panel */
+.results {
+  margin-top: 12px;
+  background: var(--info-bg);
+  border: 1px solid var(--brand-bg-tint-2);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+}
+.result-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  padding: 5px 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--ink-2);
+  align-items: baseline;
+}
+.result-row + .result-row { border-top: 1px solid rgba(0,0,0,0.05); }
+.result-row .v { color: var(--ink); font-family: var(--font-mono); font-weight: 500; font-size: 13px; text-align: right; }
+.result-row .v.big { font-family: var(--font); font-weight: 600; font-size: 14px; }
+
+/* Banner / court notice */
+.banner {
+  margin: 12px 0 0;
+  background: var(--brand-bg-tint);
+  color: var(--brand-fg-2);
+  border: 1px solid var(--brand-bg-tint-2);
+  border-radius: var(--r-md);
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.banner::before { content: "ⓘ"; color: var(--brand); font-size: 14px; flex: 0 0 auto; }
+.banner.cap { background: var(--paper-2); color: var(--ink-2); border-color: var(--rule); }
+.banner.cap::before { content: "▣"; color: var(--ink-3); }
+
+/* Disclaimer box */
+.disclaimer-box {
+  margin-top: 12px;
+  background: var(--warn-bg);
+  border: 1px solid var(--warn-border);
+  border-radius: var(--r-md);
+  padding: 8px 12px;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: 13px;
+  line-height: 18px;
+}
+.disclaimer-box .ic { color: var(--warn); font-size: 16px; line-height: 18px; }
+.disclaimer-box .body { color: var(--ink); }
+.disclaimer-box .body b { color: var(--warn); font-weight: 600; }
+
+
+/* ── Results responsive ──────────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  .result-row { grid-template-columns: 1fr; gap: 2px; padding: 7px 0; }
+  .result-row + .result-row { border-top: 1px solid rgba(0,0,0,0.06); }
+  .result-row .v { text-align: left; font-size: 14px; }
+  .result-row .v.big { font-size: 15px; }
+}
+
+@media (max-width: 480px) {
+  .results { padding: 10px 12px; }
+  .result-row .v { font-size: 13px; }
+  .result-row .v.big { font-size: 14px; }
+}
+
+@media (max-width: 360px) {
+  .results { padding: 8px 10px; }
+  .result-row { font-size: 12px; gap: 2px; }
+  .result-row .v { font-size: 12.5px; }
+  .result-row .v.big { font-size: 13.5px; }
+  .banner { font-size: 12px; padding: 6px 10px; }
+}
+
+@media (max-width: 320px) {
+  .results { padding: 6px 8px; }
+  .result-row { font-size: 11.5px; }
+  .result-row .v { font-size: 12px; }
+  .result-row .v.big { font-size: 13px; }
+  .banner { font-size: 11.5px; padding: 5px 8px; }
+  .disclaimer-box { padding: 6px 8px; font-size: 12px; }
+}

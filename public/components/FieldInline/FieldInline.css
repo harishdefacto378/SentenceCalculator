@@ -1,0 +1,47 @@
+/* ════════════════════════════════════════════════════════════════════════════
+   FIELD INLINE — quantity + unit row.
+   ALWAYS inline, NEVER stacks. Owns its own layout entirely.
+   ❌ No global CSS may override .field-inline children.
+════════════════════════════════════════════════════════════════════════════ */
+
+.field-inline {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+}
+
+/* Numeric input: fixed width so the unit select gets the remaining space */
+.field-inline .input.num {
+  width: 80px;
+  flex: 0 0 80px;
+  min-width: 80px;
+}
+
+/* Unit select: fills remaining width */
+.field-inline .select {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+
+/* ── FieldInline responsive — per-component breakpoints ─────────────────── */
+
+/* Shrink number input on small screens; unit select fills the rest */
+@media (max-width: 480px) {
+  .field-inline .input.num {
+    width: 70px;
+    flex: 0 0 70px;
+    min-width: 70px;
+  }
+}
+
+@media (max-width: 320px) {
+  .field-inline .input.num {
+    width: 64px;
+    flex: 0 0 64px;
+    min-width: 64px;
+  }
+}

@@ -1,0 +1,262 @@
+/* ════════════════════════════════════════════════════════════════════════════
+   LAYOUT — Header, Shell/Columns, FAB, Site Footer, Toast
+   These are page-level structural elements, not form/input components.
+════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+.header {
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+  padding: 12px 24px;
+}
+.header-inner {
+  max-width: 1340px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 48px 1fr auto;
+  align-items: center;
+  gap: 16px;
+}
+.seal { width: 40px; height: 40px; object-fit: contain; display: block; }
+.header-title { min-width: 0; overflow: hidden; }
+.header-title h1 {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(16px, 3vw, 20px);
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  line-height: 28px;
+}
+.header-title .actname {
+  color: var(--ink-3);
+  font-size: clamp(10px, 1.5vw, 12px);
+  line-height: 16px;
+  margin-top: 2px;
+  font-weight: 400;
+}
+.disclaimer-strip {
+  max-width: 1340px;
+  margin: 6px auto 0;
+  padding: 0 4px;
+  color: var(--ink-3);
+  font-size: 12px;
+  line-height: 16px;
+}
+.header-nav {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  font-size: 13px;
+}
+.header-nav-link {
+  color: var(--brand-fg);
+  text-decoration: none;
+  font-weight: 500;
+}
+.header-nav-mobile {
+  display: none;
+  padding: 8px 16px 4px;
+  border-top: 1px solid var(--rule);
+  gap: 16px;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 500;
+}
+.header-nav-mobile a {
+  color: var(--brand-fg);
+  text-decoration: none;
+  padding: 6px 0;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.pill-warn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--warn-bg);
+  color: var(--warn);
+  border: 1px solid var(--warn-border);
+  border-radius: var(--r-md);
+  padding: 6px 12px;
+  min-height: 44px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  white-space: nowrap;
+  touch-action: manipulation;
+  cursor: default;
+}
+.pill-warn .ic {
+  width: 14px;
+  height: 14px;
+  display: grid;
+  place-items: center;
+  color: var(--warn);
+  font-size: 12px;
+}
+
+
+/* ── Shell & Columns ─────────────────────────────────────────────────────── */
+.shell {
+  max-width: 1340px;
+  margin: 16px auto 0;
+  padding: 0 24px;
+  display: grid;
+  grid-template-columns: minmax(0,1fr) minmax(0,1.05fr);
+  gap: 16px;
+}
+.col { display: flex; flex-direction: column; gap: 16px; }
+
+
+/* ── FAB — floating action bar ──────────────────────────────────────────── */
+.fab-bar {
+  position: fixed;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-circ);
+  padding: 4px;
+  display: flex;
+  gap: 2px;
+  box-shadow: var(--shadow-16);
+  z-index: 50;
+}
+.fab {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--r-circ);
+  border: 0;
+  background: transparent;
+  color: var(--ink-2);
+  display: grid;
+  place-items: center;
+  transition: background 0.1s, color 0.1s;
+  touch-action: manipulation;
+}
+.fab:hover { background: var(--paper-hover); color: var(--ink); }
+.fab.active { background: var(--brand-bg-tint); color: var(--brand-fg); }
+.fab svg { width: 18px; height: 18px; }
+
+
+/* ── Site Footer ─────────────────────────────────────────────────────────── */
+footer.site {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--paper);
+  border-top: 1px solid var(--rule);
+  color: var(--ink-2);
+  font-size: 12px;
+  line-height: 16px;
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  z-index: 40;
+}
+footer.site a { color: var(--brand-fg); text-decoration: none; }
+footer.site a:hover { text-decoration: underline; }
+footer.site .pip { display: inline-flex; align-items: center; gap: 6px; }
+footer.site .survey a { font-weight: 600; }
+
+
+/* ── Toast notification ──────────────────────────────────────────────────── */
+.row-flex { display: flex; align-items: center; gap: 8px; }
+.toast {
+  position: fixed;
+  bottom: 116px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--paper);
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  padding: 10px 16px;
+  border-radius: var(--r-md);
+  font-size: 13px;
+  box-shadow: var(--shadow-16);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 100;
+  white-space: nowrap;
+  max-width: calc(100vw - 32px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(-6px); }
+
+
+/* ════════════════════════════════════════════════════════════════════════════
+   LAYOUT RESPONSIVE BREAKPOINTS
+════════════════════════════════════════════════════════════════════════════ */
+
+/* ── ≤ 1080px — single-column shell ─────────────────────────────────────── */
+@media (max-width: 1080px) {
+  .shell { grid-template-columns: 1fr; }
+}
+
+/* ── ≤ 768px — tablet & mobile ──────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .header { padding: 10px 16px; }
+  .header-inner { grid-template-columns: 40px 1fr; gap: 10px; }
+  .header-inner nav, .header-nav { display: none !important; }
+  .header-nav-mobile { display: flex; }
+  .disclaimer-strip { font-size: 11px; }
+  .shell { padding: 0 16px; margin-top: 12px; }
+  footer.site { padding: 8px 16px; font-size: 11px; justify-content: center; gap: 4px 14px; }
+  footer.site .pip.survey { width: 100%; justify-content: center; }
+}
+
+/* ── ≤ 600px ─────────────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .shell { padding: 0 10px; margin-top: 8px; }
+  .col { gap: 12px; }
+}
+
+/* ── ≤ 480px — small phones ─────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .header-title h1 { font-size: 16px; line-height: 22px; }
+  .header-title .actname { font-size: 11px; }
+  .disclaimer-strip { display: none; }
+  .shell { gap: 12px; }
+  .fab-bar { bottom: 100px; gap: 0; }
+  .fab { width: 40px; height: 40px; }
+  .fab svg { width: 16px; height: 16px; }
+  footer.site { padding: 6px 12px; font-size: 10.5px; gap: 3px 10px; line-height: 1.3; }
+  footer.site a { word-break: break-all; }
+  .toast { font-size: 12px; padding: 8px 14px; bottom: 152px; }
+}
+
+/* ── ≤ 360px — very small phones ────────────────────────────────────────── */
+@media (max-width: 360px) {
+  .header { padding: 8px 10px; }
+  .header-inner { gap: 8px; }
+  .header-title h1 { font-size: 14px; line-height: 20px; }
+  .header-title .actname { font-size: 10.5px; }
+  .shell { padding: 0 8px; margin-top: 6px; gap: 10px; }
+  .fab-bar { bottom: 90px; padding: 2px; }
+  .fab { width: 36px; height: 36px; }
+  .fab svg { width: 14px; height: 14px; }
+  footer.site { padding: 5px 10px; font-size: 10px; gap: 2px 8px; line-height: 1.3; }
+  .toast { font-size: 11.5px; padding: 6px 12px; bottom: 140px; }
+}
+
+/* ── ≤ 320px — Galaxy Fold & ultra-narrow ───────────────────────────────── */
+@media (max-width: 320px) {
+  .header { padding: 6px 8px; }
+  .header-inner { gap: 6px; }
+  .header-title h1 { font-size: 13px; line-height: 18px; }
+  .header-title .actname { font-size: 10px; }
+  .shell { padding: 0 6px; gap: 8px; }
+  .fab-bar { bottom: 86px; padding: 2px; gap: 0; }
+  .fab { width: 32px; height: 32px; }
+  .fab svg { width: 13px; height: 13px; }
+  footer.site { padding: 4px 8px; font-size: 9.5px; line-height: 1.3; }
+  .toast { font-size: 11px; padding: 5px 10px; bottom: 132px; }
+}

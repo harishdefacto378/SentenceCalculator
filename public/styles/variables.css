@@ -1,0 +1,76 @@
+/* ════════════════════════════════════════════════════════════════════════════
+   DESIGN TOKENS — colors, spacing, shadows, typography tokens
+   All CSS custom properties live here. No layout rules.
+════════════════════════════════════════════════════════════════════════════ */
+:root {
+  /* Neutral surface */
+  --bg: #f5f5f5;
+  --paper: #ffffff;
+  --paper-2: #fafafa;
+  --paper-hover: #f5f5f5;
+
+  /* Text */
+  --ink: #242424;
+  --ink-2: #424242;
+  --ink-3: #616161;
+  --ink-disabled: #bdbdbd;
+
+  /* Borders */
+  --rule: #e0e0e0;
+  --rule-2: #d1d1d1;
+  --rule-strong: #b3b3b3;
+
+  /* Brand palette */
+  --brand-10: #2e1747;
+  --brand-20: #3b1d5e;
+  --brand-30: #4a2476;
+  --brand-40: #5b2c8e;
+  --brand-50: #6e36a7;
+  --brand-60: #8146bf;
+  --brand-70: #9760cd;
+  --brand-80: #ad7adb;
+  --brand-90: #c294e6;
+  --brand-100: #d9b6ee;
+  --brand-130: #f3e6fa;
+  --brand-140: #faf2fd;
+  --brand-150: #fdf9fe;
+  --brand: var(--brand-60);
+  --brand-hover: var(--brand-50);
+  --brand-pressed: var(--brand-40);
+  --brand-fg: var(--brand-50);
+  --brand-fg-2: var(--brand-40);
+  --brand-bg-tint: var(--brand-140);
+  --brand-bg-tint-2: var(--brand-130);
+
+  /* Accent */
+  --accent-gold: #b8860b;
+  --accent-gold-soft: #fbf3df;
+
+  /* Semantic states */
+  --danger: #c50f1f;
+  --danger-bg: #fdf3f4;
+  --danger-border: #f1bbbc;
+  --success: #0e700e;
+  --success-bg: #f1faf1;
+  --success-border: #9fd89f;
+  --warn: #bc4b09;
+  --warn-bg: #fdf6ec;
+  --warn-border: #f6c187;
+  --info-bg: var(--brand-140);
+
+  /* Radius */
+  --r-sm: 4px;
+  --r-md: 4px;
+  --r-lg: 8px;
+  --r-circ: 999px;
+
+  /* Shadows */
+  --shadow-2:  0 0 2px rgba(0,0,0,0.12), 0 1px 2px  rgba(0,0,0,0.14);
+  --shadow-4:  0 0 2px rgba(0,0,0,0.12), 0 2px 4px  rgba(0,0,0,0.14);
+  --shadow-8:  0 0 2px rgba(0,0,0,0.12), 0 4px 8px  rgba(0,0,0,0.14);
+  --shadow-16: 0 0 2px rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.14);
+
+  /* Typography */
+  --font: "Inter", "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "Cascadia Code", "Consolas", ui-monospace, monospace;
+}
