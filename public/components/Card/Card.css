@@ -7,7 +7,10 @@
   border: 1px solid var(--rule);
   border-radius: var(--r-lg);
   box-shadow: var(--shadow-2);
-  overflow: hidden;
+  /* overflow: clip (not hidden) — clips visually but does NOT create a new
+     scroll container. This lets .table-scroll { overflow-x: auto } render
+     its scrollbar on mobile. overflow: hidden was killing the scrollbar. */
+  overflow: clip;
 }
 .card-head {
   /* Fluid: 8px/10px at 320px → 12px/16px at 500px+ */

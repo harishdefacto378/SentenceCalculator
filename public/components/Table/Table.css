@@ -1,13 +1,21 @@
 /* ════════════════════════════════════════════════════════════════════════════
    TABLE — aggravating/mitigating factor table and summary totals.
-   ✔ Table is scroll-locked (min-width: 480px) — no breakpoint chaos needed.
-   ✔ Summary section is fluid via clamp().
+   ✔ Desktop (≥481px): scroll-locked 5-column grid — unchanged.
+   ✔ Mobile  (≤480px): card-per-row layout — no horizontal scroll.
 ════════════════════════════════════════════════════════════════════════════ */
 
-/* Horizontal scroll wrapper — the table scrolls before it ever breaks */
-.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border-top: 1px solid var(--rule); }
+/* Horizontal scroll wrapper.
+   Requires parent (.card) to be overflow:clip, NOT overflow:hidden —
+   overflow:hidden creates a scroll container that kills the inner scrollbar. */
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-top: 1px solid var(--rule);
+}
 
-/* Table header row — fixed grid, scrolls on narrow screens */
+/* ── Desktop table: scroll-locked 5-column grid ──────────────────────────── */
+
+/* Table header row */
 .table-head {
   display: grid;
   grid-template-columns: 30px 1fr 96px 96px 96px;
@@ -20,7 +28,7 @@
   font-weight: 600;
   color: var(--ink-2);
   line-height: 16px;
-  min-width: 480px;   /* forces horizontal scroll instead of reflowing */
+  min-width: 480px;   /* scroll-lock floor: table scrolls before it reflows */
 }
 .table-head .num-col { text-align: center; font-size: 12px; line-height: 16px; }
 .table-head .num-col em { display: block; font-style: normal; font-weight: 400; color: var(--ink-3); font-size: 11px; margin-top: 2px; }
@@ -46,10 +54,10 @@
 .factor-row .label { color: var(--ink); }
 .factor-row .cell  { text-align: right; }
 
-/* Table footer totals row */
+/* Table footer totals row — 4 cols (avg column has no total) */
 .table-foot {
   display: grid;
-  grid-template-columns: 30px 1fr 96px 96px 96px;
+  grid-template-columns: 30px 1fr 96px 96px;
   gap: 10px;
   padding: 10px 16px;
   background: var(--paper-2);
@@ -63,7 +71,85 @@
 .table-foot .val.aggrav { color: var(--danger); }
 .table-foot .val.mitig  { color: var(--success); }
 
-/* Factor summary totals — below the table, fluid */
+
+/* ── Mobile card layout ≤ 480px ─────────────────────────────────────────────
+   Each factor row becomes a 2-row grid:
+     Row 1: [arrow+num] [factor label text…………………]
+     Row 2: [empty]     [Sent%]    [Fine%]   [Avg%]
+   No horizontal scroll. No JSX changes required.
+─────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+
+  /* Inner scroll is no longer needed — rows reflow vertically */
+  .table-scroll {
+    overflow-x: visible;
+  }
+
+  /* Column header hidden — labels shown via CSS ::before on each cell */
+  .table-head { display: none; }
+
+  /* Reflow each row into a 2-row card grid */
+  .factor-row {
+    display: grid;
+    grid-template-columns: 28px 1fr 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 6px 8px;
+    min-width: 0;      /* override the 480px desktop floor */
+    padding: 10px 12px;
+    align-items: start;
+  }
+
+  /* Row 1: idx (col 1), label spans cols 2-4 */
+  .factor-row > :nth-child(1) { grid-column: 1;     grid-row: 1; align-self: center; }
+  .factor-row > :nth-child(2) { grid-column: 2 / -1; grid-row: 1; }
+
+  /* Row 2: three cells, one per column 2-3-4 */
+  .factor-row > :nth-child(3) { grid-column: 2; grid-row: 2; }
+  .factor-row > :nth-child(4) { grid-column: 3; grid-row: 2; }
+  .factor-row > :nth-child(5) { grid-column: 4; grid-row: 2; }
+
+  /* Each cell: label above + input below */
+  .factor-row .cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    text-align: center;
+  }
+
+  /* CSS-generated column labels — no JSX change needed */
+  .factor-row .cell::before {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--ink-3);
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+  .factor-row > :nth-child(3)::before { content: "Sentence %"; }
+  .factor-row > :nth-child(4)::before { content: "Fine %"; }
+  .factor-row > :nth-child(5)::before { content: "Avg %"; }
+
+  /* Inputs fill their cell column */
+  .factor-row .cell .input.sm {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Footer: label full-width on top, two vals side by side below */
+  .table-foot {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 4px 8px;
+    min-width: 0;
+    padding: 10px 12px;
+  }
+  .table-foot .label { grid-column: 1 / -1; grid-row: 1; }
+  .table-foot .val   { grid-row: 2; text-align: center; }
+}
+
+
+/* ── Factor summary totals (below the card, always fluid) ────────────────── */
 .summary-grid { display: grid; grid-template-columns: 1fr; gap: 0; }
 .summary-row {
   display: grid;
@@ -78,11 +164,11 @@
 .summary-row .v { color: var(--ink); font-family: var(--font-mono); font-weight: 500; text-align: right; }
 .summary-row .v.big { font-family: var(--font); font-weight: 600; font-size: clamp(13px, 3.5vw, 14px); }
 
-/* Factor summary value color variants — replace inline conditional styles */
+/* Factor summary value color variants */
 .v--positive { color: var(--aggrav); }
 .v--negative { color: var(--mitig);  }
 
-/* Table-head label column — replaces inline style on the factors label div */
+/* Table-head label column */
 .table-head-label {
   text-transform: none;
   letter-spacing: 0;
