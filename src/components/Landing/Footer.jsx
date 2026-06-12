@@ -1,9 +1,10 @@
 import React from 'react';
+import './Footer.css';
 
 export default function Footer() {
   return (
     <footer className="lp-footer">
-      <span>Justice Anoop Chitkara <span style={{ opacity: 0.7 }}>©</span></span>
+      <span>Justice Anoop Chitkara <span className="copyright-sym">©</span></span>
       <span>
         Feedback:{' '}
         <a href="mailto:sentencecalculator.in@gmail.com">

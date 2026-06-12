@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import './ToolsGrid.css';
 import ToolCard, { THUMB_ICONS } from './ToolCard';
 
 const TOOLS = [

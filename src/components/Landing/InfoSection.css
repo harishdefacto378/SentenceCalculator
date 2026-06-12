@@ -1,0 +1,36 @@
+/* ── Info Section ───────────────────────────────────────────────────────── */
+
+.lp-info {
+  background: var(--paper, #ffffff);
+  border: 1px solid var(--rule, #e0e0e0);
+  border-radius: 10px;
+  padding: 22px 28px;
+  margin-top: 22px;
+}
+
+.lp-info h3 {
+  margin: 0 0 10px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.lp-info p {
+  margin: 0 0 8px;
+  color: var(--ink-2, #424242);
+  font-size: 13.5px;
+  line-height: 21px;
+}
+
+.lp-info p:last-child { margin-bottom: 0; }
+
+.lp-info strong { color: var(--ink, #242424); }
+
+@media (max-width: 540px) {
+  .lp-info { padding: 16px 18px; }
+}
+
+@media (max-width: 480px) {
+  .lp-info { padding: 14px 16px; margin-top: 14px; }
+  .lp-info h3 { font-size: 14px; }
+  .lp-info p { font-size: 13px; }
+}

@@ -1,0 +1,71 @@
+/* ── Navbar / Hero ──────────────────────────────────────────────────────── */
+
+.lp-hero {
+  background: linear-gradient(135deg, #5b2c8e 0%, #8146bf 100%);
+  color: #fff;
+  border-radius: 12px;
+  padding: 36px 40px;
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  gap: 20px;
+  align-items: center;
+  box-shadow: 0 4px 16px rgba(91, 44, 142, 0.18);
+  min-width: 0;
+}
+
+.lp-hero > * { min-width: 0; }
+
+.lp-seal {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  display: block;
+}
+
+.lp-hero h1 {
+  margin: 0;
+  font-size: clamp(18px, 3.5vw, 28px);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+.lp-actname {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: clamp(11px, 1.8vw, 13px);
+  margin-top: 4px;
+}
+
+.lp-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+@media (max-width: 800px) {
+  .lp-hero {
+    grid-template-columns: 48px 1fr;
+    padding: 24px 20px;
+  }
+  .lp-pill { display: none; }
+}
+
+@media (max-width: 540px) {
+  .lp-hero {
+    grid-template-columns: 40px 1fr;
+    gap: 12px;
+    padding: 18px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .lp-hero { padding: 14px; gap: 10px; }
+}

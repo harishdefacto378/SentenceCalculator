@@ -84,7 +84,7 @@ export default function AboutPage() {
                 <div className="row"><span className="k">Available</span><span className="v">Monday — Friday</span></div>
                 <div className="row">
                   <span className="k">Timing</span>
-                  <span className="v">9:00 AM &nbsp;—&nbsp; 6:00 PM <span style={{ color: 'var(--ink-3)', fontFamily: 'var(--font-mono)', fontSize: '12px' }}>IST</span></span>
+                  <span className="v">9:00 AM &nbsp;—&nbsp; 6:00 PM <span className="timezone-tag">IST</span></span>
                 </div>
                 <div className="row"><span className="k">Phone</span><span className="v"><a href="tel:+919648760019">+91&nbsp;9648&nbsp;760&nbsp;019</a></span></div>
                 <div className="row"><span className="k">Email</span><span className="v"><a href="mailto:customer.support@defactoinfotech.com">customer.support@defactoinfotech.com</a></span></div>
@@ -97,12 +97,12 @@ export default function AboutPage() {
               </div>
 
               <div className="hours-card" aria-hidden="true">
-                <div style={{ fontSize: '11px', color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600, marginBottom: '10px' }}>Weekly support window</div>
-                <div className="day-row"><span className="day">MON</span><div className="bar"><i style={{ left: '37.5%', right: '25%' }}></i></div><span className="when">9 — 6</span></div>
-                <div className="day-row"><span className="day">TUE</span><div className="bar"><i style={{ left: '37.5%', right: '25%' }}></i></div><span className="when">9 — 6</span></div>
-                <div className="day-row"><span className="day">WED</span><div className="bar"><i style={{ left: '37.5%', right: '25%' }}></i></div><span className="when">9 — 6</span></div>
-                <div className="day-row"><span className="day">THU</span><div className="bar"><i style={{ left: '37.5%', right: '25%' }}></i></div><span className="when">9 — 6</span></div>
-                <div className="day-row"><span className="day">FRI</span><div className="bar"><i style={{ left: '37.5%', right: '25%' }}></i></div><span className="when">9 — 6</span></div>
+                <div className="support-window-label">Weekly support window</div>
+                <div className="day-row"><span className="day">MON</span><div className="bar"><i></i></div><span className="when">9 — 6</span></div>
+                <div className="day-row"><span className="day">TUE</span><div className="bar"><i></i></div><span className="when">9 — 6</span></div>
+                <div className="day-row"><span className="day">WED</span><div className="bar"><i></i></div><span className="when">9 — 6</span></div>
+                <div className="day-row"><span className="day">THU</span><div className="bar"><i></i></div><span className="when">9 — 6</span></div>
+                <div className="day-row"><span className="day">FRI</span><div className="bar"><i></i></div><span className="when">9 — 6</span></div>
                 <div className="day-row off"><span className="day">SAT</span><div className="bar"></div><span className="when">closed</span></div>
                 <div className="day-row off"><span className="day">SUN</span><div className="bar"></div><span className="when">closed</span></div>
               </div>
@@ -125,7 +125,7 @@ export default function AboutPage() {
               </div>
             </div>
 
-            <div className="people-hero" style={{ borderBottom: 0, paddingTop: 0 }}>
+            <div className="people-hero people-hero--last">
               <div className="avatar">SA</div>
               <div className="body">
                 <div className="name">
@@ -168,7 +168,7 @@ export default function AboutPage() {
       </div>
 
       <footer className="site">
-        <div className="pip">Justice Anoop Chitkara <span style={{ opacity: 0.7 }}>©</span></div>
+        <div className="pip">Justice Anoop Chitkara <span className="copyright-sym">©</span></div>
         <div className="pip">Send feedback: <a href="mailto:sentencecalculator.in@gmail.com">sentencecalculator.in@gmail.com</a></div>
         <div className="pip"><a href="#">📊 Participate in Survey</a></div>
         <div className="pip">For any query: <a href="mailto:customer.support@defactoinfotech.com">customer.support@defactoinfotech.com</a></div>

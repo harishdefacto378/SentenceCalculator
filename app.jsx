@@ -311,7 +311,7 @@ function ProportionalCalc({ state, setState, base, onCalc, calculated, drugsData
       <div className="card-body">
         <div className="form-row">
           <label>Substance Name</label>
-          <div style={{ position: "relative", width: 220 }}>
+          <div className="substance-wrap" style={{ position: "relative" }}>
             <input
               className="input"
               style={{ width: "100%" }}
@@ -356,9 +356,9 @@ function ProportionalCalc({ state, setState, base, onCalc, calculated, drugsData
         </div>
         <div className="form-row">
           <label>Date of Confiscation <span className="sub-label">(optional)</span></label>
-          <input className="input" type="date" style={{ width: 160 }} value={state.date} onChange={e => setState({ ...state, date: e.target.value })} />
+          <input className="input date-input" type="date" value={state.date} onChange={e => setState({ ...state, date: e.target.value })} />
         </div>
-        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
+        <div className="calc-action">
           <button className="btn" disabled={!state.substance || !state.qty} onClick={handleCalculateClick}>Calculate</button>
         </div>
 
@@ -393,7 +393,7 @@ function DiscretionCalc({ state, setState, base, discretion, onCalc, calculated 
           <input className="input sm" type="number" min="0" max="100" value={state.dec} onChange={e => setState({ ...state, dec: Math.max(0, Math.min(100, +e.target.value || 0)) })} />
         </div>
         <div className="banner">We strongly recommend to decrease default to make median at 50%</div>
-        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 10 }}>
+        <div className="calc-action" style={{ marginTop: 10 }}>
           <button className="btn" disabled={!calculated} onClick={onCalc}>Calculate</button>
         </div>
         <div className="results">
@@ -453,43 +453,45 @@ function FactorTable({ kind, factors, setFactors, totalSent, totalFine }) {
         <h2 className={isAggrav ? "" : ""} style={{ color: isAggrav ? "var(--aggrav)" : "var(--mitig)" }}>{heading}</h2>
         <div className="actions"><button className="btn ghost" onClick={() => setFactors(factors.map(f => ({ ...f, sentence: 0, fine: 0 })))}>Reset</button></div>
       </div>
-      <div className="table-head">
-        <div></div>
-        <div style={{ textTransform: "none", letterSpacing: 0, fontSize: 12, fontWeight: 600, color: "var(--ink)" }}>{headLbl}</div>
-        <div className="num-col">{sentColLbl}<em>(Please fill)</em></div>
-        <div className="num-col">{fineColLbl}<em>(Please fill)</em></div>
-        <div className="num-col">Average suggested by survey (%)</div>
-      </div>
-      <div>
-        {factors.map((f, i) => (
-          <div key={f.id} className={"factor-row " + kind}>
-            <div className="idx"><span className="arrow">{arrow}</span><span>{i + 1}.</span></div>
-            <div className="label">
-              {f.label}
-              {f.options && (
-                <div style={{ marginTop: 6, display: "flex", flexDirection: "column", gap: 4 }}>
-                  {f.options.map(o => (
-                    <label key={o} style={{ fontSize: 12, color: "var(--ink-2)", display: "flex", gap: 6, alignItems: "center" }}>
-                      <input type="radio" name={f.id} /> {o}
-                    </label>
-                  ))}
-                </div>
-              )}
+      <div className="table-scroll">
+        <div className="table-head">
+          <div></div>
+          <div style={{ textTransform: "none", letterSpacing: 0, fontSize: 12, fontWeight: 600, color: "var(--ink)" }}>{headLbl}</div>
+          <div className="num-col">{sentColLbl}<em>(Please fill)</em></div>
+          <div className="num-col">{fineColLbl}<em>(Please fill)</em></div>
+          <div className="num-col">Average suggested by survey (%)</div>
+        </div>
+        <div>
+          {factors.map((f, i) => (
+            <div key={f.id} className={"factor-row " + kind}>
+              <div className="idx"><span className="arrow">{arrow}</span><span>{i + 1}.</span></div>
+              <div className="label">
+                {f.label}
+                {f.options && (
+                  <div style={{ marginTop: 6, display: "flex", flexDirection: "column", gap: 4 }}>
+                    {f.options.map(o => (
+                      <label key={o} style={{ fontSize: 12, color: "var(--ink-2)", display: "flex", gap: 6, alignItems: "center" }}>
+                        <input type="radio" name={f.id} /> {o}
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="cell"><input className="input sm" type="number" min="0" max="100" value={f.sentence} onChange={e => setField(f.id, "sentence", e.target.value)} /></div>
+              <div className="cell"><input className="input sm" type="number" min="0" max="100" value={f.fine} onChange={e => setField(f.id, "fine", e.target.value)} /></div>
+              <div className="cell"><input className="input sm" readOnly value={f.avg + "%"} style={{ background: "#f5f6fa", color: "var(--ink-3)" }} /></div>
             </div>
-            <div className="cell"><input className="input sm" type="number" min="0" max="100" value={f.sentence} onChange={e => setField(f.id, "sentence", e.target.value)} /></div>
-            <div className="cell"><input className="input sm" type="number" min="0" max="100" value={f.fine} onChange={e => setField(f.id, "fine", e.target.value)} /></div>
-            <div className="cell"><input className="input sm" readOnly value={f.avg + "%"} style={{ background: "#f5f6fa", color: "var(--ink-3)" }} /></div>
-          </div>
-        ))}
+          ))}
+        </div>
+        <div className="table-foot">
+          <div className="label">{isAggrav ? "Total Increase in Sentence (%)" : "Total Decrease in Sentence (%)"}</div>
+          <div className={"val " + (isAggrav ? "aggrav" : "mitig")}>{totalSent}%</div>
+          <div className={"val " + (isAggrav ? "aggrav" : "mitig")}>{totalFine}%</div>
+        </div>
       </div>
       <div className="custom-row">
         <input placeholder={isAggrav ? "Enter Custom Aggravating Factor" : "Enter Custom Mitigating Factor"} value={custom} onChange={e => setCustom(e.target.value)} />
         <button className="btn" disabled={!custom.trim()} onClick={addCustom}>Add</button>
-      </div>
-      <div className="table-foot">
-        <div className="label">{isAggrav ? "Total Increase in Sentence (%)" : "Total Decrease in Sentence (%)"}</div>
-        <div className={"val " + (isAggrav ? "aggrav" : "mitig")}>{totalSent}%</div>
-        <div className={"val " + (isAggrav ? "aggrav" : "mitig")}>{totalFine}%</div>
       </div>
     </div>
   );

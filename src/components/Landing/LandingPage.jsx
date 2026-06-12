@@ -1,5 +1,5 @@
 import React from 'react';
-import '../../assets/css/style.css';
+import './LandingPage.css';
 import Navbar from './Navbar';
 import Ticker from './Ticker';
 import ToolsGrid from './ToolsGrid';

@@ -1,0 +1,150 @@
+/* ── Tool Card ──────────────────────────────────────────────────────────── */
+
+.lp-card {
+  background: var(--paper, #ffffff);
+  border: 1px solid var(--rule, #e0e0e0);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: transform 0.15s, box-shadow 0.15s;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  outline: none;
+}
+
+@media (hover: hover) {
+  .lp-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  }
+}
+
+.lp-card:focus-visible {
+  box-shadow: 0 0 0 3px rgba(110, 54, 167, 0.4);
+}
+
+/* ── Thumbnail ──────────────────────────────────────────────────────────── */
+
+.lp-thumb {
+  aspect-ratio: 16 / 9;
+  display: grid;
+  place-items: center;
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  position: relative;
+}
+
+.lp-thumb svg {
+  width: 56%;
+  height: 56%;
+}
+
+.lp-thumb-calc  { background: linear-gradient(135deg, #5b2c8e, #8146bf); }
+.lp-thumb-cmp   { background: linear-gradient(135deg, #2c8a3e, #4caf50); }
+.lp-thumb-about { background: linear-gradient(135deg, #b8860b, #d4a72c); }
+
+/* ── Card body ──────────────────────────────────────────────────────────── */
+
+.lp-card-body {
+  padding: 18px 20px 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.lp-card-body h3 {
+  margin: 0 0 6px;
+  font-size: clamp(15px, 2vw, 17px);
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+
+.lp-card-body p {
+  margin: 0 0 16px;
+  font-size: 13.5px;
+  color: var(--ink-2, #424242);
+  line-height: 20px;
+}
+
+.lp-feature-list {
+  color: var(--ink-3, #616161) !important;
+  font-size: 12.5px !important;
+  line-height: 19px !important;
+}
+
+/* ── Open button ────────────────────────────────────────────────────────── */
+
+.lp-open {
+  align-self: flex-start;
+  margin-top: auto;
+  background: var(--brand-50, #6e36a7);
+  color: #fff;
+  border: 1px solid var(--brand-50, #6e36a7);
+  padding: 6px 14px;
+  min-height: 44px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.lp-open:hover {
+  background: var(--brand-40, #5b2c8e);
+  border-color: var(--brand-40, #5b2c8e);
+}
+
+.lp-open--loading,
+.lp-open:disabled {
+  background: var(--brand-70, #9760cd);
+  border-color: var(--brand-70, #9760cd);
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+@keyframes lp-spin {
+  to { transform: rotate(360deg); }
+}
+
+.lp-spinner {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: lp-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+/* ── Meta strip ─────────────────────────────────────────────────────────── */
+
+.lp-meta {
+  display: flex;
+  gap: 12px;
+  padding: 14px 20px;
+  background: var(--paper-2, #fafafa);
+  border-top: 1px solid var(--rule, #e0e0e0);
+  font-size: 12px;
+  color: var(--ink-3, #616161);
+  flex-wrap: wrap;
+}
+
+.lp-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+@media (max-width: 480px) {
+  .lp-card-body { padding: 14px 16px 16px; }
+  .lp-meta { padding: 10px 14px; gap: 8px; }
+  .lp-open { width: 100%; justify-content: center; align-self: stretch; }
+}

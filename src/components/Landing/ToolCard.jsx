@@ -1,5 +1,6 @@
 import React from 'react';
 import { fetchDrugList } from "../../services/drugListService";
+import './ToolCard.css';
 function CalcThumbSvg() {
   return (
     <svg viewBox="0 0 100 100" fill="currentColor">
@@ -58,11 +59,10 @@ export default function ToolCard({ thumbClass, svgIcon, title, description, feat
   return (
     <div
       className="lp-card"
-      
       role="button"
       tabIndex={0}
       onClick={onClick}
-      onKeyDown={e => e.key === 'Enter' && onClick()}
+      onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && onClick()}
     >
       <div className={`lp-thumb ${thumbClass}`}>{svgIcon}</div>
 

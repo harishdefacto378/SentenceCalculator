@@ -1,4 +1,5 @@
 import React from 'react';
+import './Ticker.css';
 
 export default function Ticker() {
   return (

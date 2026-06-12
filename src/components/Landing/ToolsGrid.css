@@ -1,0 +1,24 @@
+/* ── Tools Grid ─────────────────────────────────────────────────────────── */
+
+.lp-section-heading {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3, #616161);
+  margin: 36px 0 14px;
+}
+
+.lp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+  gap: clamp(12px, 2vw, 18px);
+}
+
+@media (max-width: 540px) {
+  .lp-section-heading { margin: 24px 0 10px; }
+}
+
+@media (max-width: 480px) {
+  .lp-section-heading { margin: 20px 0 10px; font-size: 12px; }
+}

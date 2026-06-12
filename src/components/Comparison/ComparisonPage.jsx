@@ -72,23 +72,23 @@ function Builder({ onAdd, draft, setDraft }) {
         <select className="select" value={draft.unit} onChange={e => setDraft({ ...draft, unit: e.target.value })}>
           {Object.keys(UNITS).map(u => <option key={u} value={u}>{u}</option>)}
         </select>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <span style={{ fontSize: 12, color: "var(--ink-3)" }}>Discretion</span>
-          <input className="input num" style={{ width: 64 }} placeholder="+%" value={draft.inc}
+        <div className="builder-group">
+          <span className="builder-label">Discretion</span>
+          <input className="input num" placeholder="+%" value={draft.inc}
             onChange={e => setDraft({ ...draft, inc: Math.max(0, Math.min(100, +e.target.value || 0)) })} />
-          <input className="input num" style={{ width: 64 }} placeholder="-%" value={draft.dec}
+          <input className="input num" placeholder="-%" value={draft.dec}
             onChange={e => setDraft({ ...draft, dec: Math.max(0, Math.min(100, +e.target.value || 0)) })} />
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <span style={{ fontSize: 12, color: "var(--ink-3)" }}>Factors</span>
-          <input className="input num" style={{ width: 64 }} placeholder="Ag%" value={draft.aggrav}
+        <div className="builder-group">
+          <span className="builder-label">Factors</span>
+          <input className="input num" placeholder="Ag%" value={draft.aggrav}
             onChange={e => setDraft({ ...draft, aggrav: Math.max(0, Math.min(100, +e.target.value || 0)) })} />
-          <input className="input num" style={{ width: 64 }} placeholder="Mt%" value={draft.mitig}
+          <input className="input num" placeholder="Mt%" value={draft.mitig}
             onChange={e => setDraft({ ...draft, mitig: Math.max(0, Math.min(100, +e.target.value || 0)) })} />
         </div>
         <button className="btn" onClick={onAdd} disabled={!sub || !draft.qty}>+ Add scenario</button>
       </div>
-      <div style={{ marginTop: 10, fontSize: 12, color: "var(--ink-3)" }}>
+      <div className="builder-hint">
         Label auto-generates from substance &amp; quantity. Add up to 6 scenarios — best (lowest) and worst (highest) sentence are highlighted.
       </div>
     </div>
@@ -154,7 +154,7 @@ function ComparisonContent() {
           </div>
         </div>
         <div className="chips">
-          {scenarios.length === 0 && <span style={{ fontSize: 12, color: "var(--ink-3)" }}>No scenarios — add one below to begin.</span>}
+          {scenarios.length === 0 && <span className="hint-text">No scenarios — add one below to begin.</span>}
           {scenarios.map((s, i) => (
             <span key={s.id} className="chip-sw">
               <span className="swatch" style={{ background: SCENARIO_COLORS[i % SCENARIO_COLORS.length] }}></span>
@@ -277,7 +277,7 @@ function ComparisonContent() {
                   return (
                     <div className="row" key={c.id}>
                       <div className="lbl"><span className="dot" style={{ background: SCENARIO_COLORS[i % SCENARIO_COLORS.length] }}></span>{c.label}</div>
-                      <div className="bar"><i style={{ width: w + "%", background: SCENARIO_COLORS[i % SCENARIO_COLORS.length], opacity: 0.85 }}></i><span className="num">{yrs} yr</span></div>
+                      <div className="bar"><i style={{ width: w + "%", background: SCENARIO_COLORS[i % SCENARIO_COLORS.length] }} className="bar-fill"></i><span className="num">{yrs} yr</span></div>
                     </div>
                   );
                 })}
@@ -291,7 +291,7 @@ function ComparisonContent() {
                   return (
                     <div className="row" key={c.id}>
                       <div className="lbl"><span className="dot" style={{ background: SCENARIO_COLORS[i % SCENARIO_COLORS.length] }}></span>{c.label}</div>
-                      <div className="bar"><i style={{ width: w + "%", background: SCENARIO_COLORS[i % SCENARIO_COLORS.length], opacity: 0.85 }}></i><span className="num">{fmtRupees(c.finalFine)}</span></div>
+                      <div className="bar"><i style={{ width: w + "%", background: SCENARIO_COLORS[i % SCENARIO_COLORS.length] }} className="bar-fill"></i><span className="num">{fmtRupees(c.finalFine)}</span></div>
                     </div>
                   );
                 })}
@@ -305,7 +305,7 @@ function ComparisonContent() {
         <div className="card">
           <div className="card-head"><h2>Sentence spectrum · 0 → 20 years</h2></div>
           <div className="spectrum">
-            <div style={{ fontSize: 12, color: "var(--ink-3)" }}>Each pin marks a scenario's final sentence on the statutory spectrum.</div>
+            <div className="spectrum-hint">Each pin marks a scenario's final sentence on the statutory spectrum.</div>
             <div className="scale">
               <div className="ticks">
                 <span></span><span></span><span></span><span></span><span></span>
@@ -325,10 +325,10 @@ function ComparisonContent() {
               <span>0y</span><span>2y</span><span>4y</span><span>6y</span><span>8y</span>
               <span>10y</span><span>12y</span><span>14y</span><span>16y</span><span>18y</span><span>20y</span>
             </div>
-            <div style={{ marginTop: 18, fontSize: 11.5, color: "var(--ink-3)", display: "flex", gap: 18, flexWrap: "wrap" }}>
-              <span><span style={{ display: "inline-block", width: 10, height: 10, borderRadius: 50, background: "#9fd89f", marginRight: 6, verticalAlign: "middle" }}></span>Small / lower intermediate</span>
-              <span><span style={{ display: "inline-block", width: 10, height: 10, borderRadius: 50, background: "#f6c187", marginRight: 6, verticalAlign: "middle" }}></span>Upper intermediate</span>
-              <span><span style={{ display: "inline-block", width: 10, height: 10, borderRadius: 50, background: "#f1bbbc", marginRight: 6, verticalAlign: "middle" }}></span>Commercial · 10 — 20 yrs</span>
+            <div className="spectrum-legend">
+              <span><span className="legend-dot legend-dot--green"></span>Small / lower intermediate</span>
+              <span><span className="legend-dot legend-dot--amber"></span>Upper intermediate</span>
+              <span><span className="legend-dot legend-dot--red"></span>Commercial · 10 — 20 yrs</span>
             </div>
           </div>
         </div>
@@ -362,7 +362,7 @@ export default function ComparisonPage() {
       <ComparisonContent />
 
       <footer className="site">
-        <div className="pip">Justice Anoop Chitkara <span style={{ opacity: 0.7 }}>©</span></div>
+        <div className="pip">Justice Anoop Chitkara <span className="copyright-sym">©</span></div>
         <div className="pip">Send feedback: <a href="mailto:sentencecalculator.in@gmail.com">sentencecalculator.in@gmail.com</a></div>
         <div className="pip"><a href="#">📊 Participate in Survey</a></div>
         <div className="pip">For any query: <a href="mailto:customer.support@defactoinfotech.com">customer.support@defactoinfotech.com</a></div>
