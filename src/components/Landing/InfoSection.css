@@ -25,6 +25,10 @@
 
 .lp-info strong { color: var(--ink, #242424); }
 
+@media (max-width: 768px) {
+  .lp-info { padding: 18px 20px; margin-top: 18px; border-radius: 8px; }
+}
+
 @media (max-width: 540px) {
   .lp-info { padding: 16px 18px; }
 }
@@ -33,4 +37,10 @@
   .lp-info { padding: 14px 16px; margin-top: 14px; }
   .lp-info h3 { font-size: 14px; }
   .lp-info p { font-size: 13px; }
+}
+
+@media (max-width: 360px) {
+  .lp-info { padding: 12px 14px; margin-top: 10px; }
+  .lp-info h3 { font-size: 13.5px; margin-bottom: 8px; }
+  .lp-info p { font-size: 12.5px; line-height: 19px; }
 }

@@ -10,8 +10,18 @@
   margin-top: 16px;
   border-radius: 6px;
   letter-spacing: 0.02em;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+@media (max-width: 768px) {
+  .lp-ticker { margin-top: 12px; border-radius: 4px; }
 }
 
 @media (max-width: 480px) {
   .lp-ticker { padding: 7px 12px; }
+}
+
+@media (max-width: 360px) {
+  .lp-ticker { padding: 6px 10px; font-size: 11px; margin-top: 10px; }
 }

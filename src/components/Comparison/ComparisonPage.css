@@ -10,6 +10,17 @@
   grid-template-columns: 44px 48px 1fr auto;
 }
 
+/* Hide pill-warn on tablet/mobile to prevent header overflow */
+@media (max-width: 768px) {
+  .cmp-page .header-inner { grid-template-columns: 44px 40px 1fr; }
+  .cmp-page .header-inner .pill-warn { display: none; }
+  .cmp-page .shell { padding: 0 16px; margin-top: 14px; }
+}
+
+@media (max-width: 600px) {
+  .cmp-page .header-inner { grid-template-columns: 44px 36px 1fr; gap: 8px; }
+}
+
 .cmp-page .back-btn {
   width: 44px; height: 44px;
   background: transparent; border: 1px solid transparent;
@@ -271,4 +282,28 @@
   .cmp-page .h-chart .row .lbl { font-size: 11.5px; }
   .cmp-page .toolbar { gap: 6px; }
   .cmp-page .chip-sw { font-size: 11.5px; padding: 4px 8px 4px 6px; }
+}
+
+/* ── ≤ 360px — very small phones ─────────────────────────────────────────── */
+@media (max-width: 360px) {
+  .cmp-page .shell { padding: 0 6px; }
+  .cmp-page .card-body { padding: 10px; }
+  .cmp-page .kpis { grid-template-columns: 1fr 1fr; gap: 4px; padding: 8px; }
+  .cmp-page .kpi { padding: 8px 10px; }
+  .cmp-page .kpi .v { font-size: 14px; }
+  .cmp-page .kpi .k { font-size: 9.5px; }
+  .cmp-page .page-title { font-size: 14px; flex-direction: column; gap: 4px; }
+  .cmp-page .page-title .subtle { font-size: 11px; }
+  .cmp-page .builder { gap: 6px; }
+  .cmp-page .builder-group { gap: 4px; }
+  .cmp-page .builder-group .input.num { width: 56px; }
+  .cmp-page .toolbar { gap: 4px; }
+  .cmp-page .toolbar .btn { padding: 3px 8px; font-size: 12px; min-height: 38px; }
+  .cmp-page .chips { padding: 8px 10px; gap: 6px; }
+  .cmp-page .chip-sw { font-size: 11px; padding: 3px 6px 3px 5px; }
+  .cmp-page .h-chart .row { grid-template-columns: 64px 1fr; gap: 6px; }
+  .cmp-page .h-chart .row .lbl { font-size: 10.5px; }
+  .cmp-page .spectrum { padding: 12px 12px 6px; }
+  .cmp-page .chart-card { padding: 10px; }
+  .cmp-page .bar-cell .num { min-width: 48px; font-size: 10.5px; }
 }

@@ -15,10 +15,20 @@
   gap: clamp(12px, 2vw, 18px);
 }
 
+@media (max-width: 768px) {
+  .lp-grid { gap: 14px; }
+  .lp-section-heading { margin: 28px 0 12px; }
+}
+
 @media (max-width: 540px) {
   .lp-section-heading { margin: 24px 0 10px; }
 }
 
 @media (max-width: 480px) {
   .lp-section-heading { margin: 20px 0 10px; font-size: 12px; }
+}
+
+@media (max-width: 360px) {
+  .lp-grid { gap: 10px; }
+  .lp-section-heading { margin: 16px 0 8px; font-size: 11px; letter-spacing: 0.06em; }
 }

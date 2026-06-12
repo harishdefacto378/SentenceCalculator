@@ -25,6 +25,10 @@
 
 .copyright-sym { opacity: 0.7; }
 
+@media (max-width: 768px) {
+  .lp-footer { gap: 12px; margin-top: 28px; }
+}
+
 @media (max-width: 540px) {
   .lp-footer {
     flex-direction: column;
@@ -35,5 +39,9 @@
 }
 
 @media (max-width: 480px) {
-  .lp-footer { margin-top: 24px; }
+  .lp-footer { margin-top: 24px; padding-top: 14px; }
+}
+
+@media (max-width: 360px) {
+  .lp-footer { margin-top: 18px; padding-top: 12px; font-size: 11px; gap: 6px; }
 }
