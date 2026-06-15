@@ -64,12 +64,10 @@ export default function AboutPage() {
               </div>
               <div className="video-card">
                 <div className="video-lang">Punjabi · ਪੰਜਾਬੀ</div>
-                <div className="video-wrapper video-wrapper--soon">
-                  <div className="video-coming-soon">
-                    <span className="video-coming-soon-icon">🎬</span>
-                    <span>Coming soon</span>
-                  </div>
-                </div>
+                <YouTubePlayer
+                  videoId="pglI1bHJYbs"
+                  title="Sentence Calculator — Punjabi walkthrough · ਪੂਰਾ ਡੈਮੋ"
+                />
                 <div className="video-caption">ਪੰਜਾਬੀ ਵਿੱਚ ਕਦਮ-ਦਰ-ਕਦਮ ਜਾਣ-ਪਛਾਣ।</div>
               </div>
             </div>
