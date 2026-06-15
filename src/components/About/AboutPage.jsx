@@ -52,7 +52,7 @@ export default function AboutPage() {
                   videoId="kLSAzAuhBps"
                   title="Sentence Calculator — English walkthrough"
                 />
-                <div className="video-caption">A complete tour — proportional, discretion, factors.</div>
+                {/* <div className="video-caption">A complete tour — proportional, discretion, factors.</div> */}
               </div>
               <div className="video-card">
                 <div className="video-lang">Hindi · हिन्दी</div>
@@ -60,7 +60,7 @@ export default function AboutPage() {
                   videoId="_nogx00NBUI"
                   title="Sentence Calculator — Hindi walkthrough · सम्पूर्ण मार्गदर्शिका"
                 />
-                <div className="video-caption">हिन्दी में पूरा डेमो।</div>
+                {/* <div className="video-caption">हिन्दी में पूरा डेमो।</div> */}
               </div>
               <div className="video-card">
                 <div className="video-lang">Punjabi · ਪੰਜਾਬੀ</div>
@@ -68,7 +68,7 @@ export default function AboutPage() {
                   videoId="pglI1bHJYbs"
                   title="Sentence Calculator — Punjabi walkthrough · ਪੂਰਾ ਡੈਮੋ"
                 />
-                <div className="video-caption">ਪੰਜਾਬੀ ਵਿੱਚ ਕਦਮ-ਦਰ-ਕਦਮ ਜਾਣ-ਪਛਾਣ।</div>
+                {/* <div className="video-caption">ਪੰਜਾਬੀ ਵਿੱਚ ਕਦਮ-ਦਰ-ਕਦਮ ਜਾਣ-ਪਛਾਣ।</div> */}
               </div>
             </div>
           </section>
