@@ -27,27 +27,67 @@ export function useCourtCalc({ base, discState, substance, qtyInGrams, showToast
     const baseFine = Number(_fineNum) || 0;
 
     // ── SENTENCE ──────────────────────────────────────────────────────────────
-    let sentence = baseSentence;
-    if (inc > 0) sentence = sentence * (1 + inc / 100);
-    if (dec > 0) sentence = sentence * (1 - dec / 100);
-    sentence = Math.round(sentence);
-    if (sentence < 1) sentence = 1;
+     // Step 1: Net percentage
+     // ── SENTENCE (COURT BASE LOGIC FIXED) ───────────────────────────────
 
-    const clampSentence = (val, type, data) => {
-      if (!data) return val;
-      const min = type === "Small"
-        ? safeNum(data.cr3e9_df_smallminsent)
-        : type === "Intermediate"
-        ? safeNum(data.cr3e9_df_interminsent)
-        : safeNum(data.cr3e9_df_commminsent);
-      const max = type === "Small"
-        ? safeNum(data.cr3e9_df_smallmaxsent)
-        : type === "Intermediate"
-        ? safeNum(data.cr3e9_df_intermaxsent)
-        : safeNum(data.cr3e9_df_commmaxsent);
-      return Math.min(Math.max(val, min), max);
-    };
-    sentence = clampSentence(sentence, quantityType, substanceData);
+// Step 1: ratio (court formula base)
+const smallQty = safeNum(substanceData?.cr3e9_df_smallquantitygram);
+
+const minSent =
+  quantityType === "Small"
+    ? safeNum(substanceData.cr3e9_df_smallminsent)
+    : quantityType === "Intermediate"
+    ? safeNum(substanceData.cr3e9_df_interminsent)
+    : safeNum(substanceData.cr3e9_df_commminsent);
+
+const maxSent =
+  quantityType === "Small"
+    ? safeNum(substanceData.cr3e9_df_smallmaxsent)
+    : quantityType === "Intermediate"
+    ? safeNum(substanceData.cr3e9_df_intermaxsent)
+    : safeNum(substanceData.cr3e9_df_commmaxsent);
+
+// Step 2: ratio
+const ratio = smallQty > 0 ? qtyInGrams / smallQty : 0;
+
+// Step 3: BASE DAYS (IMPORTANT - DO NOT ROUND HERE)
+let sentence = minSent + (maxSent - minSent) * ratio;
+
+// Step 4: apply NET % (court discretion)
+const netPct = inc - dec;
+sentence = sentence * (1 + netPct / 100);
+
+// Step 5: FIX floating precision only (no rounding bias)
+sentence = Math.round((sentence + Number.EPSILON) * 100) / 100;
+
+// Step 6: FINAL ROUNDING (court rule)
+sentence = sentence % 1 < 0.5 ? Math.floor(sentence) : Math.ceil(sentence);
+
+// Step 7: minimum safeguard
+if (sentence < 1) sentence = 0;
+
+// Step 8: clamp (same as your system)
+const clampSentence = (val, type, data) => {
+  if (!data) return val;
+
+  const min =
+    type === "Small"
+      ? safeNum(data.cr3e9_df_smallminsent)
+      : type === "Intermediate"
+      ? safeNum(data.cr3e9_df_interminsent)
+      : safeNum(data.cr3e9_df_commminsent);
+
+  const max =
+    type === "Small"
+      ? safeNum(data.cr3e9_df_smallmaxsent)
+      : type === "Intermediate"
+      ? safeNum(data.cr3e9_df_intermaxsent)
+      : safeNum(data.cr3e9_df_commmaxsent);
+
+  return Math.min(Math.max(val, min), max);
+};
+
+sentence = clampSentence(sentence, quantityType, substanceData);
 
     // ── FINE ──────────────────────────────────────────────────────────────────
     let fine = 0;
