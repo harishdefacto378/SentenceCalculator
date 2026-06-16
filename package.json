@@ -8,8 +8,8 @@
     "staging": "rsbuild build --env-mode staging",
     "build": "rsbuild build",
     "preview": "rsbuild preview",
-    "start": "node api/server.js",
-    "start:api": "node api/server.js"
+    "start": "node backend/server.js",
+    "start:api": "node backend/server.js"
   },
   "dependencies": {
     "react": "^18.3.1",

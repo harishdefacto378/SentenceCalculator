@@ -109,29 +109,58 @@ export function calculateSentence(drugRecord, quantityGrams) {
     _fineNum,
   };
 
-  void (async () => {
-    try {
-      const payload = {
-        df_age: 0,
-        df_confiscationdate: new Date().toISOString().split("T")[0],
-        df_drugquantitypercentage: Number(quantityPercent) || 0,
-        df_fine: _fineNum,
-        df_gender: 1,
-        df_quantitydetained: qty,
-        df_quantitydetainedingram: qty,
-        df_quantitytype: 1,
-        df_sentencedays: sentenceDays,
-        df_sentenceyymmdd: ymd,
-        df_unit: 1,
-        df_multiplierforcommerical: 100
-      };
+void (async () => {
+  try {
+    const safeDays = Number(sentenceDays) || 0;
+    const { y, m, d } = daysToYMD(safeDays);
 
-      await api.post("/api/createsentence", payload);
-      console.log("✅ Proportional Calculation Sentence saved successfully");
-    } catch (error) {
-      console.error("❌ Save API failed:", error);
+    const payload = {
+      df_age: Number(0),
+
+      df_confiscationdate: new Date().toISOString().split("T")[0],
+
+      df_drugquantitypercentage: Number(quantityPercent) || 0,
+
+      df_fine: Number(_fineNum) || 0,
+
+      df_gender: Number(1),
+
+      df_quantitydetained: Number(qty) || 0,
+
+      df_quantitydetainedingram: Number(qty) || 0,
+
+      df_quantitytype: Number(1),
+
+      df_sentencedays: Number(safeDays) || 0,
+
+      df_sentenceyymmdd: `${y} year(s), ${m} month(s), ${d} day(s)`,
+
+      df_unit: Number(1),
+
+      df_multiplierforcommerical: Number(100)
+    };
+
+    console.log("📦 FINAL PAYLOAD:");
+    console.log(JSON.stringify(payload, null, 2));
+
+    const res = await api.post("/api/createsentence", payload, {
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      }
+    });
+
+    console.log("📡 RESPONSE:", res.data);
+
+    if (res?.data?.id) {
+      console.log("🆔 Record ID:", res.data.id);
     }
-  })();
 
+    console.log("✅ Save successful");
+
+  } catch (error) {
+    console.error("❌ Save API failed:", error);
+  }
+})();
   return result;
 }

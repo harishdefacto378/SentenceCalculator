@@ -161,14 +161,29 @@ sentence = clampSentence(sentence, quantityType, substanceData);
         df_quantitydetainedingram: qtyInGrams,
         df_quantitytype: 1,
         df_sentencedays: updatedDiscretion.sentenceDays,
-        df_sentenceyymmdd: updatedDiscretion.ymd,
+        df_sentenceyymmdd: (() => {
+          const { y = 0, m = 0, d = 0 } = updatedDiscretion.ymd || {};
+          return `${y} year(s), ${m} month(s), ${d} day(s)`;
+        })(),
         df_unit: 1,
         df_multiplierforcommerical: 100
       };
 
-      await api.post("/api/createsentence", payload);
+      const res = await api.post("/api/createsentence", payload);
+         console.log("📡 FULL RESPONSE:", res.data);
 
+  // ✅ CHECK YOUR PLUGIN OUTPUT
+  if (res?.data?.message) {
+    console.log("✅", res.data.message);
+  }
+
+  if (res?.data?.id) {
+    console.log("🆔 Record ID:", res.data.id);
+  }
       console.log("✅ Calculation as per Discretion Sentence saved successfully");
+      if (res?.data?.id) {
+       console.log("🆔 Record ID:", res.data.id);
+       }
     } catch (error) {
       console.error("❌ Save API failed:", error);
     }
