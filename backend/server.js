@@ -9,6 +9,8 @@ app.use(express.json());
 const BASE_URL = "https://orge31c15cd.api.crm8.dynamics.com";
 const API_PATH =
   "/api/data/v9.2/api_getdruglist";
+const CREATE_SENTENCE_PATH =
+  "/api/data/v9.2/api_createsentence";
 
 // safe fetch (Node 18+)
 const fetchFn = globalThis.fetch;
@@ -54,6 +56,59 @@ app.post("/api/getdruglist", async (req, res) => {
     }
 
     return res.json(data);
+  } catch (err) {
+    console.error("❌ SERVER ERROR:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/createsentence", async (req, res) => {
+  try {
+    console.log("🔥 CREATE SENTENCE API HIT");
+
+    const token = await fetchAndStoreToken();
+
+    console.log("📥 REQUEST BODY:", req.body);
+
+    const response = await fetchFn(`${BASE_URL}${CREATE_SENTENCE_PATH}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "OData-MaxVersion": "4.0",
+        "OData-Version": "4.0",
+        Prefer: "return=representation",
+      },
+      body: JSON.stringify(req.body || {}),
+    });
+
+    const text = await response.text();
+
+    console.log("📡 STATUS:", response.status);
+    console.log("📦 RAW RESPONSE:", text);
+
+    if (!text) {
+      return res.status(500).json({
+        error: "Empty response from Dataverse",
+      });
+    }
+
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (err) {
+      return res.status(500).json({
+        error: "Invalid JSON from Dataverse",
+        raw: text,
+      });
+    }
+
+    return res.json({
+      success: true,
+      data
+    });
+
   } catch (err) {
     console.error("❌ SERVER ERROR:", err);
     res.status(500).json({ error: err.message });

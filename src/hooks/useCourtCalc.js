@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { daysToYMD } from '../utils/formatters';
+import api from '../services/api';
 
 /**
  * Owns discretion state and the court-calculation handler.
@@ -9,7 +10,7 @@ import { daysToYMD } from '../utils/formatters';
 export function useCourtCalc({ base, discState, substance, qtyInGrams, showToast }) {
   const [discretion, setDiscretion] = useState({ sentenceDays: 0, fine: 0 });
 
-  const handleCourtCalc = useCallback(() => {
+  const handleCourtCalc = useCallback(async () => {
     const { sentenceDays, _fineNum, quantityType } = base;
     const substanceData = substance;
 
@@ -145,8 +146,32 @@ sentence = clampSentence(sentence, quantityType, substanceData);
       fine = Math.round(fineValue / 1000) * 1000;
     }
 
-    setDiscretion({ sentenceDays: sentence, fine, ymd: daysToYMD(sentence) });
+    const updatedDiscretion = { sentenceDays: sentence, fine, ymd: daysToYMD(sentence) };
+    setDiscretion(updatedDiscretion);
     showToast("Discretion applied");
+
+    try {
+      const payload = {
+        df_age: 0,
+        df_confiscationdate: new Date().toISOString().split("T")[0],
+        df_drugquantitypercentage: 0,
+        df_fine: updatedDiscretion.fine,
+        df_gender: 1,
+        df_quantitydetained: qtyInGrams,
+        df_quantitydetainedingram: qtyInGrams,
+        df_quantitytype: 1,
+        df_sentencedays: updatedDiscretion.sentenceDays,
+        df_sentenceyymmdd: updatedDiscretion.ymd,
+        df_unit: 1,
+        df_multiplierforcommerical: 100
+      };
+
+      await api.post("/api/createsentence", payload);
+
+      console.log("✅ Sentence saved successfully");
+    } catch (error) {
+      console.error("❌ Save API failed:", error);
+    }
 
   }, [base, discState, substance, qtyInGrams, showToast]);
 
