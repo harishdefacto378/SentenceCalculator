@@ -1,5 +1,6 @@
 // Pure sentence calculation engine — no React, no side-effects.
 import { fmtRupees, fmtYMD, daysToYMD } from './formatters';
+import api from '../services/api';
 
 export const EMPTY_BASE = {
   section: "NA",
@@ -90,14 +91,15 @@ export function calculateSentence(drugRecord, quantityGrams) {
 
   const sentenceDays              = Math.max(0, roundSent(clampedSent));
   const _fineNum                  = Math.max(0, roundFine(clampedFine));
-  const sentenceInYearsMonthsDays = fmtYMD(daysToYMD(sentenceDays));
+  const ymd                       = daysToYMD(sentenceDays);
+  const sentenceInYearsMonthsDays = fmtYMD(ymd);
   const fineFormatted             = fmtRupees(_fineNum);
 
   const quantityPercent = commercialQty > 0
     ? ((qty / commercialQty) * 100).toFixed(2)
     : "0.00";
 
-  return {
+  const result = {
     section,
     sentenceDays,
     sentenceInYearsMonthsDays,
@@ -106,4 +108,30 @@ export function calculateSentence(drugRecord, quantityGrams) {
     quantityPercent,
     _fineNum,
   };
+
+  void (async () => {
+    try {
+      const payload = {
+        df_age: 0,
+        df_confiscationdate: new Date().toISOString().split("T")[0],
+        df_drugquantitypercentage: Number(quantityPercent) || 0,
+        df_fine: _fineNum,
+        df_gender: 1,
+        df_quantitydetained: qty,
+        df_quantitydetainedingram: qty,
+        df_quantitytype: 1,
+        df_sentencedays: sentenceDays,
+        df_sentenceyymmdd: ymd,
+        df_unit: 1,
+        df_multiplierforcommerical: 100
+      };
+
+      await api.post("/api/createsentence", payload);
+      console.log("✅ Sentence saved successfully");
+    } catch (error) {
+      console.error("❌ Save API failed:", error);
+    }
+  })();
+
+  return result;
 }
