@@ -168,7 +168,7 @@ sentence = clampSentence(sentence, quantityType, substanceData);
 
       await api.post("/api/createsentence", payload);
 
-      console.log("✅ Sentence saved successfully");
+      console.log("✅ Calculation as per Discretion Sentence saved successfully");
     } catch (error) {
       console.error("❌ Save API failed:", error);
     }

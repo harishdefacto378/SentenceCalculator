@@ -127,7 +127,7 @@ export function calculateSentence(drugRecord, quantityGrams) {
       };
 
       await api.post("/api/createsentence", payload);
-      console.log("✅ Sentence saved successfully");
+      console.log("✅ Proportional Calculation Sentence saved successfully");
     } catch (error) {
       console.error("❌ Save API failed:", error);
     }
