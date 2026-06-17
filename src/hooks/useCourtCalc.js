@@ -92,9 +92,30 @@ sentence = clampSentence(sentence, quantityType, substanceData);
 
     // ── FINE ──────────────────────────────────────────────────────────────────
     let fine = 0;
+    const fineChangePct = inc - dec;
+    const finePercentage = 100 + fineChangePct;
+    const roundToNearest1000 = value => Math.round(value / 1000) * 1000;
+
+    const applyFineRules = (fineValue, type, commMaxFine) => {
+      if (type === "Small") {
+        if (fineValue <= 1) return 0;
+        if (fineValue > 10000) return 10000;
+        return roundToNearest1000(fineValue);
+      }
+
+      if (type === "Intermediate") {
+        if (fineValue <= 1) return 0;
+        if (fineValue > 100000) return 100000;
+        return roundToNearest1000(fineValue);
+      }
+
+      const commercialMaxFine = Math.max(100000, safeNum(commMaxFine));
+      const clampedCommercialFine = Math.min(Math.max(fineValue, 100000), commercialMaxFine);
+      return roundToNearest1000(clampedCommercialFine);
+    };
 
     if (substanceData) {
-      const smallQty      = safeNum(substanceData.cr3e9_df_smallquantitygram);
+      const smallQty = safeNum(substanceData.cr3e9_df_smallquantitygram);
       const commercialQty = safeNum(substanceData.cr3e9_df_commercialquantitygram);
       const commercialMaxQty = safeNum(substanceData.cr3e9_df_commercialmaxquantitygram) || commercialQty * 2;
       const qty = qtyInGrams;
@@ -104,46 +125,32 @@ sentence = clampSentence(sentence, quantityType, substanceData);
         smallMax: safeNum(substanceData.cr3e9_df_smallmaxfine),
         interMin: safeNum(substanceData.cr3e9_df_interminfine),
         interMax: safeNum(substanceData.cr3e9_df_intermaxfine),
-        commMin:  safeNum(substanceData.cr3e9_df_commminfine),
-        commMax:  safeNum(substanceData.cr3e9_df_commmaxfine),
+        commMin: safeNum(substanceData.cr3e9_df_commminfine),
+        commMax: safeNum(substanceData.cr3e9_df_commmaxfine),
       };
 
-      let rawFine;
+      let fineAmount;
       if (qty < smallQty) {
-        rawFine = smallQty > 0
+        fineAmount = smallQty > 0
           ? fineRange.smallMin + ((fineRange.smallMax - fineRange.smallMin) / smallQty) * qty
           : fineRange.smallMin;
       } else if (qty <= commercialQty) {
-        const interQty = commercialQty - smallQty;
-        rawFine = interQty > 0
-          ? fineRange.interMin + ((fineRange.interMax - fineRange.interMin) / interQty) * (qty - smallQty)
+        const qtyDiff = commercialQty - smallQty;
+        fineAmount = qtyDiff > 0
+          ? fineRange.interMin + ((fineRange.interMax - fineRange.interMin) / qtyDiff) * (qty - smallQty)
           : fineRange.interMin;
       } else {
-        const commQty = commercialMaxQty - commercialQty;
-        rawFine = commQty > 0
-          ? fineRange.commMin + ((fineRange.commMax - fineRange.commMin) / commQty) * (qty - commercialQty)
+        const qtyDiff = commercialMaxQty - commercialQty;
+        fineAmount = qtyDiff > 0
+          ? fineRange.commMin + ((fineRange.commMax - fineRange.commMin) / qtyDiff) * (qty - commercialQty)
           : fineRange.commMin;
       }
 
-      // Apply inc + dec separately (preserves original logic, avoids net-% bug)
-      let fineValue = rawFine;
-      if (inc > 0) fineValue = fineValue * (1 + inc / 100);
-      if (dec > 0) fineValue = fineValue * (1 - dec / 100);
-
-      const limits = quantityType === "Small"
-        ? { min: fineRange.smallMin, max: fineRange.smallMax }
-        : quantityType === "Intermediate"
-        ? { min: fineRange.interMin, max: fineRange.interMax }
-        : { min: fineRange.commMin,  max: fineRange.commMax };
-
-      fineValue = Math.min(Math.max(fineValue, limits.min), limits.max);
-      fine = Math.round(fineValue / 1000) * 1000;
-
+      const fineAfterIncDec = fineAmount * finePercentage / 100;
+      fine = applyFineRules(fineAfterIncDec, quantityType, fineRange.commMax);
     } else {
-      let fineValue = baseFine;
-      if (inc > 0) fineValue = fineValue * (1 + inc / 100);
-      if (dec > 0) fineValue = fineValue * (1 - dec / 100);
-      fine = Math.round(fineValue / 1000) * 1000;
+      const fineAfterIncDec = baseFine * finePercentage / 100;
+      fine = applyFineRules(fineAfterIncDec, quantityType, baseFine);
     }
 
     const updatedDiscretion = { sentenceDays: sentence, fine, ymd: daysToYMD(sentence) };
