@@ -1,27 +1,19 @@
 // Pure formatting helpers — no React, no side-effects.
 
 export function daysToYMD(days) {
-  if (!days || isNaN(days)) return { y: 0, m: 0, d: 0 };
+  if (!days || isNaN(days) || days < 0) return "0 year(s), 0 month(s), 0 day(s)";
+
+  const YEARS_IN_DAYS = 365;
+  const MONTH_IN_DAYS = 30.44;
+
   const totalDays = Math.floor(days);
-  const y = Math.floor(totalDays / 365);
-  const remAfterYears = totalDays % 365;
-  const m = Math.floor(remAfterYears / 30);
-  const d = remAfterYears % 30;
-  return { y, m, d };
+  const y = Math.floor(totalDays / YEARS_IN_DAYS);
+  const remainingAfterYears = totalDays % YEARS_IN_DAYS;
+  const m = Math.floor(remainingAfterYears / MONTH_IN_DAYS);
+  const d = Math.floor(remainingAfterYears % MONTH_IN_DAYS);
+
+  return `${y} year(s), ${m} month(s), ${d} day(s)`;
 }
-// export function daysToYMD(days) {
-//   if (!days || isNaN(days)) return { y: 0, m: 0, d: 0 };
-
-//   const totalDays = Math.floor(days);
-
-//   const y = Math.floor(totalDays / 365);
-//   const remAfterYears = totalDays % 365;
-
-//   const m = Math.floor(remAfterYears / 30.42);
-//   const d = Math.floor(remAfterYears % 30.42);
-
-//   return { y, m, d };
-// }
 export function fmtRupees(n) {
   if (!n) return "₹0.00";
   return "₹" + n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -32,6 +24,6 @@ export function fmtNum(n) {
   return n.toLocaleString("en-IN");
 }
 
-export function fmtYMD({ y, m, d }) {
-  return `${y} year(s) ${m} month(s) ${d} day(s)`;
+export function fmtYMD(value) {
+  return value;
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { fmtRupees, fmtYMD, daysToYMD } from '../../utils/formatters';
+import { fmtRupees, daysToYMD } from '../../utils/formatters';
 import { Spec } from './Spec';
 
 function notifLinkNode(url) {
@@ -66,11 +66,11 @@ export function ReportCard({ substance, base, discretion, final, tab, setTab, on
             <Spec k="Quantity Type" v={base.quantityType} />
             <Spec k="Base Sentence" v={base.sentenceInYearsMonthsDays} />
             <Spec k="Base Fine" v={base.fine} />
-            <Spec k="After Discretion (Sentence)" v={fmtYMD(daysToYMD(discretion.sentenceDays))} />
+            <Spec k="After Discretion (Sentence)" v={daysToYMD(discretion.sentenceDays)} />
             <Spec k="After Discretion (Fine)" v={fmtRupees(discretion.fine)} />
             {tab === "factors" && (
               <>
-                <Spec k="Final Sentence (with Factors)" v={fmtYMD(daysToYMD(final.sentenceDays))} />
+                <Spec k="Final Sentence (with Factors)" v={daysToYMD(final.sentenceDays)} />
                 <Spec k="Final Fine (with Factors)" v={fmtRupees(final.fine)} />
               </>
             )}

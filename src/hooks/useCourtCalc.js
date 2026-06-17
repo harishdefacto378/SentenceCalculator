@@ -161,10 +161,7 @@ sentence = clampSentence(sentence, quantityType, substanceData);
         df_quantitydetainedingram: qtyInGrams,
         df_quantitytype: 1,
         df_sentencedays: updatedDiscretion.sentenceDays,
-        df_sentenceyymmdd: (() => {
-          const { y = 0, m = 0, d = 0 } = updatedDiscretion.ymd || {};
-          return `${y} year(s), ${m} month(s), ${d} day(s)`;
-        })(),
+        df_sentenceyymmdd: updatedDiscretion.ymd,
         df_unit: 1,
         df_multiplierforcommerical: 100
       };

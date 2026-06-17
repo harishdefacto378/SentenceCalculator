@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { AGGRAVATING, MITIGATING, UNITS } from '../../../data';
 import { EMPTY_BASE } from '../../utils/calculateSentence';
-import { fmtRupees, fmtYMD, daysToYMD } from '../../utils/formatters';
+import { fmtRupees, daysToYMD } from '../../utils/formatters';
 import { useDrugList }  from '../../hooks/useDrugList';
 import { getCachedAverageFactors } from '../../services/drugListService';
 import { useToast }     from '../../hooks/useToast';
@@ -78,8 +78,8 @@ export function CalculatorPage() {
       `Quantity Type: ${base.quantityType}`,
       `Base Sentence: ${base.sentenceInYearsMonthsDays}`,
       `Base Fine: ${base.fine}`,
-      `After Discretion: ${fmtYMD(daysToYMD(discretion.sentenceDays))} · ${fmtRupees(discretion.fine)}`,
-      `Final (w/ Factors): ${fmtYMD(daysToYMD(final.sentenceDays))} · ${fmtRupees(final.fine)}`,
+      `After Discretion: ${daysToYMD(discretion.sentenceDays)} · ${fmtRupees(discretion.fine)}`,
+      `Final (w/ Factors): ${daysToYMD(final.sentenceDays)} · ${fmtRupees(final.fine)}`,
     ];
     navigator.clipboard?.writeText(lines.join("\n"));
     showToast("Report copied to clipboard");

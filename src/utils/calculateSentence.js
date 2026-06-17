@@ -1,5 +1,5 @@
 // Pure sentence calculation engine — no React, no side-effects.
-import { fmtRupees, fmtYMD, daysToYMD } from './formatters';
+import { fmtRupees, daysToYMD } from './formatters';
 import api from '../services/api';
 
 export const EMPTY_BASE = {
@@ -91,8 +91,7 @@ export function calculateSentence(drugRecord, quantityGrams) {
 
   const sentenceDays              = Math.max(0, roundSent(clampedSent));
   const _fineNum                  = Math.max(0, roundFine(clampedFine));
-  const ymd                       = daysToYMD(sentenceDays);
-  const sentenceInYearsMonthsDays = fmtYMD(ymd);
+  const sentenceInYearsMonthsDays = daysToYMD(sentenceDays);
   const fineFormatted             = fmtRupees(_fineNum);
 
   const quantityPercent = commercialQty > 0
@@ -112,8 +111,6 @@ export function calculateSentence(drugRecord, quantityGrams) {
 void (async () => {
   try {
     const safeDays = Number(sentenceDays) || 0;
-    const { y, m, d } = daysToYMD(safeDays);
-
     const payload = {
       df_age: Number(0),
 
@@ -133,7 +130,7 @@ void (async () => {
 
       df_sentencedays: Number(safeDays) || 0,
 
-      df_sentenceyymmdd: `${y} year(s), ${m} month(s), ${d} day(s)`,
+      df_sentenceyymmdd: daysToYMD(safeDays),
 
       df_unit: Number(1),
 
