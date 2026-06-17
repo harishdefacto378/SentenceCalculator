@@ -37,6 +37,10 @@ export function CalculatorPage() {
     if (!isFinite(n)) return 0;
     return n * (UNITS[propState.unit] || 1);
   }, [propState.qty, propState.unit]);
+  const isQtyValid = useMemo(() => {
+    if (propState.qty == null || propState.qty === "") return false;
+    return Number.isFinite(parseFloat(propState.qty));
+  }, [propState.qty]);
 
   // Court discretion calculation — logic lives in hook, state owned by hook
   const { discretion, handleCourtCalc } = useCourtCalc({
@@ -82,6 +86,7 @@ export function CalculatorPage() {
           <ProportionalCalc
             state={propState} setState={setPropState}
             base={base} calculated={calculated}
+            qtyEnabled={isQtyValid}
             drugsData={drugsData}
             onCalc={result => { setBase(result); setCalculated(true); showToast("Proportional calculation updated"); }}
             onSelect={record => {
@@ -103,11 +108,12 @@ export function CalculatorPage() {
           <DiscretionCalc
             state={discState} setState={setDiscState}
             base={base} discretion={discretion}
-            calculated={calculated} onCalc={handleCourtCalc}
+            calculated={calculated} qtyEnabled={isQtyValid} onCalc={handleCourtCalc}
           />
           <FactorSummary
             aggSentTotal={aggSentTotal} aggFineTotal={aggFineTotal}
             mitSentTotal={mitSentTotal} mitFineTotal={mitFineTotal}
+            qtyEnabled={isQtyValid}
             baseSentenceDays={discretion.sentenceDays} baseFine={discretion.fine}
             final={final}
           />

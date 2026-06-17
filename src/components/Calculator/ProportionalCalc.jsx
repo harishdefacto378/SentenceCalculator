@@ -3,7 +3,7 @@ import { calculateSentence } from '../../utils/calculateSentence';
 import { UNITS, UNIT_LABELS } from '../../../data';
 import { WarningModal } from './WarningModal';
 
-export function ProportionalCalc({ state, setState, base, onCalc, calculated, drugsData, onSelect }) {
+export function ProportionalCalc({ state, setState, base, onCalc, calculated, qtyEnabled, drugsData, onSelect }) {
   const [substanceInput, setSubstanceInput] = useState(state.substance || "");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedRecord, setSelectedRecord]   = useState(null);
@@ -124,7 +124,7 @@ export function ProportionalCalc({ state, setState, base, onCalc, calculated, dr
             <input className="input date-input" type="date" value={state.date} onChange={e => setState({ ...state, date: e.target.value })} />
           </div>
           <div className="calc-action">
-            <button className="btn calc-btn" disabled={!state.substance || !state.qty} onClick={handleCalculateClick}>Calculate</button>
+            <button className="btn calc-btn" disabled={!qtyEnabled} onClick={handleCalculateClick}>Calculate</button>
           </div>
 
           <div className="results">

@@ -21,8 +21,8 @@ export function FabBar({ active, setActive }) {
     <div className="fab-bar">
       <button className="fab" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}><Icon name="up" /></button>
       <button className={"fab " + (active === "home" ? "active" : "")} onClick={() => navigate('/')}><Icon name="home" /></button>
-      <button className={"fab " + (active === "stats" ? "active" : "")} onClick={() => setActive("stats")}><Icon name="bars" /></button>
-      <button className={"fab " + (active === "report" ? "active" : "")} onClick={() => setActive("report")}><Icon name="book" /></button>
+      <button className={"fab " + (active === "stats" ? "active" : "")} onClick={() => { setActive("stats"); navigate('/comparison'); }}><Icon name="bars" /></button>
+      <button className={"fab " + (active === "report" ? "active" : "")} onClick={() => { setActive("report"); navigate('/about'); }}><Icon name="book" /></button>
       <button className={"fab " + (active === "info" ? "active" : "")} onClick={() => setActive("info")}><Icon name="info" /></button>
     </div>
   );
