@@ -8,6 +8,7 @@ export function ProportionalCalc({ state, setState, base, onCalc, calculated, qt
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedRecord, setSelectedRecord]   = useState(null);
   const [showWarning, setShowWarning]         = useState(false);
+  const today = new Date().toISOString().split("T")[0];
 
   // useMemo replaces the old useState+useEffect pattern — single render per keystroke
   const subs = useMemo(
@@ -121,7 +122,17 @@ export function ProportionalCalc({ state, setState, base, onCalc, calculated, qt
           </div>
           <div className="form-row">
             <label>Date of Confiscation <span className="sub-label">(optional)</span></label>
-            <input className="input date-input" type="date" value={state.date} onChange={e => setState({ ...state, date: e.target.value })} />
+            <input
+              className="input date-input"
+              type="date"
+              max={today}
+              value={state.date}
+              onChange={e => {
+                const value = e.target.value;
+                if (value && value > today) return;
+                setState({ ...state, date: value });
+              }}
+            />
           </div>
           <div className="calc-action">
             <button className="btn calc-btn" disabled={!qtyEnabled} onClick={handleCalculateClick}>Calculate</button>
