@@ -23,17 +23,10 @@ export function daysToYMD(days) {
   const YEARS_IN_DAYS = 365;
   const MONTH_IN_DAYS = 30.42;
 
-  const totalDays = Math.floor(days);
-
-  const years = Math.floor(totalDays / YEARS_IN_DAYS);
-
-  const remainingAfterYears = totalDays % YEARS_IN_DAYS;
-
+  const years = Math.floor(days / YEARS_IN_DAYS);
+  const remainingAfterYears = days % YEARS_IN_DAYS;
   const months = Math.floor(remainingAfterYears / MONTH_IN_DAYS);
-
-  const remainingDays = Math.floor(
-    remainingAfterYears % MONTH_IN_DAYS
-  );
+  const remainingDays = Math.floor(remainingAfterYears % MONTH_IN_DAYS);
 
   return `${years} year(s), ${months} month(s), ${remainingDays} day(s)`;
 }
