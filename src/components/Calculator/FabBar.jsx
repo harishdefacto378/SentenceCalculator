@@ -23,7 +23,7 @@ export function FabBar({ active, setActive }) {
       <button className={"fab " + (active === "home" ? "active" : "")} onClick={() => navigate('/')}><Icon name="home" /></button>
       <button className={"fab " + (active === "stats" ? "active" : "")} onClick={() => { setActive("stats"); navigate('/comparison'); }}><Icon name="bars" /></button>
       <button className={"fab " + (active === "report" ? "active" : "")} onClick={() => { setActive("report"); navigate('/about'); }}><Icon name="book" /></button>
-      <button className={"fab " + (active === "info" ? "active" : "")} onClick={() => setActive("info")}><Icon name="info" /></button>
+      <button className={"fab " + (active === "info" ? "active" : "")} onClick={() =>  { setActive("info"); navigate('/about'); }}><Icon name="info" /></button>
     </div>
   );
 }

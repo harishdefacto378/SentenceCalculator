@@ -3,6 +3,7 @@ import { AGGRAVATING, MITIGATING, UNITS } from '../../../data';
 import { EMPTY_BASE } from '../../utils/calculateSentence';
 import { fmtRupees, fmtYMD, daysToYMD } from '../../utils/formatters';
 import { useDrugList }  from '../../hooks/useDrugList';
+import { getCachedAverageFactors } from '../../services/drugListService';
 import { useToast }     from '../../hooks/useToast';
 import { useCourtCalc } from '../../hooks/useCourtCalc';
 import { Toast }          from '../Toast';
@@ -16,6 +17,7 @@ import { FabBar }           from './FabBar';
 export function CalculatorPage() {
   const drugsData = useDrugList();
   const { toastState, showToast } = useToast();
+  const cachedAverageFactors = getCachedAverageFactors();
 
   // ── Form state ─────────────────────────────────────────────────────────────
   const [propState, setPropState] = useState({
@@ -23,8 +25,12 @@ export function CalculatorPage() {
     date: new Date().toISOString().split('T')[0],
   });
   const [discState,     setDiscState]     = useState({ inc: 0, dec: 0 });
-  const [aggravFactors, setAggravFactors] = useState(AGGRAVATING);
-  const [mitigFactors,  setMitigFactors]  = useState(MITIGATING);
+  const [aggravFactors, setAggravFactors] = useState(
+    cachedAverageFactors?.aggravating?.length ? cachedAverageFactors.aggravating : AGGRAVATING
+  );
+  const [mitigFactors,  setMitigFactors]  = useState(
+    cachedAverageFactors?.mitigating?.length ? cachedAverageFactors.mitigating : MITIGATING
+  );
   const [calculated,    setCalculated]    = useState(false);  // fix: was incorrectly true
   const [reportTab,     setReportTab]     = useState("sentence");
   const [fabActive,     setFabActive]     = useState("home");

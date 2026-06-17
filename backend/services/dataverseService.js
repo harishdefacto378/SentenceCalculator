@@ -6,6 +6,7 @@ const BASE_URL = process.env.DATAVERSE_BASE_URL || "https://orge31c15cd.api.crm8
 
 const PATHS = {
   drugList: "/api/data/v9.2/api_getdruglist",
+  averageFactors: "/api/data/v9.2/api_getaveragefactors",
   createSentence: "/api/data/v9.2/api_df_createsentence",
 };
 
@@ -48,7 +49,58 @@ async function callDataverseApi(path, payload) {
   }
 }
 
+async function getAverageFactors(payload) {
+  const response = await callDataverseApi(PATHS.averageFactors, payload);
+  console.log("[averageFactorsService] Fresh data fetched from API");
+  let aggr = [];
+  let mitig = [];
+
+  try {
+    aggr = JSON.parse(response.aggravatingAverageFactors || "[]");
+  } catch {
+    throw new AppError("DATAVERSE_INVALID_JSON", "Invalid aggravatingAverageFactors payload", 502);
+  }
+
+  try {
+    mitig = JSON.parse(response.mitigatingAverageFactors || "[]");
+  } catch {
+    throw new AppError("DATAVERSE_INVALID_JSON", "Invalid mitigatingAverageFactors payload", 502);
+  }
+
+  console.log("[averageFactorsService] Parsed API response");
+  console.log({
+    aggravatingRaw: aggr.length,
+    mitigatingRaw: mitig.length,
+  });
+
+  const formatted = {
+    aggravating: aggr.map((item, i) => ({
+      id: `a${i + 1}`,
+      label: item.factorName,
+      sentence: 0,
+      fine: 0,
+      avg: Math.round(item.average),
+    })),
+    mitigating: mitig.map((item, i) => ({
+      id: `m${i + 1}`,
+      label: item.factorName,
+      sentence: 0,
+      fine: 0,
+      avg: Math.round(item.average),
+    })),
+  };
+
+  console.log("[averageFactorsService] Final formatted data ready");
+  console.log({
+    aggravating: formatted.aggravating.length,
+    mitigating: formatted.mitigating.length,
+  });
+
+  return formatted;
+}
+
 module.exports = {
   PATHS,
   callDataverseApi,
+  getAverageFactors,
 };

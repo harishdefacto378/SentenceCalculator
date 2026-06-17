@@ -44,6 +44,12 @@ export async function handleLpClick() {
   try {
     const data = await fetchDrugList();
     console.log("✅ Drug list ready:", data.length, "records");
+    const factorCacheRaw = localStorage.getItem("averageFactorsData");
+    const factorCache = factorCacheRaw ? JSON.parse(factorCacheRaw) : null;
+    console.log("✅ Average factors ready:", {
+      aggravating: factorCache?.aggravating?.length || 0,
+      mitigating: factorCache?.mitigating?.length || 0,
+    });
     return data;
   } catch (err) {
     console.error("❌ handleLpClick error:", err.message);

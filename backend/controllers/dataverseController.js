@@ -1,4 +1,4 @@
-const { callDataverseApi, PATHS } = require("../services/dataverseService");
+const { callDataverseApi, getAverageFactors, PATHS } = require("../services/dataverseService");
 const asyncHandler = require("../utils/asyncHandler");
 
 const health = (_req, res) => {
@@ -6,8 +6,16 @@ const health = (_req, res) => {
 };
 
 const getDrugList = asyncHandler(async (req, res) => {
-  const data = await callDataverseApi(PATHS.drugList, req.body);
-  res.json(data);
+  const [data, factors] = await Promise.all([
+    callDataverseApi(PATHS.drugList, req.body),
+    getAverageFactors(req.body),
+  ]);
+
+  res.json({
+    ...data,
+    aggravating: factors.aggravating,
+    mitigating: factors.mitigating,
+  });
 });
 
 const createSentence = asyncHandler(async (req, res) => {

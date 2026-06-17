@@ -1,4 +1,5 @@
 const DRUG_CACHE_KEY = "drugsData";
+const FACTOR_CACHE_KEY = "averageFactorsData";
 const CACHE_EXPIRY_MS = 10 * 60 * 1000; // 10 minutes
 
 // In-flight promise guard — prevents duplicate concurrent API calls
@@ -22,6 +23,24 @@ export function getCachedDrugList() {
   return null;
 }
 
+export function getCachedAverageFactors() {
+  try {
+    const raw = localStorage.getItem(FACTOR_CACHE_KEY);
+    if (!raw) return null;
+    const { aggravating, mitigating, timestamp } = JSON.parse(raw);
+    if (
+      Date.now() - timestamp < CACHE_EXPIRY_MS &&
+      Array.isArray(aggravating) &&
+      Array.isArray(mitigating)
+    ) {
+      return { aggravating, mitigating };
+    }
+  } catch {
+    localStorage.removeItem(FACTOR_CACHE_KEY);
+  }
+  return null;
+}
+
 /**
  * Fetches the drug list from the API, with localStorage caching and 10-minute expiry.
  * - Returns cached data immediately if valid.
@@ -32,9 +51,20 @@ export function getCachedDrugList() {
  */
 export async function fetchDrugList() {
   const cached = getCachedDrugList();
+  const cachedFactors = getCachedAverageFactors();
   if (cached) {
     console.log("[drugListService] Using cached drug data");
     console.log(JSON.parse(localStorage.getItem(DRUG_CACHE_KEY)))
+    if (cachedFactors) {
+      const factorsRaw = localStorage.getItem(FACTOR_CACHE_KEY);
+      const factorsStamp = factorsRaw ? JSON.parse(factorsRaw)?.timestamp : undefined;
+      console.log("[averageFactorsService] Using cached factors data");
+      console.log({
+        aggravatingCount: cachedFactors.aggravating.length,
+        mitigatingCount: cachedFactors.mitigating.length,
+        timestamp: factorsStamp,
+      });
+    }
     return cached;
   }
 
@@ -65,6 +95,22 @@ export async function fetchDrugList() {
         localStorage.setItem(DRUG_CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
         console.log("[drugListService] Drug data fetched and cached");
       }
+      if (Array.isArray(json.aggravating) && Array.isArray(json.mitigating)) {
+        localStorage.setItem(
+          FACTOR_CACHE_KEY,
+          JSON.stringify({
+            aggravating: json.aggravating,
+            mitigating: json.mitigating,
+            timestamp: Date.now(),
+          })
+        );
+        console.log("[drugListService] Average factors fetched and cached");
+        console.log("[averageFactorsService] Final formatted data ready");
+        console.log({
+          aggravating: json.aggravating.length,
+          mitigating: json.mitigating.length,
+        });
+      }
       return data;
     })
     .catch(err => {
@@ -81,5 +127,6 @@ export async function fetchDrugList() {
 /** Clears the drug list cache (useful for forced refresh). */
 export function clearDrugListCache() {
   localStorage.removeItem(DRUG_CACHE_KEY);
+  localStorage.removeItem(FACTOR_CACHE_KEY);
   _pendingFetch = null;
 }
