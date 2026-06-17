@@ -27,6 +27,12 @@
 .btn:focus-visible { outline: 2px solid var(--ink);    outline-offset: 2px; }
 .btn:disabled      { background: #f0f0f0; color: var(--ink-disabled); border-color: var(--rule); cursor: not-allowed; }
 
+/* Primary calculate button variant with explicit state styles */
+.btn.calc-btn { background: var(--brand); color: #fff; border-color: var(--brand); }
+.btn.calc-btn:hover:not(:disabled)  { background: var(--brand-hover);   border-color: var(--brand-hover); }
+.btn.calc-btn:active:not(:disabled) { background: var(--brand-pressed); border-color: var(--brand-pressed); }
+.btn.calc-btn:disabled { background: #f0f0f0; color: var(--ink-disabled); border-color: var(--rule); opacity: 1; }
+
 /* Ghost variant */
 .btn.ghost        { background: transparent; color: var(--ink); border-color: transparent; }
 .btn.ghost:hover  { background: #f0f0f0; }

@@ -84,7 +84,12 @@ export function CalculatorPage() {
             base={base} calculated={calculated}
             drugsData={drugsData}
             onCalc={result => { setBase(result); setCalculated(true); showToast("Proportional calculation updated"); }}
-            onSelect={record => setSubstance(record)}
+            onSelect={record => {
+              setSubstance(record);
+              if (!record) {
+                setCalculated(false);
+              }
+            }}
           />
           <ReportCard
             substance={substance} base={base}

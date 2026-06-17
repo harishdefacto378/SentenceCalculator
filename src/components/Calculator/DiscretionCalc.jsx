@@ -19,7 +19,7 @@ export function DiscretionCalc({ state, setState, base, discretion, onCalc, calc
         </div>
         <div className="banner">We strongly recommend to decrease default to make median at 50%</div>
         <div className="calc-action calc-action--top">
-          <button className="btn" disabled={!calculated} onClick={onCalc}>Calculate</button>
+          <button className="btn calc-btn" disabled={!calculated} onClick={onCalc}>Calculate</button>
         </div>
         <div className="results">
           <div className="result-row"><span>SENTENCE in day(s):</span><span className="v big">{discretion ? fmtNum(discretion.sentenceDays) + " days" : "0 days"}</span></div>

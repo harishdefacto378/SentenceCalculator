@@ -8,7 +8,7 @@ export function FactorSummary({ aggSentTotal, aggFineTotal, mitSentTotal, mitFin
     <div className="card">
       <div className="card-head">
         <h2>Calculation on the Basis of Aggravating &amp; Mitigating Factors</h2>
-        <div className="actions"><button className="btn ghost">Calculate</button></div>
+        <div className="actions"><button className="btn calc-btn">Calculate</button></div>
       </div>
       <div className="card-body">
         <div className="summary-grid">

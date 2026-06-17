@@ -23,7 +23,12 @@ export function ProportionalCalc({ state, setState, base, onCalc, calculated, dr
     const val = e.target.value;
     setSubstanceInput(val);
     setSelectedRecord(null);
-    setState({ ...state, substance: "" });
+    onSelect(null);
+    if (!val.trim()) {
+      setState({ ...state, substance: "", qty: "" });
+    } else {
+      setState({ ...state, substance: "" });
+    }
     setShowSuggestions(true);
   }
 
@@ -119,7 +124,7 @@ export function ProportionalCalc({ state, setState, base, onCalc, calculated, dr
             <input className="input date-input" type="date" value={state.date} onChange={e => setState({ ...state, date: e.target.value })} />
           </div>
           <div className="calc-action">
-            <button className="btn" disabled={!state.substance || !state.qty} onClick={handleCalculateClick}>Calculate</button>
+            <button className="btn calc-btn" disabled={!state.substance || !state.qty} onClick={handleCalculateClick}>Calculate</button>
           </div>
 
           <div className="results">
