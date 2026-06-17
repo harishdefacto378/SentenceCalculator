@@ -4,7 +4,7 @@ export function daysToYMD(days) {
   if (!days || isNaN(days) || days < 0) return "0 year(s), 0 month(s), 0 day(s)";
 
   const YEARS_IN_DAYS = 365;
-  const MONTH_IN_DAYS = 30.44;
+  const MONTH_IN_DAYS = 30.42;
 
   const totalDays = Math.floor(days);
   const y = Math.floor(totalDays / YEARS_IN_DAYS);
