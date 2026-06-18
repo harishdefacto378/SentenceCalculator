@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { calculateSentence } from '../../utils/calculateSentence';
+import { daysToYMD, fmtRupees } from '../../utils/formatters';
 import { UNITS, UNIT_LABELS } from '../../../data';
 import { WarningModal } from './WarningModal';
 
@@ -47,24 +48,53 @@ export function ProportionalCalc({ state, setState, base, onCalc, calculated, qt
     if (!selectedRecord || !state.qty) return;
     const qty = parseFloat(state.qty) || 0;
     const qtyInGrams = qty * (UNITS[state.unit] || 1);
+    const calculatedResult = calculateSentence(selectedRecord, qtyInGrams);
+    let sentAfterIncOrDec = Number(calculatedResult.sentenceDays) || 0;
+    let commSentAfterIncDec = sentAfterIncOrDec;
+    let fineAfterIncDec = Number(calculatedResult._fineNum) || 0;
 
-    if (qtyInGrams > 500) {
-      const commercialMsg = "As per discretion of the Court, however, minimum sentence is 10 years";
+    const isCommercial =
+      commSentAfterIncDec >= 3653 ||
+      fineAfterIncDec >= 100000;
+
+    if (isCommercial) {
+      commSentAfterIncDec =
+        sentAfterIncOrDec <= 3653 ? 3653 : commSentAfterIncDec;
+      fineAfterIncDec =
+        fineAfterIncDec <= 100000 ? 100000 : fineAfterIncDec;
+
+      const popupData = {
+        message:
+          "This calculator is designed only for small and intermediate quantities. In commercial quantities the minimum sentence that the courts can impose is imprisonment for 10 years and fine of rupees 100000.",
+        section: "S.21(c) of NDPS Act, 1985",
+        sentenceDays:
+          "As per discretion of the Court, however, minimum sentence is 10 years",
+        sentenceInYearsMonthsDays:
+          "As per discretion of the Court, however, minimum sentence is 10 years",
+        fine:
+          "As per discretion of the Court, however, minimum fine is 1,00,000/-",
+        quantityType: "Commercial",
+        drugQuantityPercentToUpperIntermediate: "200.00%"
+      };
+
       onCalc({
-        section:                   "S.22(c) of NDPS Act, 1985",
-        sentenceDays:              commercialMsg,
-        sentenceInYearsMonthsDays: commercialMsg,
-        fine:                      "As per discretion of the Court, however, minimum fine is 1,00,000/-",
-        quantityType:              "Commercial",
-        quantityPercent:           "100.20",
-        _fineNum:                  0,
+        ...calculatedResult,
+        section: popupData.section,
+        sentenceDays: commSentAfterIncDec,
+        sentenceInYearsMonthsDays: daysToYMD(commSentAfterIncDec),
+        fine: fmtRupees(fineAfterIncDec),
+        quantityType: popupData.quantityType,
+        quantityPercent: "200.00",
+        _fineNum: fineAfterIncDec,
+        popupData,
+        drugQuantityPercentToUpperIntermediate: popupData.drugQuantityPercentToUpperIntermediate,
       });
       onSelect(selectedRecord);
       setShowWarning(true);
       return;
     }
 
-    onCalc(calculateSentence(selectedRecord, qtyInGrams));
+    onCalc(calculatedResult);
     onSelect(selectedRecord);
   }
 
