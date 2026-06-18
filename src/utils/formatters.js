@@ -1,20 +1,45 @@
 // Pure formatting helpers — no React, no side-effects.
 
-export function daysToYMD(days) {
-  if (!days || isNaN(days) || days < 0) return "0 year(s), 0 month(s), 0 day(s)";
+// export function daysToYMD(days) {
+//   if (!days || isNaN(days) || days < 0) return "0 year(s), 0 month(s), 0 day(s)";
 
-  const YEARS_IN_DAYS = 365;
-  const MONTH_IN_DAYS = 30.42;
+//   const YEARS_IN_DAYS = 365;
+//   //const MONTH_IN_DAYS = 30.42;
+//   const MONTH_IN_DAYS = 30;
 
-  const totalDays = Math.floor(days);
-  const y = Math.floor(totalDays / YEARS_IN_DAYS);
-  const remainingAfterYears = totalDays % YEARS_IN_DAYS;
-  const m = Math.floor(remainingAfterYears / MONTH_IN_DAYS);
-  const d = Math.floor(remainingAfterYears % MONTH_IN_DAYS);
+//   const totalDays = Math.floor(days);
+//   const y = Math.floor(totalDays / YEARS_IN_DAYS);
+//   const remainingAfterYears = totalDays % YEARS_IN_DAYS;
+//   const m = Math.floor(remainingAfterYears / MONTH_IN_DAYS);
+//   const d = Math.floor(remainingAfterYears % MONTH_IN_DAYS);
 
-  return `${y} year(s), ${m} month(s), ${d} day(s)`;
+//   return `${y} year(s), ${m} month(s), ${d} day(s)`;
+// }
+
+
+
+export function daysToYMD(days) 
+{
+   if (isNaN(days) || days < 0) {
+    return `0 year(s), 0 month(s), 0 day(s)`;
+  }
+
+  const years = Math.floor(days / 365);
+  let remainingDays = days % 365;
+
+  const months = Math.floor((remainingDays * 12) / 365);
+
+  let daysLeft = Math.round(
+    remainingDays - (months * 365) / 12
+  );
+
+  // ✅ Fix: prevent 1-day loss for small values
+  if (daysLeft === 0 && remainingDays > 0) {
+    daysLeft = 1;
+  }
+
+  return `${years} year(s), ${months} month(s), ${daysLeft} day(s)`;
 }
-
 
 
 export function fmtRupees(n) {
