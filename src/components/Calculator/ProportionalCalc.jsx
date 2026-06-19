@@ -45,58 +45,44 @@ export function ProportionalCalc({ state, setState, base, onCalc, calculated, qt
   }
 
   function handleCalculateClick() {
-    if (!selectedRecord || !state.qty) return;
-    const qty = parseFloat(state.qty) || 0;
-    const qtyInGrams = qty * (UNITS[state.unit] || 1);
-    const calculatedResult = calculateSentence(selectedRecord, qtyInGrams);
-    let sentAfterIncOrDec = Number(calculatedResult.sentenceDays) || 0;
-    let commSentAfterIncDec = sentAfterIncOrDec;
-    let fineAfterIncDec = Number(calculatedResult._fineNum) || 0;
+  if (!selectedRecord || !state.qty) return;
 
-    const isCommercial =
-      commSentAfterIncDec >= 3653 ||
-      fineAfterIncDec >= 100000;
+  const qty = parseFloat(state.qty) || 0;
+  const qtyInGrams = qty * (UNITS[state.unit] || 1);
 
-    if (isCommercial) {
-      commSentAfterIncDec =
-        sentAfterIncOrDec <= 3653 ? 3653 : commSentAfterIncDec;
-      fineAfterIncDec =
-        fineAfterIncDec <= 100000 ? 100000 : fineAfterIncDec;
+  const calculatedResult = calculateSentence(selectedRecord, qtyInGrams);
 
-      const popupData = {
-        message:
-          "This calculator is designed only for small and intermediate quantities. In commercial quantities the minimum sentence that the courts can impose is imprisonment for 10 years and fine of rupees 100000.",
-        section: "S.21(c) of NDPS Act, 1985",
-        sentenceDays:
-          "As per discretion of the Court, however, minimum sentence is 10 years",
-        sentenceInYearsMonthsDays:
-          "As per discretion of the Court, however, minimum sentence is 10 years",
-        fine:
-          "As per discretion of the Court, however, minimum fine is 1,00,000/-",
-        quantityType: "Commercial",
-        drugQuantityPercentToUpperIntermediate: "200.00%"
-      };
+  const isCommercial = calculatedResult.quantityType === "Commercial";
 
-      onCalc({
-        ...calculatedResult,
-        section: popupData.section,
-        sentenceDays: commSentAfterIncDec,
-        sentenceInYearsMonthsDays: daysToYMD(commSentAfterIncDec),
-        fine: fmtRupees(fineAfterIncDec),
-        quantityType: popupData.quantityType,
-        quantityPercent: "200.00",
-        _fineNum: fineAfterIncDec,
-        popupData,
-        drugQuantityPercentToUpperIntermediate: popupData.drugQuantityPercentToUpperIntermediate,
-      });
-      onSelect(selectedRecord);
-      setShowWarning(true);
-      return;
-    }
-
+  // 🟢 NORMAL CASE
+  if (!isCommercial) {
     onCalc(calculatedResult);
     onSelect(selectedRecord);
+    return;
   }
+
+ // 🔴 COMMERCIAL CASE → CALCULATE DYNAMIC PERCENTAGE
+ const commercialQty = selectedRecord?.cr3e9_df_commercialquantitygram || 1;
+ const drugPercentage = commercialQty > 0
+   ? ((qtyInGrams / commercialQty) * 100).toFixed(2)
+   : 'NA';
+
+ const staticResult = {
+   section: "S.21(c) of NDPS Act, 1985",
+   sentenceDays: "As per discretion of the Court, however, minimum sentence is 10 years",
+   sentenceInYearsMonthsAndDays: "As per discretion of the Court, however, minimum sentence is 10 years",
+   fine: "As per discretion of the Court, however, minimum fine is 1,00,000/-",
+   quantityType: "Commercial",
+   quantityPercent: drugPercentage, // ✅ MATCH UI EXPECTATION
+   drugQuantityPercentToUpperIntermediate: `${drugPercentage}%`,
+   message: "This calculator is designed only for small and intermediate quantities. In commercial quantities the minimum sentence is 10 years and fine is 1,00,000/-"
+ };
+
+ // ❗ ONLY STATIC DATA SENT TO UI
+ onCalc(staticResult);
+ onSelect(selectedRecord);
+ setShowWarning(true);
+}
 
   return (
     <>

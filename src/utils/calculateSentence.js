@@ -63,7 +63,7 @@ export function calculateSentence(drugRecord, quantityGrams) {
       ? fine.interMin + ((fine.interMax - fine.interMin) / interQty) * (qty - smallQty)
       : fine.interMin;
 
-  } else {
+  } else if (qty <= commercialMaxQty) {
     type    = "Commercial";
     section = drugRecord.cr3e9_df_punishableundersectioncommercial || "NA";
     const commQty = commercialMaxQty - commercialQty;
@@ -72,26 +72,16 @@ export function calculateSentence(drugRecord, quantityGrams) {
     rawFine = commQty > 0
       ? fine.commMin + ((fine.commMax - fine.commMin) / commQty) * (qty - commercialQty)
       : fine.commMin;
+  } else {
+    type    = "Commercial";
+    section = drugRecord.cr3e9_df_punishableundersectioncommercial || "NA";
+    rawSent = sent.commMax;
+    rawFine = fine.commMax;
   }
 
-  const clampedSent = Math.max(
-    type === "Small" ? sent.smallMin : type === "Intermediate" ? sent.interMin : sent.commMin,
-    Math.min(
-      type === "Small" ? sent.smallMax : type === "Intermediate" ? sent.interMax : sent.commMax,
-      rawSent
-    )
-  );
-  const clampedFine = Math.max(
-    type === "Small" ? fine.smallMin : type === "Intermediate" ? fine.interMin : fine.commMin,
-    Math.min(
-      type === "Small" ? fine.smallMax : type === "Intermediate" ? fine.interMax : fine.commMax,
-      rawFine
-    )
-  );
-
-  const sentenceDays              = Math.max(0, roundSent(clampedSent));
-  const _fineNum                  = Math.max(0, roundFine(clampedFine));
-  const sentenceInYearsMonthsDays = daysToYMD(sentenceDays);
+  const sentenceDays              = Math.max(0, Math.round(rawSent));
+  const _fineNum                  = Math.max(0, roundFine(rawFine));
+  const sentenceInYearsMonthsDays = daysToYMD(rawSent);
   const fineFormatted             = fmtRupees(_fineNum);
 
   const quantityPercent = commercialQty > 0
@@ -105,6 +95,8 @@ export function calculateSentence(drugRecord, quantityGrams) {
     fine: fineFormatted,
     quantityType: type,
     quantityPercent,
+    baseDays: rawSent,
+    baseFine: rawFine,
     _fineNum,
   };
 
