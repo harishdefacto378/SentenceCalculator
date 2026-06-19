@@ -16,10 +16,10 @@ export function ReportCard({ substance, base, discretion, final, tab, setTab, on
       <div className="report-head">
         <h2>Report</h2>
         <div className="report-tabs">
-          <button className={"btn tab " + (tab === "sentence" ? "active" : "")} onClick={() => setTab("sentence")}>Copy with Sentence</button>
-          <button className={"btn tab " + (tab === "basic"    ? "active" : "")} onClick={() => setTab("basic")}>Copy Basic</button>
-          <button className={"btn tab " + (tab === "factors"  ? "active" : "")} onClick={() => setTab("factors")}>Copy With Sentence &amp; Factors</button>
-          <button className="btn" onClick={onCopy}>Copy</button>
+          <button className={"btn tab " + (tab === "sentence" ? "active" : "")} title="Copy with Sentence" aria-label="Copy with Sentence" onClick={() => setTab("sentence")}>Copy with Sentence</button>
+          <button className={"btn tab " + (tab === "basic"    ? "active" : "")} title="Copy Basic" aria-label="Copy Basic" onClick={() => setTab("basic")}>Copy Basic</button>
+          <button className={"btn tab " + (tab === "factors"  ? "active" : "")} title="Copy With Sentence and Factors" aria-label="Copy With Sentence and Factors" onClick={() => setTab("factors")}>Copy With Sentence &amp; Factors</button>
+          <button className="btn" title="Copy report" aria-label="Copy report" onClick={onCopy}>Copy</button>
         </div>
       </div>
       <div className="report-body">

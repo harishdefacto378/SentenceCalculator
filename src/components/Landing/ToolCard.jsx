@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { fetchDrugList } from "../../services/drugListService";
 import './ToolCard.css';
 function CalcThumbSvg() {
@@ -62,6 +62,22 @@ export const THUMB_ICONS = {
 };
 
 export default function ToolCard({ thumbClass, svgIcon, title, description, features, openLabel, isCalculator,metaItems, onClick }) {
+  const [isLoading, setIsLoading] = useState(false);
+
+  async function handleOpenClick(e) {
+    e.stopPropagation();
+    if (isLoading) return;
+
+    if (isCalculator) {
+      setIsLoading(true);
+      await handleLpClick();
+    }
+
+    if (typeof onClick === "function") {
+      onClick();
+    }
+  }
+
   return (
     <div
       className="lp-card"
@@ -76,25 +92,14 @@ export default function ToolCard({ thumbClass, svgIcon, title, description, feat
         <h3>{title}</h3>
         <p>{description}</p>
         <p className="lp-feature-list">{features}</p>
-   <button
-  className="lp-open"
-  onClick={async (e) => {
-    e.stopPropagation();
-
-    console.log("🟢 Button clicked");
-
-    if (isCalculator) {
-      await handleLpClick();
-    }
-
-    if (typeof onClick === "function") {
-      onClick();
-    }
-  }}
+  <button
+ className={"lp-open " + (isLoading ? "lp-open--loading" : "")}
+ disabled={isLoading}
+ onClick={handleOpenClick}
 >
-  {openLabel} →
+ {isLoading ? <><span className="lp-spinner" />Please wait...</> : <>{openLabel} →</>}
 </button>
-      </div>
+     </div>
 
       <div className="lp-meta">
         {metaItems.map((item, i) => <span key={i}>{item}</span>)}

@@ -10,6 +10,7 @@ export function ProportionalCalc({ state, setState, base, onCalc, calculated, qt
   const [selectedRecord, setSelectedRecord]   = useState(null);
   const [showWarning, setShowWarning]         = useState(false);
   const today = new Date().toISOString().split("T")[0];
+  const isCommercialMessage = calculated && base?.quantityType === "Commercial";
 
   // useMemo replaces the old useState+useEffect pattern — single render per keystroke
   const subs = useMemo(
@@ -155,12 +156,12 @@ export function ProportionalCalc({ state, setState, base, onCalc, calculated, qt
           </div>
 
           <div className="results">
-            <div className="result-row"><span>Punishable Under Section:</span><span className="v">{calculated ? base.section : "NA"}</span></div>
-            <div className="result-row"><span>Sentence in day(s):</span><span className="v big">{calculated ? base.sentenceDays : "0"}</span></div>
-            <div className="result-row"><span>Sentence in year(s), month(s) and day(s):</span><span className="v">{calculated ? base.sentenceInYearsMonthsDays : "0 year(s) 0 month(s) 0 day(s)"}</span></div>
-            <div className="result-row"><span>Fine (in Rupees):</span><span className="v big">{calculated ? base.fine : "₹0.00"}</span></div>
-            <div className="result-row"><span>Quantity Type:</span><span className="v">{calculated ? base.quantityType : "NA"}</span></div>
-            <div className="result-row"><span>Drug Quantity in % to Upper Limit of Intermediate:</span><span className="v">{calculated ? base.quantityPercent + "%" : "0%"}</span></div>
+            <div className={isCommercialMessage ? "result-row result-row--singleline" : "result-row"}><span>Punishable Under Section:</span><span className={isCommercialMessage ? "v v--singleline" : "v"}>{calculated ? base.section : "NA"}</span></div>
+            <div className={isCommercialMessage ? "result-row result-row--message" : "result-row"}><span>Sentence in day(s):</span><span className={isCommercialMessage ? "v v--normal" : "v big"}>{calculated ? base.sentenceDays : "0"}</span></div>
+            <div className={isCommercialMessage ? "result-row result-row--message" : "result-row"}><span>Sentence in year(s), month(s) and day(s):</span><span className={isCommercialMessage ? "v v--normal" : "v"}>{calculated ? (base.sentenceInYearsMonthsDays || base.sentenceInYearsMonthsAndDays) : "0 year(s) 0 month(s) 0 day(s)"}</span></div>
+            <div className={isCommercialMessage ? "result-row result-row--message" : "result-row"}><span>Fine (in Rupees):</span><span className={isCommercialMessage ? "v v--normal" : "v big"}>{calculated ? base.fine : "₹0.00"}</span></div>
+            <div className={isCommercialMessage ? "result-row result-row--singleline" : "result-row"}><span>Quantity Type:</span><span className={isCommercialMessage ? "v v--singleline" : "v"}>{calculated ? base.quantityType : "NA"}</span></div>
+            <div className={isCommercialMessage ? "result-row result-row--singleline" : "result-row"}><span>Drug Quantity in % to Upper Limit of Intermediate:</span><span className={isCommercialMessage ? "v v--singleline" : "v"}>{calculated ? base.quantityPercent + "%" : "0%"}</span></div>
           </div>
         </div>
       </div>

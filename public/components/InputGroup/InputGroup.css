@@ -41,6 +41,20 @@
   min-height: clamp(32px, 9vw, 36px);
 }
 
+.input.sm.discretion-pct {
+  width: clamp(64px, 18vw, 84px);
+  appearance: auto;
+  -moz-appearance: auto;
+}
+
+.input.sm.discretion-pct::-webkit-outer-spin-button,
+.input.sm.discretion-pct::-webkit-inner-spin-button {
+  -webkit-appearance: inner-spin-button;
+  display: block;
+  opacity: 1 !important;
+  margin: 0;
+}
+
 /* Date input: fills up to 160px, then shrinks with container */
 .input.date-input { width: min(160px, 100%); }
 
@@ -97,25 +111,54 @@
   top: 100%;
   left: 0;
   right: 0;
-  margin: 0;
+  margin: 4px 0 0;
   padding: 0;
   list-style: none;
-  border: 1px solid #ccc;
+  border: 1px solid var(--rule-2);
   background: var(--paper);
   z-index: 100;
-  max-height: 200px;
+  max-height: 240px;
   overflow-y: auto;
-  border-radius: 0 0 var(--r-md) var(--r-md);
-  box-shadow: var(--shadow-4);
+  overflow-x: hidden;
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-16);
 }
 .substance-suggestions li {
-  padding: 8px 12px;
+  padding: 10px 12px;
   cursor: pointer;
   font-size: clamp(12px, 3.5vw, 14px);
-  line-height: 20px;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.substance-suggestions li + li {
+  border-top: 1px solid var(--rule);
 }
 /* Pure CSS hover — replaces onMouseEnter/Leave JS style mutations */
-.substance-suggestions li:hover { background: #f0f4ff; }
+.substance-suggestions li:hover {
+  background: var(--brand-bg-tint);
+  color: var(--brand-fg-2);
+}
+
+.substance-suggestions::-webkit-scrollbar {
+  width: 10px;
+}
+.substance-suggestions::-webkit-scrollbar-track {
+  background: transparent;
+}
+.substance-suggestions::-webkit-scrollbar-thumb {
+  background: var(--rule-strong);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.substance-suggestions::-webkit-scrollbar-thumb:hover {
+  background: var(--ink-3);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
 
 /* ── Readonly avg input inside factor table ──────────────────────────────── */
 .input.avg {

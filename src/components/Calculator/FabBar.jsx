@@ -19,11 +19,11 @@ export function FabBar({ active, setActive }) {
 
   return (
     <div className="fab-bar">
-      <button className="fab" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}><Icon name="up" /></button>
-      <button className={"fab " + (active === "home" ? "active" : "")} onClick={() => navigate('/')}><Icon name="home" /></button>
-      <button className={"fab " + (active === "stats" ? "active" : "")} onClick={() => { setActive("stats"); navigate('/comparison'); }}><Icon name="bars" /></button>
-      <button className={"fab " + (active === "report" ? "active" : "")} onClick={() => { setActive("report"); navigate('/about'); }}><Icon name="book" /></button>
-      <button className={"fab " + (active === "info" ? "active" : "")} onClick={() =>  { setActive("info"); navigate('/about'); }}><Icon name="info" /></button>
+      <button className="fab" title="Scroll to top" aria-label="Scroll to top" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}><Icon name="up" /></button>
+      <button className={"fab " + (active === "home" ? "active" : "")} title="Home" aria-label="Home" onClick={() => navigate('/')}><Icon name="home" /></button>
+      <button className={"fab " + (active === "stats" ? "active" : "")} title="Comparison" aria-label="Comparison" onClick={() => { setActive("stats"); navigate('/comparison'); }}><Icon name="bars" /></button>
+      <button className={"fab " + (active === "report" ? "active" : "")} title="Report" aria-label="Report" onClick={() => { setActive("report"); navigate('/about'); }}><Icon name="book" /></button>
+      <button className={"fab " + (active === "info" ? "active" : "")} title="About" aria-label="About" onClick={() =>  { setActive("info"); navigate('/about'); }}><Icon name="info" /></button>
     </div>
   );
 }

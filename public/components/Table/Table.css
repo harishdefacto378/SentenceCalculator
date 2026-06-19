@@ -13,6 +13,11 @@
   border-top: 1px solid var(--rule);
 }
 
+.table-scroll.table-scroll--mitig {
+  max-height: 420px;
+  overflow-y: auto;
+}
+
 /* ── Desktop table: scroll-locked 5-column grid ──────────────────────────── */
 
 /* Table header row */

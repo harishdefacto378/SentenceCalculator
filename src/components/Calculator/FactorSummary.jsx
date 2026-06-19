@@ -1,14 +1,14 @@
 import React from 'react';
 import { fmtNum, fmtRupees, daysToYMD } from '../../utils/formatters';
 
-export function FactorSummary({ aggSentTotal, aggFineTotal, mitSentTotal, mitFineTotal, baseSentenceDays, baseFine, final, qtyEnabled }) {
+export function FactorSummary({ aggSentTotal, aggFineTotal, mitSentTotal, mitFineTotal, baseSentenceDays, baseFine, final, qtyEnabled, onCalc }) {
   const netSent = aggSentTotal - mitSentTotal;
   const netFine = aggFineTotal - mitFineTotal;
   return (
     <div className="card">
       <div className="card-head">
         <h2>Calculation on the Basis of Aggravating &amp; Mitigating Factors</h2>
-        <div className="actions"><button className="btn calc-btn" disabled={!qtyEnabled}>Calculate</button></div>
+        <div className="actions"><button className="btn calc-btn" disabled={!qtyEnabled} onClick={onCalc}>Calculate</button></div>
       </div>
       <div className="card-body">
         <div className="summary-grid">

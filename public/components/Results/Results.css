@@ -36,6 +36,45 @@
   font-size: clamp(13px, 3.8vw, 15px);
 }
 
+.result-row.result-row--message {
+  grid-template-columns: 1fr;
+  gap: 4px;
+  align-items: start;
+}
+
+.result-row .v.v--normal {
+  font-family: var(--font);
+  font-weight: 400;
+  font-size: clamp(12px, 3.4vw, 14px);
+  text-align: left;
+  line-height: 1.45;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.result-row.result-row--singleline {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.result-row.result-row--singleline > span:first-child,
+.result-row .v.v--singleline {
+  white-space: nowrap;
+}
+
+.result-row.result-row--singleline > span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.result-row .v.v--singleline {
+  font-family: var(--font);
+  font-weight: 400;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Banner / court notice */
 .banner {
   margin: 12px 0 0;
@@ -84,4 +123,11 @@
   .result-row + .result-row { border-top: 1px solid rgba(0,0,0,0.06); }
   /* In single-col, the value aligns left to read naturally */
   .result-row .v { text-align: left; }
+
+  .result-row.result-row--singleline {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+
+  .result-row .v.v--singleline { text-align: right; }
 }

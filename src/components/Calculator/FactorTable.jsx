@@ -10,7 +10,16 @@ export function FactorTable({ kind, factors, setFactors, totalSent, totalFine })
   const [custom, setCustom] = useState("");
 
   function setField(id, key, val) {
-    setFactors(factors.map(f => f.id === id ? { ...f, [key]: Math.max(0, Math.min(100, +val || 0)) } : f));
+    const parsedValue = Math.max(0, Math.min(100, +val || 0));
+    setFactors(
+      factors.map((f) => {
+        if (f.id !== id) return f;
+        if (key === "sentence") {
+          return { ...f, sentence: parsedValue, fine: parsedValue };
+        }
+        return { ...f, [key]: parsedValue };
+      })
+    );
   }
   function addCustom() {
     if (!custom.trim()) return;
@@ -24,7 +33,7 @@ export function FactorTable({ kind, factors, setFactors, totalSent, totalFine })
         <h2>{heading}</h2>
         <div className="actions"><button className="btn ghost" onClick={() => setFactors(factors.map(f => ({ ...f, sentence: 0, fine: 0 })))}>Reset</button></div>
       </div>
-      <div className="table-scroll">
+      <div className={"table-scroll " + (!isAggrav ? "table-scroll--mitig" : "")}>
         <div className="table-head">
           <div></div>
           <div className="table-head-label">{headLbl}</div>
@@ -48,8 +57,8 @@ export function FactorTable({ kind, factors, setFactors, totalSent, totalFine })
                   </div>
                 )}
               </div>
-              <div className="cell"><input className="input sm" type="number" min="0" max="100" value={f.sentence} onChange={e => setField(f.id, "sentence", e.target.value)} /></div>
-              <div className="cell"><input className="input sm" type="number" min="0" max="100" value={f.fine} onChange={e => setField(f.id, "fine", e.target.value)} /></div>
+              <div className="cell"><input className="input sm" type="text" inputMode="numeric" pattern="[0-9]*" value={f.sentence} onChange={e => setField(f.id, "sentence", e.target.value.replace(/[^\d]/g, ""))} /></div>
+              <div className="cell"><input className="input sm" type="text" inputMode="numeric" pattern="[0-9]*" value={f.fine} onChange={e => setField(f.id, "fine", e.target.value.replace(/[^\d]/g, ""))} /></div>
               <div className="cell"><input className="input sm avg" readOnly value={f.avg + "%"} /></div>
             </div>
           ))}

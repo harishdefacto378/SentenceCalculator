@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { AGGRAVATING, MITIGATING, UNITS } from '../../../data';
 import { EMPTY_BASE } from '../../utils/calculateSentence';
 import { fmtRupees, daysToYMD } from '../../utils/formatters';
+import api from '../../services/api';
 import { useDrugList }  from '../../hooks/useDrugList';
 import { getCachedAverageFactors } from '../../services/drugListService';
 import { useToast }     from '../../hooks/useToast';
@@ -13,6 +14,8 @@ import { FactorTable }      from './FactorTable';
 import { FactorSummary }    from './FactorSummary';
 import { ReportCard }       from './ReportCard';
 import { FabBar }           from './FabBar';
+
+const cloneFactorList = (list) => list.map((item) => ({ ...item }));
 
 export function CalculatorPage() {
   const drugsData = useDrugList();
@@ -30,6 +33,12 @@ export function CalculatorPage() {
   );
   const [mitigFactors,  setMitigFactors]  = useState(
     cachedAverageFactors?.mitigating?.length ? cachedAverageFactors.mitigating : MITIGATING
+  );
+  const [appliedAggravFactors, setAppliedAggravFactors] = useState(
+    cloneFactorList(cachedAverageFactors?.aggravating?.length ? cachedAverageFactors.aggravating : AGGRAVATING)
+  );
+  const [appliedMitigFactors, setAppliedMitigFactors] = useState(
+    cloneFactorList(cachedAverageFactors?.mitigating?.length ? cachedAverageFactors.mitigating : MITIGATING)
   );
   const [calculated,    setCalculated]    = useState(false);  // fix: was incorrectly true
   const [reportTab,     setReportTab]     = useState("sentence");
@@ -54,10 +63,10 @@ export function CalculatorPage() {
   });
 
   // ── Factor totals (capped at 100%) ─────────────────────────────────────────
-  const aggSentTotal = useMemo(() => Math.min(100, aggravFactors.reduce((a, f) => a + (+f.sentence || 0), 0)), [aggravFactors]);
-  const aggFineTotal = useMemo(() => Math.min(100, aggravFactors.reduce((a, f) => a + (+f.fine     || 0), 0)), [aggravFactors]);
-  const mitSentTotal = useMemo(() => Math.min(100, mitigFactors.reduce ((a, f) => a + (+f.sentence || 0), 0)), [mitigFactors]);
-  const mitFineTotal = useMemo(() => Math.min(100, mitigFactors.reduce ((a, f) => a + (+f.fine     || 0), 0)), [mitigFactors]);
+  const aggSentTotal = useMemo(() => Math.min(100, appliedAggravFactors.reduce((a, f) => a + (+f.sentence || 0), 0)), [appliedAggravFactors]);
+  const aggFineTotal = useMemo(() => Math.min(100, appliedAggravFactors.reduce((a, f) => a + (+f.fine     || 0), 0)), [appliedAggravFactors]);
+  const mitSentTotal = useMemo(() => Math.min(100, appliedMitigFactors.reduce ((a, f) => a + (+f.sentence || 0), 0)), [appliedMitigFactors]);
+  const mitFineTotal = useMemo(() => Math.min(100, appliedMitigFactors.reduce ((a, f) => a + (+f.fine     || 0), 0)), [appliedMitigFactors]);
 
   // ── Final sentence after factors ───────────────────────────────────────────
   const final = useMemo(() => {
@@ -83,6 +92,46 @@ export function CalculatorPage() {
     ];
     navigator.clipboard?.writeText(lines.join("\n"));
     showToast("Report copied to clipboard");
+  }
+
+  async function handleFactorCalc() {
+    const nextAppliedAggrav = cloneFactorList(aggravFactors);
+    const nextAppliedMitig = cloneFactorList(mitigFactors);
+    const nextAggSentTotal = Math.min(100, nextAppliedAggrav.reduce((a, f) => a + (+f.sentence || 0), 0));
+    const nextAggFineTotal = Math.min(100, nextAppliedAggrav.reduce((a, f) => a + (+f.fine || 0), 0));
+    const nextMitSentTotal = Math.min(100, nextAppliedMitig.reduce((a, f) => a + (+f.sentence || 0), 0));
+    const nextMitFineTotal = Math.min(100, nextAppliedMitig.reduce((a, f) => a + (+f.fine || 0), 0));
+    const sentNet = (nextAggSentTotal - nextMitSentTotal) / 100;
+    const fineNet = (nextAggFineTotal - nextMitFineTotal) / 100;
+    const nextFinalSentenceDays = Math.max(0, Math.round((Number(discretion.sentenceDays) || 0) * (1 + sentNet)));
+    const nextFinalFine = Math.max(0, Math.round((Number(discretion.fine) || 0) * (1 + fineNet)));
+
+    setAppliedAggravFactors(nextAppliedAggrav);
+    setAppliedMitigFactors(nextAppliedMitig);
+
+    try {
+      const payload = {
+        df_age: 0,
+        df_confiscationdate: propState.date || new Date().toISOString().split("T")[0],
+        df_drugquantitypercentage: Number(base.quantityPercent) || 0,
+        df_fine: nextFinalFine,
+        df_gender: 1,
+        df_quantitydetained: qtyInGrams,
+        df_quantitydetainedingram: qtyInGrams,
+        df_quantitytype: 1,
+        df_sentencedays: nextFinalSentenceDays,
+        df_sentenceyymmdd: daysToYMD(nextFinalSentenceDays),
+        df_unit: 1,
+        df_multiplierforcommerical: 100,
+      };
+
+      const res = await api.post("/api/createsentence", payload);
+      console.log("✅ Aggravating & Mitigating Factors saved - ID:", res?.id ?? res?.data?.id ?? "NA");
+      showToast("Factors calculation updated & saved");
+    } catch (error) {
+      console.error("❌ Factors save failed:", error);
+      showToast("Factors calculation updated (save failed)");
+    }
   }
 
   return (
@@ -122,6 +171,7 @@ export function CalculatorPage() {
             qtyEnabled={isQtyValid}
             baseSentenceDays={discretion.sentenceDays} baseFine={discretion.fine}
             final={final}
+            onCalc={handleFactorCalc}
           />
           <FactorTable kind="aggrav" factors={aggravFactors} setFactors={setAggravFactors} totalSent={aggSentTotal} totalFine={aggFineTotal} />
           <FactorTable kind="mitig"  factors={mitigFactors}  setFactors={setMitigFactors}  totalSent={mitSentTotal} totalFine={mitFineTotal} />
