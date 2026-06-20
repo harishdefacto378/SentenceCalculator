@@ -3,6 +3,7 @@ import { AGGRAVATING, MITIGATING, UNITS } from '../../../data';
 import { EMPTY_BASE } from '../../utils/calculateSentence';
 import { fmtRupees, daysToYMD } from '../../utils/formatters';
 import api from '../../services/api';
+import { jsPDF } from 'jspdf';
 import { useDrugList }  from '../../hooks/useDrugList';
 import { getCachedAverageFactors } from '../../services/drugListService';
 import { useToast }     from '../../hooks/useToast';
@@ -182,6 +183,255 @@ export function CalculatorPage() {
     }
   }
 
+  function handleExportPdf() {
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const marginX = 32;
+    const contentWidth = pageWidth - marginX * 2;
+    const leftColWidth = 190;
+    const rightColWidth = contentWidth - leftColWidth;
+    const lineHeight = 12;
+    const cellPadding = 6;
+    const minRowHeight = 24;
+    const bodyBottomY = pageHeight - 34;
+    const reportGeneratedAt = new Date();
+    let y = 34;
+
+    const asText = (value, fallback = "NA") => {
+      if (value === null || value === undefined || value === "") return fallback;
+      return String(value);
+    };
+
+    const pad2 = (n) => String(n).padStart(2, "0");
+    const formatDate = (value) => {
+      if (!value) return "NA";
+      const parsed = new Date(value);
+      if (Number.isNaN(parsed.getTime())) return asText(value);
+      return `${pad2(parsed.getDate())}-${pad2(parsed.getMonth() + 1)}-${parsed.getFullYear()}`;
+    };
+    const formatDateTime = (value) =>
+      `${formatDate(value)} ${pad2(value.getHours())}:${pad2(value.getMinutes())}:${pad2(value.getSeconds())}`;
+
+    const formatRs = (value) => {
+      const parsed = Number(String(value ?? "").replace(/[^\d.-]/g, ""));
+      if (!Number.isFinite(parsed)) return asText(value);
+      return `Rs. ${parsed.toLocaleString("en-IN")}`;
+    };
+
+    const drawHeader = () => {
+      const top = 20;
+      const bottom = 82;
+      doc.setDrawColor(90);
+      doc.setLineWidth(0.6);
+      doc.line(marginX, top, marginX + contentWidth, top);
+      doc.line(marginX, bottom, marginX + contentWidth, bottom);
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
+      doc.text("Sentence Calculation Report", marginX + contentWidth / 2, 43, { align: "center" });
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.text("Generated from: www.sentencecalculator.in", marginX + contentWidth / 2, 58, { align: "center" });
+      doc.text(`Generated on: ${formatDateTime(reportGeneratedAt)}`, marginX + contentWidth / 2, 72, { align: "center" });
+
+      y = bottom + 10;
+    };
+
+    const ensureSpace = (requiredHeight) => {
+      if (y + requiredHeight <= bodyBottomY) return;
+      doc.addPage();
+      drawHeader();
+    };
+
+    const drawSectionHeader = (title) => {
+      const lines = doc.splitTextToSize(asText(title), contentWidth - cellPadding * 2);
+      const height = Math.max(minRowHeight, lines.length * lineHeight + cellPadding * 2);
+      ensureSpace(height);
+
+      doc.setFillColor(243, 245, 248);
+      doc.setDrawColor(80);
+      doc.rect(marginX, y, contentWidth, height, "FD");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10.5);
+      lines.forEach((line, idx) => {
+        doc.text(line, marginX + contentWidth / 2, y + cellPadding + lineHeight * (idx + 0.8), { align: "center" });
+      });
+      y += height;
+    };
+
+    const drawTwoColRow = (label, value, valueAlign = "left") => {
+      const labelLines = doc.splitTextToSize(asText(label), leftColWidth - cellPadding * 2);
+      const valueLines = doc.splitTextToSize(asText(value), rightColWidth - cellPadding * 2);
+      const height = Math.max(minRowHeight, Math.max(labelLines.length, valueLines.length) * lineHeight + cellPadding * 2);
+      ensureSpace(height);
+
+      doc.setDrawColor(95);
+      doc.rect(marginX, y, leftColWidth, height);
+      doc.rect(marginX + leftColWidth, y, rightColWidth, height);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      labelLines.forEach((line, idx) => {
+        doc.text(line, marginX + cellPadding, y + cellPadding + lineHeight * (idx + 0.8));
+      });
+      valueLines.forEach((line, idx) => {
+        const textY = y + cellPadding + lineHeight * (idx + 0.8);
+        if (valueAlign === "center") {
+          doc.text(line, marginX + leftColWidth + rightColWidth / 2, textY, { align: "center" });
+        } else if (valueAlign === "right") {
+          doc.text(line, marginX + leftColWidth + rightColWidth - cellPadding, textY, { align: "right" });
+        } else {
+          doc.text(line, marginX + leftColWidth + cellPadding, textY);
+        }
+      });
+      y += height;
+    };
+
+    const drawThreeColRow = (field, details, date) => {
+      const col2Width = (contentWidth - leftColWidth) * 0.62;
+      const col3Width = (contentWidth - leftColWidth) - col2Width;
+      const fLines = doc.splitTextToSize(asText(field), leftColWidth - cellPadding * 2);
+      const dLines = doc.splitTextToSize(asText(details), col2Width - cellPadding * 2);
+      const dtLines = doc.splitTextToSize(asText(date), col3Width - cellPadding * 2);
+      const height = Math.max(minRowHeight, Math.max(fLines.length, dLines.length, dtLines.length) * lineHeight + cellPadding * 2);
+      ensureSpace(height);
+
+      doc.rect(marginX, y, leftColWidth, height);
+      doc.rect(marginX + leftColWidth, y, col2Width, height);
+      doc.rect(marginX + leftColWidth + col2Width, y, col3Width, height);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      fLines.forEach((line, idx) => {
+        doc.text(line, marginX + cellPadding, y + cellPadding + lineHeight * (idx + 0.8));
+      });
+      dLines.forEach((line, idx) => {
+        doc.text(line, marginX + leftColWidth + col2Width / 2, y + cellPadding + lineHeight * (idx + 0.8), { align: "center" });
+      });
+      dtLines.forEach((line, idx) => {
+        doc.text(line, marginX + leftColWidth + col2Width + col3Width / 2, y + cellPadding + lineHeight * (idx + 0.8), { align: "center" });
+      });
+      y += height;
+    };
+
+    const drawFactorTable = (title, factors) => {
+      drawSectionHeader(title);
+
+      const widths = [40, contentWidth - (40 + 72 + 72 + 72), 72, 72, 72];
+      const headers = ["No.", "Factor", "Sentence %", "Fine %", "Avg %"];
+      const headerHeight = minRowHeight;
+      ensureSpace(headerHeight);
+      doc.setFillColor(248, 248, 248);
+      doc.setDrawColor(95);
+
+      let x = marginX;
+      headers.forEach((h, i) => {
+        doc.rect(x, y, widths[i], headerHeight, "FD");
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(9.5);
+        doc.text(h, x + widths[i] / 2, y + 15, { align: "center" });
+        x += widths[i];
+      });
+      y += headerHeight;
+
+      (factors || []).forEach((factor, idx) => {
+        const cells = [
+          String(idx + 1),
+          asText(factor?.label, "Custom factor"),
+          `${Number(factor?.sentence) || 0}`,
+          `${Number(factor?.fine) || 0}`,
+          `${Number(factor?.avg) || 0}`,
+        ];
+        const factorLines = doc.splitTextToSize(cells[1], widths[1] - cellPadding * 2);
+        const rowHeight = Math.max(minRowHeight, factorLines.length * lineHeight + cellPadding * 2);
+        ensureSpace(rowHeight);
+
+        let colX = marginX;
+        cells.forEach((cell, colIdx) => {
+          doc.rect(colX, y, widths[colIdx], rowHeight);
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(9.5);
+          if (colIdx === 1) {
+            const lines = doc.splitTextToSize(cell, widths[colIdx] - cellPadding * 2);
+            lines.forEach((line, lineIdx) => {
+              doc.text(line, colX + cellPadding, y + cellPadding + lineHeight * (lineIdx + 0.8));
+            });
+          } else {
+            doc.text(cell, colX + widths[colIdx] / 2, y + 15, { align: "center" });
+          }
+          colX += widths[colIdx];
+        });
+        y += rowHeight;
+      });
+    };
+
+    drawHeader();
+
+    drawSectionHeader("Case and Substance Details");
+    drawTwoColRow("Case Type", "NDPS");
+    drawTwoColRow("Substance Name", substance?.cr3e9_df_drugidentifier || substance?.cr3e9_df_drugtype || "NA");
+    drawTwoColRow("Quantity detained", `${asText(propState.qty, "0")} ${asText(propState.unit, "g")}`);
+    drawTwoColRow("Date of Confiscation", formatDate(propState.date));
+
+    drawSectionHeader("Proportional Calculation");
+    drawTwoColRow("Punishable Under", base.section || "NA");
+    drawTwoColRow("Quantity Type", base.quantityType || "NA");
+    drawTwoColRow("Sentence in day(s)", asText(base.sentenceDays, "0"), "center");
+    drawTwoColRow("Sentence in year(s), month(s) and day(s)", base.sentenceInYearsMonthsDays || base.sentenceInYearsMonthsAndDays || "0 year(s), 0 month(s), 0 day(s)");
+    drawTwoColRow("Fine (in Rupees)", formatRs(base.fine || 0), "right");
+    drawTwoColRow("Drug Quantity in % to Upper Limit of Intermediate", `${asText(base.quantityPercent, "0.00")}%`, "center");
+
+    drawSectionHeader("Official Notification Details");
+    drawThreeColRow(
+      "Notification No.",
+      substance?.cr3e9_df_notificationno_under_viia_xxiiia_of_s2 || "NA",
+      formatDate(substance?.cr3e9_df_notificationdate_under_viia_xxiiia_of_s2)
+    );
+    drawTwoColRow("Notification Report", substance?.cr3e9_df_notificationreportanddate || "NA");
+    drawTwoColRow("Common Name", substance?.cr3e9_df_drugtype || "NA");
+    drawTwoColRow("Chemical Name", substance?.cr3e9_df_chemicalname_defined_in_s2xxiii || "NA");
+    drawTwoColRow("Small Quantity", substance ? `< ${substance.cr3e9_df_smallquantitygram} Gram` : "NA");
+    drawTwoColRow("Commercial Quantity", substance ? `> ${substance.cr3e9_df_commercialquantitygram} Gram` : "NA");
+
+    drawSectionHeader("Calculation as per Discretion of the Court");
+    drawTwoColRow("%age Increase in SENTENCE/FINE", `${Number(discState.inc) || 0}%`, "center");
+    drawTwoColRow("%age Decrease in SENTENCE/FINE", `${Number(discState.dec) || 0}%`, "center");
+    drawTwoColRow("Sentence in day(s)", asText(discretion.sentenceDays, "0"), "center");
+    drawTwoColRow("Sentence in year(s), month(s) and day(s)", daysToYMD(discretion.sentenceDays || 0));
+    drawTwoColRow("Fine (in Rupees)", formatRs(discretion.fine || 0), "right");
+
+    drawSectionHeader("Aggravating & Mitigating Factors");
+    drawTwoColRow("%age Increase/Decrease in SENTENCE", `${aggSentTotal - mitSentTotal}%`, "center");
+    drawTwoColRow("%age Increase/Decrease in FINE", `${aggFineTotal - mitFineTotal}%`, "center");
+    drawTwoColRow("New Sentence in day(s)", asText(final.sentenceDays, "0"), "center");
+    drawTwoColRow("New Sentence in year(s), month(s) and day(s)", daysToYMD(final.sentenceDays || 0));
+    drawTwoColRow("New Fine (in Rupees)", formatRs(final.fine || 0), "right");
+
+    drawSectionHeader("Final Sentence Recommendation");
+    drawTwoColRow("Recommended Sentence (Days)", asText(final.sentenceDays, "0"), "center");
+    drawTwoColRow("Recommended Sentence (Y/M/D)", daysToYMD(final.sentenceDays || 0));
+    drawTwoColRow("Recommended Fine", formatRs(final.fine || 0), "right");
+
+    drawFactorTable("Positive Factors (Aggravating)", aggravFactors);
+    drawFactorTable("Negative Factors (Mitigating)", mitigFactors);
+
+    const totalPages = doc.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i += 1) {
+      doc.setPage(i);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.text(`Page ${i} of ${totalPages}`, pageWidth - marginX, pageHeight - 16, { align: "right" });
+      doc.text(formatDateTime(reportGeneratedAt), marginX, pageHeight - 16);
+    }
+
+    const safeSubstance = String(substance?.cr3e9_df_drugidentifier || "report")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    doc.save(`sentence-calculation-${safeSubstance || "report"}.pdf`);
+    showToast("Report PDF downloaded");
+  }
+
   return (
     <>
       <div className="shell">
@@ -226,7 +476,7 @@ export function CalculatorPage() {
         </div>
       </div>
 
-      <FabBar active={fabActive} setActive={setFabActive} />
+      <FabBar active={fabActive} setActive={setFabActive} onReportClick={handleExportPdf} />
 
       <footer className="site">
         <div className="pip">Justice Anoop Chitkara <span className="pip-copyright">©</span></div>
