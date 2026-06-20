@@ -80,7 +80,6 @@ export function calculateSentence(drugRecord, quantityGrams) {
   }
 
   const sentenceDays              = Math.max(0, Math.round(rawSent));
-  console.log("rawSent :",rawSent);
   const _fineNum                  = Math.max(0, roundFine(rawFine));
   const sentenceInYearsMonthsDays = daysToYMD(sentenceDays);
   const fineFormatted             = fmtRupees(_fineNum);
