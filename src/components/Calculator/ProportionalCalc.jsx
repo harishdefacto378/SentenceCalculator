@@ -3,6 +3,7 @@ import { calculateSentence } from '../../utils/calculateSentence';
 import { daysToYMD, fmtRupees } from '../../utils/formatters';
 import { UNITS, UNIT_LABELS } from '../../../data';
 import { WarningModal } from './WarningModal';
+import { DatePicker } from './DatePicker';
 
 export function ProportionalCalc({ state, setState, base, onCalc, calculated, qtyEnabled, drugsData, onSelect }) {
   const [substanceInput, setSubstanceInput] = useState(state.substance || "");
@@ -139,9 +140,7 @@ export function ProportionalCalc({ state, setState, base, onCalc, calculated, qt
           </div>
           <div className="form-row">
             <label>Date of Confiscation <span className="sub-label">(optional)</span></label>
-            <input
-              className="input date-input"
-              type="date"
+            <DatePicker
               max={today}
               value={state.date}
               onChange={e => {

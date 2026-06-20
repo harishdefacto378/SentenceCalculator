@@ -16,6 +16,54 @@ import { ReportCard }       from './ReportCard';
 import { FabBar }           from './FabBar';
 
 const cloneFactorList = (list) => list.map((item) => ({ ...item }));
+const normalizeLabel = (label) =>
+  String(label || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+
+function orderFactorsByBase(baseFactors, incomingFactors, prefix) {
+  const base = Array.isArray(baseFactors) ? baseFactors : [];
+  const incoming = Array.isArray(incomingFactors) ? incomingFactors : [];
+  const consumed = new Set();
+
+  const ordered = base.map((baseItem) => {
+    let idx = incoming.findIndex((f, i) => !consumed.has(i) && f?.id === baseItem.id);
+    if (idx < 0) {
+      const baseLabel = normalizeLabel(baseItem.label);
+      idx = incoming.findIndex(
+        (f, i) => !consumed.has(i) && normalizeLabel(f?.label) === baseLabel
+      );
+    }
+
+    if (idx >= 0) {
+      consumed.add(idx);
+      const match = incoming[idx] || {};
+      return {
+        ...baseItem,
+        ...match,
+        id: baseItem.id,
+        label: match.label || baseItem.label,
+      };
+    }
+
+    return { ...baseItem };
+  });
+
+  incoming.forEach((item, idx) => {
+    if (consumed.has(idx)) return;
+    ordered.push({
+      ...item,
+      id: item?.id || `${prefix}-x-${idx + 1}`,
+      label: item?.label || "Custom factor",
+      sentence: Number(item?.sentence) || 0,
+      fine: Number(item?.fine) || 0,
+      avg: Number(item?.avg) || 0,
+    });
+  });
+
+  return ordered;
+}
 
 export function CalculatorPage() {
   const drugsData = useDrugList();
@@ -28,17 +76,17 @@ export function CalculatorPage() {
     date: new Date().toISOString().split('T')[0],
   });
   const [discState,     setDiscState]     = useState({ inc: 0, dec: 0 });
-  const [aggravFactors, setAggravFactors] = useState(
-    cachedAverageFactors?.aggravating?.length ? cachedAverageFactors.aggravating : AGGRAVATING
+  const [aggravFactors, setAggravFactors] = useState(() =>
+    orderFactorsByBase(AGGRAVATING, cachedAverageFactors?.aggravating, "a")
   );
-  const [mitigFactors,  setMitigFactors]  = useState(
-    cachedAverageFactors?.mitigating?.length ? cachedAverageFactors.mitigating : MITIGATING
+  const [mitigFactors,  setMitigFactors]  = useState(() =>
+    orderFactorsByBase(MITIGATING, cachedAverageFactors?.mitigating, "m")
   );
-  const [appliedAggravFactors, setAppliedAggravFactors] = useState(
-    cloneFactorList(cachedAverageFactors?.aggravating?.length ? cachedAverageFactors.aggravating : AGGRAVATING)
+  const [appliedAggravFactors, setAppliedAggravFactors] = useState(() =>
+    cloneFactorList(orderFactorsByBase(AGGRAVATING, cachedAverageFactors?.aggravating, "a"))
   );
-  const [appliedMitigFactors, setAppliedMitigFactors] = useState(
-    cloneFactorList(cachedAverageFactors?.mitigating?.length ? cachedAverageFactors.mitigating : MITIGATING)
+  const [appliedMitigFactors, setAppliedMitigFactors] = useState(() =>
+    cloneFactorList(orderFactorsByBase(MITIGATING, cachedAverageFactors?.mitigating, "m"))
   );
   const [calculated,    setCalculated]    = useState(false);  // fix: was incorrectly true
   const [reportTab,     setReportTab]     = useState("sentence");
