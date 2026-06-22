@@ -172,7 +172,7 @@ export function useCalculationEngine() {
   // ────────────────────────────────────────────────────────────────────────────
 
   const calculateCourt = useCallback(
-    (substance, qty, quantityType, incPct, decPct, baseSentenceDays = 0) => {
+    (substance, qty, quantityType, incPct, decPct, baseSentenceDays = 0, baseFineDays = 0) => {
       if (!substance) {
         return { sentenceDays: 0, fine: 0, ymd: '0 year(s), 0 month(s), 0 day(s)' };
       }
@@ -233,53 +233,63 @@ export function useCalculationEngine() {
       const clampedSentence = ceilRound(sentenceToRound);
 
       // ── FINE CALCULATION ──
+      // REUSE baseFine from Proportional calculation (not recalculated)
       const fineChangePct = incPct - decPct;
       const finePercentage = 100 + fineChangePct;
 
-      const fineRange = {
-        smallMin: safeNum(substance.cr3e9_df_smallminfine),
-        smallMax: safeNum(substance.cr3e9_df_smallmaxfine),
-        interMin: safeNum(substance.cr3e9_df_interminfine),
-        interMax: safeNum(substance.cr3e9_df_intermaxfine),
-        commMin: safeNum(substance.cr3e9_df_commminfine),
-        commMax: safeNum(substance.cr3e9_df_commmaxfine),
-      };
-
-      const commercialQty = safeNum(substance.cr3e9_df_commercialquantitygram);
-      const commercialMaxQty =
-        safeNum(substance.cr3e9_df_commercialmaxquantitygram) ||
-        commercialQty * 2;
-
-      let fineAmount;
-      if (qty < smallQty) {
-        fineAmount =
-          smallQty > 0
-            ? fineRange.smallMin +
-              ((fineRange.smallMax - fineRange.smallMin) / smallQty) * qty
-            : fineRange.smallMin;
-      } else if (qty <= commercialQty) {
-        const qtyDiff = commercialQty - smallQty;
-        fineAmount =
-          qtyDiff > 0
-            ? fineRange.interMin +
-              ((fineRange.interMax - fineRange.interMin) / qtyDiff) *
-                (qty - smallQty)
-            : fineRange.interMin;
+      // Use base fine if provided, otherwise fall back to old calculation
+      let fineAfterIncDec;
+      if (safeNum(baseFineDays) > 0) {
+        // ✅ NEW: Reuse proportional base fine
+        fineAfterIncDec = (baseFineDays * finePercentage) / 100;
       } else {
-        const qtyDiff = commercialMaxQty - commercialQty;
-        fineAmount =
-          qtyDiff > 0
-            ? fineRange.commMin +
-              ((fineRange.commMax - fineRange.commMin) / qtyDiff) *
-                (qty - commercialQty)
-            : fineRange.commMin;
+        // FALLBACK: Recalculate (old behavior, less accurate)
+        const fineRange = {
+          smallMin: safeNum(substance.cr3e9_df_smallminfine),
+          smallMax: safeNum(substance.cr3e9_df_smallmaxfine),
+          interMin: safeNum(substance.cr3e9_df_interminfine),
+          interMax: safeNum(substance.cr3e9_df_intermaxfine),
+          commMin: safeNum(substance.cr3e9_df_commminfine),
+          commMax: safeNum(substance.cr3e9_df_commmaxfine),
+        };
+
+        const commercialQty = safeNum(substance.cr3e9_df_commercialquantitygram);
+        const commercialMaxQty =
+          safeNum(substance.cr3e9_df_commercialmaxquantitygram) ||
+          commercialQty * 2;
+
+        let fineAmount;
+        if (qty < smallQty) {
+          fineAmount =
+            smallQty > 0
+              ? fineRange.smallMin +
+                ((fineRange.smallMax - fineRange.smallMin) / smallQty) * qty
+              : fineRange.smallMin;
+        } else if (qty <= commercialQty) {
+          const qtyDiff = commercialQty - smallQty;
+          fineAmount =
+            qtyDiff > 0
+              ? fineRange.interMin +
+                ((fineRange.interMax - fineRange.interMin) / qtyDiff) *
+                  (qty - smallQty)
+              : fineRange.interMin;
+        } else {
+          const qtyDiff = commercialMaxQty - commercialQty;
+          fineAmount =
+            qtyDiff > 0
+              ? fineRange.commMin +
+                ((fineRange.commMax - fineRange.commMin) / qtyDiff) *
+                  (qty - commercialQty)
+              : fineRange.commMin;
+        }
+
+        fineAfterIncDec = (fineAmount * finePercentage) / 100;
       }
 
-      const fineAfterIncDec = (fineAmount * finePercentage) / 100;
       let fine = applyFineRules(
         fineAfterIncDec,
         quantityType,
-        fineRange.commMax
+        safeNum(substance.cr3e9_df_commmaxfine)
       );
 
       return {
@@ -336,10 +346,10 @@ export function useCalculationEngine() {
       );
 
       // ── AGGREGATE FINE ──
-      const aggrFine =
-        fineFromCourt * (1 + (aggrFinePct - mitiFinePct) / 100);
+      // Angular-style: Factors only affect SENTENCE, not FINE
+      // Fine remains the same as Court stage (not multiplied by factors)
       const clampedFine = applyFineRules(
-        aggrFine,
+        fineFromCourt,  // ← Keep from Court, don't multiply by factors!
         quantityType,
         safeNum(substance.cr3e9_df_commmaxfine)
       );

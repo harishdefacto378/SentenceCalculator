@@ -68,13 +68,15 @@ export function useCourtCalc({ base, discState, substance, qtyInGrams, showToast
     const dec = Number(discState.dec) || 0;
 
     // Use unified engine for consistent calculations
+    // Pass baseFine from Proportional calculation (not recalculated)
     const result = engine.calculateCourt(
       substanceData,
       qtyInGrams,
       quantityType,
       inc,
       dec,
-      baseDays ?? sentenceDays
+      baseDays ?? sentenceDays,
+      base.baseFine ?? 0  // ← NEW: Pass baseFine to prevent recalculation
     );
 
     const updatedDiscretion = {

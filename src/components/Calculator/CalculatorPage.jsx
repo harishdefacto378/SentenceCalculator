@@ -8,6 +8,7 @@ import { useDrugList }  from '../../hooks/useDrugList';
 import { getCachedAverageFactors } from '../../services/drugListService';
 import { useToast }     from '../../hooks/useToast';
 import { useCourtCalc } from '../../hooks/useCourtCalc';
+import { useCalculationEngine } from '../../hooks/useCalculationEngine';
 import { Toast }          from '../Toast';
 import { ProportionalCalc } from './ProportionalCalc';
 import { DiscretionCalc }   from './DiscretionCalc';
@@ -111,21 +112,50 @@ export function CalculatorPage() {
     base, discState, substance, qtyInGrams, showToast,
   });
 
+  // Calculation engine for consistent logic across all stages
+  const engine = useCalculationEngine();
+
   // ── Factor totals (capped at 100%) ─────────────────────────────────────────
   const aggSentTotal = useMemo(() => Math.min(100, appliedAggravFactors.reduce((a, f) => a + (+f.sentence || 0), 0)), [appliedAggravFactors]);
   const aggFineTotal = useMemo(() => Math.min(100, appliedAggravFactors.reduce((a, f) => a + (+f.fine     || 0), 0)), [appliedAggravFactors]);
   const mitSentTotal = useMemo(() => Math.min(100, appliedMitigFactors.reduce ((a, f) => a + (+f.sentence || 0), 0)), [appliedMitigFactors]);
   const mitFineTotal = useMemo(() => Math.min(100, appliedMitigFactors.reduce ((a, f) => a + (+f.fine     || 0), 0)), [appliedMitigFactors]);
 
-  // ── Final sentence after factors ───────────────────────────────────────────
+  // ── Final sentence after factors (using unified engine) ────────────────────
   const final = useMemo(() => {
-    const sentNet = (aggSentTotal - mitSentTotal) / 100;
-    const fineNet = (aggFineTotal - mitFineTotal) / 100;
+    if (!substance || !discretion?.sentenceDays) {
+      return { sentenceDays: 0, fine: 0, ymd: '0 year(s) 0 month(s) 0 day(s)' };
+    }
+
+    // Use the engine's calculateAggrAndMiti for consistent logic with Stage 2 & Angular
+    const result = engine.calculateAggrAndMiti(
+      substance,
+      qtyInGrams,
+      base.quantityType,
+      discretion.sentenceDays,
+      discretion.fine,
+      aggSentTotal,
+      aggFineTotal,
+      mitSentTotal,
+      mitFineTotal
+    );
+
     return {
-      sentenceDays: Math.max(0, Math.round(discretion.sentenceDays * (1 + sentNet))),
-      fine:         Math.max(0, Math.round(discretion.fine         * (1 + fineNet))),
+      sentenceDays: result.sentenceDays,
+      fine: result.fine,
+      ymd: result.ymd,
     };
-  }, [discretion, aggSentTotal, aggFineTotal, mitSentTotal, mitFineTotal]);
+  }, [
+    discretion,
+    aggSentTotal,
+    aggFineTotal,
+    mitSentTotal,
+    mitFineTotal,
+    substance,
+    qtyInGrams,
+    base.quantityType,
+    engine,
+  ]);
 
   // ── Clipboard report ───────────────────────────────────────────────────────
   function copyReport() {
