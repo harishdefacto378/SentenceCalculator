@@ -55,30 +55,17 @@ export function daysToYMD(days) {
     return '0 year(s), 0 month(s), 0 day(s)';
   }
 
-  const totalDays = Number(days);
-  const DAYS_IN_YEAR = totalDays < 1461 ? 365 : 365.25;
-  const DAYS_IN_MONTH = 30.42;
-  let years = Math.floor(totalDays / DAYS_IN_YEAR);
-  let months = Math.floor((totalDays % DAYS_IN_YEAR) / DAYS_IN_MONTH);
-  let remainingDays = Math.round((totalDays % DAYS_IN_YEAR) % DAYS_IN_MONTH);
+  // 🔥 IMPORTANT FIX
+  const totalDays = Math.floor(Number(days));
 
-  if (remainingDays >= 30) {
-    remainingDays = 0;
-    months += 1;
-  }
+  const years = Math.floor(totalDays / 365);
 
-  if (months >= 12) {
-    months = 0;
-    years += 1;
-  }
+  const months = Math.floor((totalDays % 365) / 30.42);
 
-  if (YMD_MINUS_ONE_DAYS.has(Math.round(totalDays)) && remainingDays > 0) {
-    remainingDays -= 1;
-  }
+  const remainingDays = Math.floor((totalDays % 365) % 30.42);
 
   return `${years} year(s), ${months} month(s), ${remainingDays} day(s)`;
 }
-
 export function fmtRupees(n) {
   if (!n) return "₹0.00";
   return "₹" + n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });

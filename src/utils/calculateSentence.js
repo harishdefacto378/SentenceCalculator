@@ -82,6 +82,7 @@ export function calculateSentence(drugRecord, quantityGrams) {
   const sentenceDays              = Math.max(0, Math.round(rawSent));
   const _fineNum                  = Math.max(0, roundFine(rawFine));
   const sentenceInYearsMonthsDays = daysToYMD(rawSent);
+  console.log(rawSent);
   const fineFormatted             = fmtRupees(_fineNum);
   const quantityPercent = commercialQty > 0
     ? ((qty / commercialQty) * 100).toFixed(2)
