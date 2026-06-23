@@ -180,10 +180,19 @@ export function CalculatorPage() {
     const nextAggFineTotal = Math.min(100, nextAppliedAggrav.reduce((a, f) => a + (+f.fine || 0), 0));
     const nextMitSentTotal = Math.min(100, nextAppliedMitig.reduce((a, f) => a + (+f.sentence || 0), 0));
     const nextMitFineTotal = Math.min(100, nextAppliedMitig.reduce((a, f) => a + (+f.fine || 0), 0));
-    const sentNet = (nextAggSentTotal - nextMitSentTotal) / 100;
-    const fineNet = (nextAggFineTotal - nextMitFineTotal) / 100;
-    const nextFinalSentenceDays = Math.max(0, Math.round((Number(discretion.sentenceDays) || 0) * (1 + sentNet)));
-    const nextFinalFine = Math.max(0, Math.round((Number(discretion.fine) || 0) * (1 + fineNet)));
+
+    // Use the unified engine so displayed values and saved values are identical
+    const result = engine.calculateAggrAndMiti(
+      substance,
+      qtyInGrams,
+      base.quantityType,
+      discretion.sentenceDays,
+      discretion.fine,
+      nextAggSentTotal,
+      nextAggFineTotal,
+      nextMitSentTotal,
+      nextMitFineTotal,
+    );
 
     setAppliedAggravFactors(nextAppliedAggrav);
     setAppliedMitigFactors(nextAppliedMitig);
@@ -193,13 +202,13 @@ export function CalculatorPage() {
         df_age: 0,
         df_confiscationdate: propState.date || new Date().toISOString().split("T")[0],
         df_drugquantitypercentage: Number(base.quantityPercent) || 0,
-        df_fine: nextFinalFine,
+        df_fine: result.fine,
         df_gender: 1,
         df_quantitydetained: qtyInGrams,
         df_quantitydetainedingram: qtyInGrams,
         df_quantitytype: 1,
-        df_sentencedays: nextFinalSentenceDays,
-        df_sentenceyymmdd: daysToYMD(nextFinalSentenceDays),
+        df_sentencedays: result.sentenceDays,
+        df_sentenceyymmdd: result.ymd,
         df_unit: 1,
         df_multiplierforcommerical: 100,
       };

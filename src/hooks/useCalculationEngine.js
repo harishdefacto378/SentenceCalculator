@@ -235,6 +235,7 @@ export function useCalculationEngine() {
       const clampedSentence = ceilRound(sentenceToRound);
 
       // ── FINE CALCULATION ──
+
       // REUSE baseFine from Proportional calculation (not recalculated)
       const fineChangePct = incPct - decPct;
       const finePercentage = 100 + fineChangePct;
@@ -297,7 +298,7 @@ export function useCalculationEngine() {
       return {
         sentenceDays: clampedSentence,
         fine,
-        ymd: daysToYMD(rawCourtSentence),
+        ymd: daysToYMD(clampedSentence),
       };
     },
     [safeNum, roundDecimal, ceilRound, clampValue, baseSentence]
@@ -323,35 +324,29 @@ export function useCalculationEngine() {
         return { sentenceDays: 0, fine: 0, ymd: '0 year(s), 0 month(s), 0 day(s)' };
       }
 
-      // ── AGGREGATE SENTENCE ──
+      // ── AGGREGATE SENTENCE — Angular-style absolute bounds ──
       const aggrSentence =
         sentenceFromCourt * (1 + (aggrSentencePct - mitiSentencePct) / 100);
 
-      const minSent =
+      const smallSent   = aggrSentence > 1 && aggrSentence <= 365   ? aggrSentence : 365;
+      const interSent   = aggrSentence > 1 && aggrSentence <= 3652  ? aggrSentence : 3652;
+      const commSent    = aggrSentence > 3652 && aggrSentence <= 7305 ? aggrSentence : 7305;
+
+      const bounded =
         quantityType === 'Small'
-          ? safeNum(substance.cr3e9_df_smallminsent)
+          ? (aggrSentence <= 1 ? 0 : smallSent)
           : quantityType === 'Intermediate'
-          ? safeNum(substance.cr3e9_df_interminsent)
-          : safeNum(substance.cr3e9_df_commminsent);
+          ? (aggrSentence <= 1 ? 0 : interSent)
+          : (aggrSentence <= 3653 ? 3653 : commSent);
 
-      const maxSent =
-        quantityType === 'Small'
-          ? safeNum(substance.cr3e9_df_smallmaxsent)
-          : quantityType === 'Intermediate'
-          ? safeNum(substance.cr3e9_df_intermaxsent)
-          : safeNum(substance.cr3e9_df_commmaxsent);
+      const clampedSentence = ceilRound(bounded);
 
-      const clampedSentence = clampValue(
-        ceilRound(aggrSentence),
-        minSent,
-        maxSent
-      );
-
-      // ── AGGREGATE FINE ──
-      // Angular-style: Factors only affect SENTENCE, not FINE
-      // Fine remains the same as Court stage (not multiplied by factors)
+      // ── AGGREGATE FINE — Angular applies factor% on top of court fine ──
+      const fineNetPct     = aggrFinePct - mitiFinePct;
+      const finePercentage = 100 + fineNetPct;
+      const fineAfterFactors = (fineFromCourt * finePercentage) / 100;
       const clampedFine = applyFineRules(
-        fineFromCourt,  // ← Keep from Court, don't multiply by factors!
+        fineAfterFactors,
         quantityType,
         safeNum(substance.cr3e9_df_commmaxfine)
       );
