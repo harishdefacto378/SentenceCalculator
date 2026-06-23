@@ -156,7 +156,7 @@ export function useCalculationEngine() {
       setQuantityInGram(qty);
 
       return {
-        sentenceDays: Math.round(sentenceDays),
+        sentenceDays: Math.max(0, sentenceDays),
         fine: fineAmount,
         category,
         percentage: roundDecimal(percentage),

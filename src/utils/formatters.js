@@ -1,5 +1,4 @@
 // Pure formatting helpers — no React, no side-effects.
-import { YMD_MINUS_ONE_DAYS } from './ymdAdjustments';
 // cover two case
 // export function daysToYMD(days) 
 // {
@@ -51,18 +50,13 @@ import { YMD_MINUS_ONE_DAYS } from './ymdAdjustments';
 //   return `${years} year(s), ${months} month(s), ${daysLeft} day(s)`;
 // }
 export function daysToYMD(days) {
-  if (Number.isNaN(Number(days))) {
+  if (isNaN(days)) {
     return '0 year(s), 0 month(s), 0 day(s)';
   }
 
-  // 🔥 IMPORTANT FIX
-  const totalDays = Math.floor(Number(days));
-
-  const years = Math.floor(totalDays / 365);
-
-  const months = Math.floor((totalDays % 365) / 30.42);
-
-  const remainingDays = Math.floor((totalDays % 365) % 30.42);
+  const years = Math.floor(days / 365);
+  const months = Math.floor((days % 365) / 30.42);
+  const remainingDays = Math.round((days % 365) % 30.42);
 
   return `${years} year(s), ${months} month(s), ${remainingDays} day(s)`;
 }
