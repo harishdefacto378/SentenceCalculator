@@ -54,6 +54,16 @@ export function useCourtCalc({ base, discState, substance, qtyInGrams, showToast
       return;
     }
 
+    if (quantityType === "Commercial") {
+      setDiscretion({
+        sentenceDays: 0,
+        fine: 0,
+        ymd: "0 year(s), 0 month(s), 0 day(s)",
+      });
+      showToast("Commercial quantity: court discretion text is shown");
+      return;
+    }
+
     const inc = Number(discState.inc) || 0;
     const dec = Number(discState.dec) || 0;
 

@@ -123,7 +123,7 @@ export function CalculatorPage() {
 
   // ── Final sentence after factors (using unified engine) ────────────────────
   const final = useMemo(() => {
-    if (!substance || !discretion?.sentenceDays) {
+    if (!substance || !discretion?.sentenceDays || base.quantityType === "Commercial") {
       return { sentenceDays: 0, fine: 0, ymd: '0 year(s) 0 month(s) 0 day(s)' };
     }
 
@@ -174,6 +174,10 @@ export function CalculatorPage() {
   }
 
   async function handleFactorCalc() {
+    if (base.quantityType === "Commercial") {
+      showToast("Commercial quantity: aggravating & mitigating factors are not applicable");
+      return;
+    }
     const nextAppliedAggrav = cloneFactorList(aggravFactors);
     const nextAppliedMitig = cloneFactorList(mitigFactors);
     const nextAggSentTotal = Math.min(100, nextAppliedAggrav.reduce((a, f) => a + (+f.sentence || 0), 0));
