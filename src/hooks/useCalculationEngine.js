@@ -229,6 +229,8 @@ export function useCalculationEngine() {
           : quantityType === 'Intermediate'
           ? interSentAfterIncDec
           : commSentAfterIncDec;
+      // Raw (pre-round) court sentence — Angular feeds this decimal into YMD
+      const rawCourtSentence = sentenceToRound;
       sentenceToRound = roundDecimal(sentenceToRound);
       const clampedSentence = ceilRound(sentenceToRound);
 
@@ -295,7 +297,7 @@ export function useCalculationEngine() {
       return {
         sentenceDays: clampedSentence,
         fine,
-        ymd: daysToYMD(clampedSentence),
+        ymd: daysToYMD(rawCourtSentence),
       };
     },
     [safeNum, roundDecimal, ceilRound, clampValue, baseSentence]
