@@ -22,6 +22,20 @@ export function calculateSentence(drugRecord, quantityGrams) {
   const qty           = Math.max(0, safeNum(quantityGrams));
   const commercialMaxQty = safeNum(drugRecord.cr3e9_df_commercialmaxquantitygram) || commercialQty * 2;
 
+  // ─── STAGE 1 ── RAW DRUG FIELDS FROM API ───────────────────────────────────
+  console.group("╔══ STAGE 1: PROPORTIONAL CALCULATION ══╗");
+  console.group("📦 Drug Record — Raw API Fields");
+  console.log("Drug Name          :", drugRecord.cr3e9_df_drugidentifier);
+  console.log("smallquantitygram  :", drugRecord.cr3e9_df_smallquantitygram, " → safeNum:", smallQty);
+  console.log("commercialqtygram  :", drugRecord.cr3e9_df_commercialquantitygram, " → safeNum:", commercialQty);
+  console.log("commercialmaxqtygram:", drugRecord.cr3e9_df_commercialmaxquantitygram, " → resolved:", commercialMaxQty);
+  console.log("Qty Detained (g)   :", qty);
+  console.log("🔎 ALL DRUG RECORD FIELDS:");
+  console.table(
+    Object.fromEntries(Object.entries(drugRecord).map(([k, v]) => [k, { value: v }]))
+  );
+  console.groupEnd();
+
   const sent = {
     smallMin:  safeNum(drugRecord.cr3e9_df_smallminsent),
     smallMax:  safeNum(drugRecord.cr3e9_df_smallmaxsent),
@@ -39,6 +53,17 @@ export function calculateSentence(drugRecord, quantityGrams) {
     commMax:   safeNum(drugRecord.cr3e9_df_commmaxfine),
   };
 
+  console.group("📐 Sentence Min/Max per Category");
+  console.log("Small   → min:", sent.smallMin, "  max:", sent.smallMax);
+  console.log("Inter   → min:", sent.interMin, "  max:", sent.interMax);
+  console.log("Comm    → min:", sent.commMin,  "  max:", sent.commMax);
+  console.groupEnd();
+  console.group("💰 Fine Min/Max per Category");
+  console.log("Small   → min:", fine.smallMin, "  max:", fine.smallMax);
+  console.log("Inter   → min:", fine.interMin, "  max:", fine.interMax);
+  console.log("Comm    → min:", fine.commMin,  "  max:", fine.commMax);
+  console.groupEnd();
+
   const roundSent = v => (v % 1 < 0.5) ? Math.floor(v) : Math.ceil(v);
   const roundFine = v => Math.round(v / 1000) * 1000;
 
@@ -53,6 +78,12 @@ export function calculateSentence(drugRecord, quantityGrams) {
       ? fine.smallMin + ((fine.smallMax - fine.smallMin) / smallQty) * qty
       : fine.smallMin;
 
+    console.group("🟡 Category: SMALL");
+    console.log("ratio        = qty / smallQty =", qty, "/", smallQty, "=", ratio);
+    console.log("rawSent      =", sent.smallMin, "+ (", sent.smallMax, "-", sent.smallMin, ") *", ratio, "=", rawSent);
+    console.log("rawFine      =", fine.smallMin, "+ ((", fine.smallMax, "-", fine.smallMin, ") /", smallQty, ") *", qty, "=", rawFine);
+    console.groupEnd();
+
   } else if (qty <= commercialQty) {
     type    = "Intermediate";
     section = drugRecord.cr3e9_df_punishableundersectionintermediate || "NA";
@@ -63,6 +94,13 @@ export function calculateSentence(drugRecord, quantityGrams) {
       ? fine.interMin + ((fine.interMax - fine.interMin) / interQty) * (qty - smallQty)
       : fine.interMin;
 
+    console.group("🔵 Category: INTERMEDIATE");
+    console.log("interQty     = commercialQty - smallQty =", commercialQty, "-", smallQty, "=", interQty);
+    console.log("ratio        = (qty - smallQty) / interQty = (", qty, "-", smallQty, ") /", interQty, "=", ratio);
+    console.log("rawSent      =", sent.interMin, "+ (", sent.interMax, "-", sent.interMin, ") *", ratio, "=", rawSent);
+    console.log("rawFine      =", fine.interMin, "+ ((", fine.interMax, "-", fine.interMin, ") /", interQty, ") * (", qty, "-", smallQty, ") =", rawFine);
+    console.groupEnd();
+
   } else if (qty <= commercialMaxQty) {
     type    = "Commercial";
     section = drugRecord.cr3e9_df_punishableundersectioncommercial || "NA";
@@ -72,28 +110,47 @@ export function calculateSentence(drugRecord, quantityGrams) {
     rawFine = commQty > 0
       ? fine.commMin + ((fine.commMax - fine.commMin) / commQty) * (qty - commercialQty)
       : fine.commMin;
+
+    console.group("🔴 Category: COMMERCIAL");
+    console.log("commQty      = commercialMaxQty - commercialQty =", commercialMaxQty, "-", commercialQty, "=", commQty);
+    console.log("ratio        = (qty - commercialQty) / commQty = (", qty, "-", commercialQty, ") /", commQty, "=", ratio);
+    console.log("rawSent      =", sent.commMin, "+ (", sent.commMax, "-", sent.commMin, ") *", ratio, "=", rawSent);
+    console.log("rawFine      =", fine.commMin, "+ ((", fine.commMax, "-", fine.commMin, ") /", commQty, ") * (", qty, "-", commercialQty, ") =", rawFine);
+    console.groupEnd();
+
   } else {
     type    = "Commercial";
     section = drugRecord.cr3e9_df_punishableundersectioncommercial || "NA";
     rawSent = sent.commMax;
     rawFine = fine.commMax;
+
+    console.group("🔴 Category: COMMERCIAL (EXCEEDS MAX — capped)");
+    console.log("rawSent      = commMax =", rawSent);
+    console.log("rawFine      = commMax =", rawFine);
+    console.groupEnd();
   }
 
   const sentenceDays              = Math.max(0, roundSent(rawSent));
   const _fineNum                  = Math.max(0, roundFine(rawFine));
   const sentenceInYearsMonthsDays = daysToYMD(sentenceDays);
-  console.log("🔹 Sentence Calculation:", {
-    rawSent,
-    rawFine,
-    sentenceDays,
-    _fineNum,
-    sentenceInYearsMonthsDays
-  });
-  const fineFormatted             = fmtRupees(_fineNum);
   const quantityPercent = commercialQty > 0
     ? ((qty / commercialQty) * 100).toFixed(2)
     : "0.00";
 
+  console.group("✅ Stage 1 Output");
+  console.log("rawSent (pre-round)   :", rawSent);
+  console.log("sentenceDays (rounded):", sentenceDays);
+  console.log("rawFine  (pre-round)  :", rawFine);
+  console.log("fineNum  (×1000 round):", _fineNum);
+  console.log("baseDays (for Stage 2):", rawSent, "  ← this is the raw float passed forward");
+  console.log("baseFine (for Stage 2):", rawFine, "  ← this is the raw float passed forward");
+  console.log("quantityType          :", type);
+  console.log("quantityPercent       :", quantityPercent + "%");
+  console.log("YMD                   :", sentenceInYearsMonthsDays);
+  console.groupEnd();
+  console.groupEnd(); // STAGE 1
+
+  const fineFormatted = fmtRupees(_fineNum);
   const result = {
     section,
     sentenceDays,

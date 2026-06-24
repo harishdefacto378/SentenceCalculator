@@ -229,24 +229,18 @@ export function useCalculationEngine() {
           : quantityType === 'Intermediate'
           ? interSentAfterIncDec
           : commSentAfterIncDec;
-      // Raw (pre-round) court sentence — Angular feeds this decimal into YMD
       const rawCourtSentence = sentenceToRound;
       sentenceToRound = roundDecimal(sentenceToRound);
       const clampedSentence = ceilRound(sentenceToRound);
 
       // ── FINE CALCULATION ──
-
-      // REUSE baseFine from Proportional calculation (not recalculated)
       const fineChangePct = incPct - decPct;
       const finePercentage = 100 + fineChangePct;
 
-      // Use base fine if provided, otherwise fall back to old calculation
       let fineAfterIncDec;
       if (safeNum(baseFineDays) > 0) {
-        // ✅ NEW: Reuse proportional base fine
         fineAfterIncDec = (baseFineDays * finePercentage) / 100;
       } else {
-        // FALLBACK: Recalculate (old behavior, less accurate)
         const fineRange = {
           smallMin: safeNum(substance.cr3e9_df_smallminfine),
           smallMax: safeNum(substance.cr3e9_df_smallmaxfine),
@@ -294,6 +288,23 @@ export function useCalculationEngine() {
         quantityType,
         safeNum(substance.cr3e9_df_commmaxfine)
       );
+
+      // ─── STAGE 2 LOGS ──────────────────────────────────────────────────────
+      console.group("╔══ STAGE 2: COURT DISCRETION ══╗");
+      console.log("quantityType         :", quantityType);
+      console.log("inc%                 :", incPct, "  dec%:", decPct, "  netPct:", netPct);
+      console.log("baseSentenceDays in  :", baseSentenceDays, "  (used:", proportionalBaseSentence, ")");
+      console.log("baseFineDays in      :", baseFineDays);
+      console.log("sentAfterIncOrDec    :", proportionalBaseSentence, "× (1 +", netPct, "/ 100) =", sentAfterIncOrDec);
+      console.log("Sentence bounds used :", quantityType === 'Small' ? 'smallSentAfterIncDec → ' + smallSentAfterIncDec : quantityType === 'Intermediate' ? 'interSentAfterIncDec → ' + interSentAfterIncDec : 'commSentAfterIncDec → ' + commSentAfterIncDec);
+      console.log("clampedSentence      :", clampedSentence);
+      console.log("finePercentage       :", finePercentage);
+      console.log("baseFineDays path    :", safeNum(baseFineDays) > 0 ? "reused baseFine" : "fallback recalc");
+      console.log("fineAfterIncDec      :", fineAfterIncDec);
+      console.log("fine (after rules)   :", fine);
+      console.log("YMD                  :", daysToYMD(clampedSentence));
+      console.groupEnd();
+      // ───────────────────────────────────────────────────────────────────────
 
       return {
         sentenceDays: clampedSentence,
@@ -350,6 +361,23 @@ export function useCalculationEngine() {
         quantityType,
         safeNum(substance.cr3e9_df_commmaxfine)
       );
+
+      // ─── STAGE 3 LOGS ──────────────────────────────────────────────────────
+      console.group("╔══ STAGE 3: AGGRAVATING & MITIGATING FACTORS ══╗");
+      console.log("quantityType         :", quantityType);
+      console.log("sentenceFromCourt    :", sentenceFromCourt);
+      console.log("fineFromCourt        :", fineFromCourt);
+      console.log("aggrSentencePct      :", aggrSentencePct, "  mitiSentencePct:", mitiSentencePct, "  net:", aggrSentencePct - mitiSentencePct);
+      console.log("aggrFinePct          :", aggrFinePct,     "  mitiFinePct    :", mitiFinePct,     "  net:", fineNetPct);
+      console.log("aggrSentence         :", sentenceFromCourt, "× (1 +", (aggrSentencePct - mitiSentencePct), "/ 100) =", aggrSentence);
+      console.log("bounded (pre-ceil)   :", bounded);
+      console.log("clampedSentence      :", clampedSentence);
+      console.log("finePercentage       :", finePercentage);
+      console.log("fineAfterFactors     :", fineFromCourt, "×", finePercentage, "/ 100 =", fineAfterFactors);
+      console.log("clampedFine          :", clampedFine);
+      console.log("YMD                  :", daysToYMD(clampedSentence));
+      console.groupEnd();
+      // ───────────────────────────────────────────────────────────────────────
 
       return {
         sentenceDays: clampedSentence,
