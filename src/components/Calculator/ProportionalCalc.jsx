@@ -15,7 +15,7 @@ export function ProportionalCalc({ state, setState, base, onCalc, calculated, qt
 
   // useMemo replaces the old useState+useEffect pattern — single render per keystroke
   const subs = useMemo(
-    () => drugsData.map(d => ({ name: d.cr3e9_df_drugidentifier, id: d.cr3e9_df_drugidentifier })),
+    () => drugsData.map(d => ({ name: d.df_drugidentifier, id: d.df_drugidentifier })),
     [drugsData]
   );
   const filtered = useMemo(() => {
@@ -39,7 +39,7 @@ export function ProportionalCalc({ state, setState, base, onCalc, calculated, qt
   function selectSuggestion(item) {
     setSubstanceInput(item.name);
     const record = drugsData.find(d =>
-      (d.cr3e9_df_drugidentifier || "").toLowerCase() === item.name.toLowerCase()
+      (d.df_drugidentifier || "").toLowerCase() === item.name.toLowerCase()
     );
     setSelectedRecord(record || null);
     setState({ ...state, substance: item.name });
@@ -64,7 +64,7 @@ export function ProportionalCalc({ state, setState, base, onCalc, calculated, qt
   }
 
  // 🔴 COMMERCIAL CASE → CALCULATE DYNAMIC PERCENTAGE
- const commercialQty = selectedRecord?.cr3e9_df_commercialquantitygram || 1;
+ const commercialQty = selectedRecord?.df_commercialquantitygram || 1;
  const drugPercentage = commercialQty > 0
    ? ((qtyInGrams / commercialQty) * 100).toFixed(2)
    : 'NA';

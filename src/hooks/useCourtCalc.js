@@ -24,7 +24,7 @@ export function useCourtCalc({ base, discState, substance, qtyInGrams, showToast
 
     // Try all possible field name variations
     const commercialQty =
-      substance?.cr3e9_df_commercialquantitygram ||
+      substance?.df_commercialquantitygram ||
       substance?.df_commercialquantitygram ||
       substance?.commercialQuantity ||
       substance?.commercialQty ||

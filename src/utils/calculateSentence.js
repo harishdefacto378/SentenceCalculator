@@ -17,18 +17,18 @@ export function calculateSentence(drugRecord, quantityGrams) {
 
   const safeNum = v => { const n = parseFloat(v); return isFinite(n) ? n : 0; };
 
-  const smallQty      = safeNum(drugRecord.cr3e9_df_smallquantitygram);
-  const commercialQty = safeNum(drugRecord.cr3e9_df_commercialquantitygram);
+  const smallQty      = safeNum(drugRecord.df_smallquantitygram);
+  const commercialQty = safeNum(drugRecord.df_commercialquantitygram);
   const qty           = Math.max(0, safeNum(quantityGrams));
-  const commercialMaxQty = safeNum(drugRecord.cr3e9_df_commercialmaxquantitygram) || commercialQty * 2;
+  const commercialMaxQty = safeNum(drugRecord.df_commercialmaxquantitygram) || commercialQty * 2;
 
   // ─── STAGE 1 ── RAW DRUG FIELDS FROM API ───────────────────────────────────
   console.group("╔══ STAGE 1: PROPORTIONAL CALCULATION ══╗");
   console.group("📦 Drug Record — Raw API Fields");
-  console.log("Drug Name          :", drugRecord.cr3e9_df_drugidentifier);
-  console.log("smallquantitygram  :", drugRecord.cr3e9_df_smallquantitygram, " → safeNum:", smallQty);
-  console.log("commercialqtygram  :", drugRecord.cr3e9_df_commercialquantitygram, " → safeNum:", commercialQty);
-  console.log("commercialmaxqtygram:", drugRecord.cr3e9_df_commercialmaxquantitygram, " → resolved:", commercialMaxQty);
+  console.log("Drug Name          :", drugRecord.df_drugidentifier);
+  console.log("smallquantitygram  :", drugRecord.df_smallquantitygram, " → safeNum:", smallQty);
+  console.log("commercialqtygram  :", drugRecord.df_commercialquantitygram, " → safeNum:", commercialQty);
+  console.log("commercialmaxqtygram:", drugRecord.df_commercialmaxquantitygram, " → resolved:", commercialMaxQty);
   console.log("Qty Detained (g)   :", qty);
   console.log("🔎 ALL DRUG RECORD FIELDS:");
   console.table(
@@ -37,20 +37,20 @@ export function calculateSentence(drugRecord, quantityGrams) {
   console.groupEnd();
 
   const sent = {
-    smallMin:  safeNum(drugRecord.cr3e9_df_smallminsent),
-    smallMax:  safeNum(drugRecord.cr3e9_df_smallmaxsent),
-    interMin:  safeNum(drugRecord.cr3e9_df_interminsent),
-    interMax:  safeNum(drugRecord.cr3e9_df_intermaxsent),
-    commMin:   safeNum(drugRecord.cr3e9_df_commminsent),
-    commMax:   safeNum(drugRecord.cr3e9_df_commmaxsent),
+    smallMin:  safeNum(drugRecord.df_smallminsent),
+    smallMax:  safeNum(drugRecord.df_smallmaxsent),
+    interMin:  safeNum(drugRecord.df_interminsent),
+    interMax:  safeNum(drugRecord.df_intermaxsent),
+    commMin:   safeNum(drugRecord.df_commminsent),
+    commMax:   safeNum(drugRecord.df_commmaxsent),
   };
   const fine = {
-    smallMin:  safeNum(drugRecord.cr3e9_df_smallminfine),
-    smallMax:  safeNum(drugRecord.cr3e9_df_smallmaxfine),
-    interMin:  safeNum(drugRecord.cr3e9_df_interminfine),
-    interMax:  safeNum(drugRecord.cr3e9_df_intermaxfine),
-    commMin:   safeNum(drugRecord.cr3e9_df_commminfine),
-    commMax:   safeNum(drugRecord.cr3e9_df_commmaxfine),
+    smallMin:  safeNum(drugRecord.df_smallminfine),
+    smallMax:  safeNum(drugRecord.df_smallmaxfine),
+    interMin:  safeNum(drugRecord.df_interminfine),
+    interMax:  safeNum(drugRecord.df_intermaxfine),
+    commMin:   safeNum(drugRecord.df_commminfine),
+    commMax:   safeNum(drugRecord.df_commmaxfine),
   };
 
   console.group("📐 Sentence Min/Max per Category");
@@ -71,7 +71,7 @@ export function calculateSentence(drugRecord, quantityGrams) {
 
   if (qty < smallQty) {
     type    = "Small";
-    section = drugRecord.cr3e9_df_punishableundersectionsmall || "NA";
+    section = drugRecord.df_punishableundersectionsmall || "NA";
     const ratio = smallQty > 0 ? qty / smallQty : 0;
     rawSent = sent.smallMin + (sent.smallMax - sent.smallMin) * ratio;
     rawFine = smallQty > 0
@@ -86,7 +86,7 @@ export function calculateSentence(drugRecord, quantityGrams) {
 
   } else if (qty <= commercialQty) {
     type    = "Intermediate";
-    section = drugRecord.cr3e9_df_punishableundersectionintermediate || "NA";
+    section = drugRecord.df_punishableundersectionintermediate || "NA";
     const interQty = commercialQty - smallQty;
     const ratio    = interQty > 0 ? (qty - smallQty) / interQty : 0;
     rawSent = sent.interMin + (sent.interMax - sent.interMin) * ratio;
@@ -103,7 +103,7 @@ export function calculateSentence(drugRecord, quantityGrams) {
 
   } else if (qty <= commercialMaxQty) {
     type    = "Commercial";
-    section = drugRecord.cr3e9_df_punishableundersectioncommercial || "NA";
+    section = drugRecord.df_punishableundersectioncommercial || "NA";
     const commQty = commercialMaxQty - commercialQty;
     const ratio   = commQty > 0 ? (qty - commercialQty) / commQty : 0;
     rawSent = sent.commMin + (sent.commMax - sent.commMin) * ratio;
@@ -120,7 +120,7 @@ export function calculateSentence(drugRecord, quantityGrams) {
 
   } else {
     type    = "Commercial";
-    section = drugRecord.cr3e9_df_punishableundersectioncommercial || "NA";
+    section = drugRecord.df_punishableundersectioncommercial || "NA";
     rawSent = sent.commMax;
     rawFine = fine.commMax;
 

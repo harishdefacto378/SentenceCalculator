@@ -84,29 +84,29 @@ function calculateSentence(drugRecord, quantityGrams) {
   const safeNum = v => { const n = parseFloat(v); return isFinite(n) ? n : 0; };
 
   // Slab boundaries
-  const smallQty      = safeNum(drugRecord.cr3e9_df_smallquantitygram);
-  const commercialQty = safeNum(drugRecord.cr3e9_df_commercialquantitygram);
+  const smallQty      = safeNum(drugRecord.df_smallquantitygram);
+  const commercialQty = safeNum(drugRecord.df_commercialquantitygram);
   const qty           = Math.max(0, safeNum(quantityGrams));
 
   // Commercial upper bound: if API provides it, use it; otherwise double commercial as fallback
-  const commercialMaxQty = safeNum(drugRecord.cr3e9_df_commercialmaxquantitygram) || commercialQty * 2;
+  const commercialMaxQty = safeNum(drugRecord.df_commercialmaxquantitygram) || commercialQty * 2;
 
   // Sentence field helpers
   const sent = {
-    smallMin:  safeNum(drugRecord.cr3e9_df_smallminsent),
-    smallMax:  safeNum(drugRecord.cr3e9_df_smallmaxsent),
-    interMin:  safeNum(drugRecord.cr3e9_df_interminsent),
-    interMax:  safeNum(drugRecord.cr3e9_df_intermaxsent),
-    commMin:   safeNum(drugRecord.cr3e9_df_commminsent),
-    commMax:   safeNum(drugRecord.cr3e9_df_commmaxsent),
+    smallMin:  safeNum(drugRecord.df_smallminsent),
+    smallMax:  safeNum(drugRecord.df_smallmaxsent),
+    interMin:  safeNum(drugRecord.df_interminsent),
+    interMax:  safeNum(drugRecord.df_intermaxsent),
+    commMin:   safeNum(drugRecord.df_commminsent),
+    commMax:   safeNum(drugRecord.df_commmaxsent),
   };
   const fine = {
-    smallMin:  safeNum(drugRecord.cr3e9_df_smallminfine),
-    smallMax:  safeNum(drugRecord.cr3e9_df_smallmaxfine),
-    interMin:  safeNum(drugRecord.cr3e9_df_interminfine),
-    interMax:  safeNum(drugRecord.cr3e9_df_intermaxfine),
-    commMin:   safeNum(drugRecord.cr3e9_df_commminfine),
-    commMax:   safeNum(drugRecord.cr3e9_df_commmaxfine),
+    smallMin:  safeNum(drugRecord.df_smallminfine),
+    smallMax:  safeNum(drugRecord.df_smallmaxfine),
+    interMin:  safeNum(drugRecord.df_interminfine),
+    interMax:  safeNum(drugRecord.df_intermaxfine),
+    commMin:   safeNum(drugRecord.df_commminfine),
+    commMax:   safeNum(drugRecord.df_commmaxfine),
   };
 
   // Sentence rounding: decimal < 0.5 → floor, else ceil
@@ -119,7 +119,7 @@ function calculateSentence(drugRecord, quantityGrams) {
   if (qty < smallQty) {
     // ── SMALL ──────────────────────────────────────────────────────────────
     type    = "Small";
-    section = drugRecord.cr3e9_df_punishableundersectionsmall        || "NA";
+    section = drugRecord.df_punishableundersectionsmall        || "NA";
 
     const ratio = smallQty > 0 ? qty / smallQty : 0;
     rawSent = sent.smallMin + (sent.smallMax - sent.smallMin) * ratio;
@@ -130,7 +130,7 @@ function calculateSentence(drugRecord, quantityGrams) {
   } else if (qty <= commercialQty) {
     // ── INTERMEDIATE ───────────────────────────────────────────────────────
     type    = "Intermediate";
-    section = drugRecord.cr3e9_df_punishableundersectionintermediate || "NA";
+    section = drugRecord.df_punishableundersectionintermediate || "NA";
 
     const interQty = commercialQty - smallQty;
     const ratio    = interQty > 0 ? (qty - smallQty) / interQty : 0;
@@ -142,7 +142,7 @@ function calculateSentence(drugRecord, quantityGrams) {
   } else {
     // ── COMMERCIAL ─────────────────────────────────────────────────────────
     type    = "Commercial";
-    section = drugRecord.cr3e9_df_punishableundersectioncommercial   || "NA";
+    section = drugRecord.df_punishableundersectioncommercial   || "NA";
 
     const commQty = commercialMaxQty - commercialQty;
     const ratio   = commQty > 0 ? (qty - commercialQty) / commQty : 0;
@@ -234,7 +234,7 @@ function WarningModal({ open, onClose }) {
 }
 
 function ProportionalCalc({ state, setState, base, onCalc, calculated, drugsData, onSelect }) {
-  const subs                                  = drugsData.map(d => ({ name: d.cr3e9_df_drugidentifier, id: d.cr3e9_df_drugidentifier }));
+  const subs                                  = drugsData.map(d => ({ name: d.df_drugidentifier, id: d.df_drugidentifier }));
   const [substanceInput, setSubstanceInput]   = useState(state.substance || "");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedRecord, setSelectedRecord]   = useState(null);
@@ -257,7 +257,7 @@ function ProportionalCalc({ state, setState, base, onCalc, calculated, drugsData
   function selectSuggestion(item) {
     setSubstanceInput(item.name);
     const record = drugsData.find(d =>
-      (d.cr3e9_df_drugidentifier || "").toLowerCase() === item.name.toLowerCase()
+      (d.df_drugidentifier || "").toLowerCase() === item.name.toLowerCase()
     );
     setSelectedRecord(record || null);
     setState({ ...state, substance: item.name });
@@ -524,26 +524,26 @@ function ReportCard({ substance, base, discretion, final, tab, setTab, onCopy })
       <div className="report-body">
         <div className="report-section">
           <h3>Specified as Small &amp; Commercial in S.2(viia) &amp; 2(xxiiia) NDPS Act, 1985</h3>
-          <Spec k="Notification Link" v={notifLinkNode(sub?.cr3e9_df_notificationlink)} />
-          <Spec k="Notification No." v={sub?.cr3e9_df_notificationno_under_viia_xxiiia_of_s2 || na} />
-          <Spec k="Dated" v={sub?.cr3e9_df_notificationdate_under_viia_xxiiia_of_s2 || "01-01-1970"} />
-          <Spec k="SR. No." v={sub?.cr3e9_df_slno != null ? String(sub.cr3e9_df_slno) : na} />
-          <Spec k="Common Name (Name of Narcotic Drug and Psychotropic Substance — International non-proprietary name (INN))" v={sub?.cr3e9_df_drugtype || na} />
-          <Spec k="Other Non-proprietary Name" v={sub?.cr3e9_df_othername_defined_in_s2xxiii || na} />
-          <Spec k="Chemical Name" v={sub?.cr3e9_df_chemicalname_defined_in_s2xxiii || na} />
-          <Spec k="Small Quantity" v={sub ? `≤ ${sub.cr3e9_df_smallquantitygram} Gram` : "< 0 Gram"} />
-          <Spec k="Commercial Quantity" v={sub ? `≥ ${sub.cr3e9_df_commercialquantitygram} Gram` : "> 0 Gram"} />
+          <Spec k="Notification Link" v={notifLinkNode(sub?.df_notificationlink)} />
+          <Spec k="Notification No." v={sub?.df_notificationno_under_viia_xxiiia_of_s2 || na} />
+          <Spec k="Dated" v={sub?.df_notificationdate_under_viia_xxiiia_of_s2 || "01-01-1970"} />
+          <Spec k="SR. No." v={sub?.df_slno != null ? String(sub.df_slno) : na} />
+          <Spec k="Common Name (Name of Narcotic Drug and Psychotropic Substance — International non-proprietary name (INN))" v={sub?.df_drugtype || na} />
+          <Spec k="Other Non-proprietary Name" v={sub?.df_othername_defined_in_s2xxiii || na} />
+          <Spec k="Chemical Name" v={sub?.df_chemicalname_defined_in_s2xxiii || na} />
+          <Spec k="Small Quantity" v={sub ? `≤ ${sub.df_smallquantitygram} Gram` : "< 0 Gram"} />
+          <Spec k="Commercial Quantity" v={sub ? `≥ ${sub.df_commercialquantitygram} Gram` : "> 0 Gram"} />
         </div>
 
         <div className="report-section">
           <h3>Declared as punishable under NDPS Act and as per schedule defined in S.2(viia) &amp; 2(xxiiia) NDPS Act, 1985</h3>
-          <Spec k="Notification Link" v={notifLinkNode(sub?.cr3e9_df_notificationlink2)} />
-          <Spec k="Notification No." v={sub?.cr3e9_df_notification_under_s2xxiii || na} />
-          <Spec k="Dated" v={sub?.cr3e9_df_notificationdate_under_s2xxiii || "—"} />
-          <Spec k="SR. No." v={sub?.cr3e9_df_ndpsact_srno != null ? String(sub.cr3e9_df_ndpsact_srno) : na} />
-          <Spec k="Common Name (Name of Narcotic Drug and Psychotropic Substance — International non-proprietary name (INN))" v={sub?.cr3e9_df_drugtype || na} />
-          <Spec k="Other Non-proprietary Name" v={sub?.cr3e9_df_otherpropname_under_s2viia_xxiiia || na} />
-          <Spec k="Chemical Name" v={sub?.cr3e9_df_chemicalname_under_s2viia_xxiiia || na} />
+          <Spec k="Notification Link" v={notifLinkNode(sub?.df_notificationlink2)} />
+          <Spec k="Notification No." v={sub?.df_notification_under_s2xxiii || na} />
+          <Spec k="Dated" v={sub?.df_notificationdate_under_s2xxiii || "—"} />
+          <Spec k="SR. No." v={sub?.df_ndpsact_srno != null ? String(sub.df_ndpsact_srno) : na} />
+          <Spec k="Common Name (Name of Narcotic Drug and Psychotropic Substance — International non-proprietary name (INN))" v={sub?.df_drugtype || na} />
+          <Spec k="Other Non-proprietary Name" v={sub?.df_otherpropname_under_s2viia_xxiiia || na} />
+          <Spec k="Chemical Name" v={sub?.df_chemicalname_under_s2viia_xxiiia || na} />
 
           <div className="disclaimer-box">
             <span className="ic">⚠</span>
@@ -553,10 +553,10 @@ function ReportCard({ substance, base, discretion, final, tab, setTab, onCopy })
 
         <div className="report-section">
           <h3>Drug's Small &amp; Commercial Qty. suggested by Committee Report</h3>
-          <Spec k="Notification No. &amp; Date" v={sub?.cr3e9_df_notificationreportanddate || na} />
-          <Spec k="Notification Link" v={notifLinkNode(sub?.cr3e9_df_notificationcommitteereport)} />
-          <Spec k="IUPAC — Weblink" v={sub?.cr3e9_df_iupaclink || "—"} />
-          <Spec k="IUPAC Name" v={sub?.cr3e9_df_iupacname || na} />
+          <Spec k="Notification No. &amp; Date" v={sub?.df_notificationreportanddate || na} />
+          <Spec k="Notification Link" v={notifLinkNode(sub?.df_notificationcommitteereport)} />
+          <Spec k="IUPAC — Weblink" v={sub?.df_iupaclink || "—"} />
+          <Spec k="IUPAC Name" v={sub?.df_iupacname || na} />
         </div>
 
         {sub && tab !== "basic" && (
@@ -624,17 +624,17 @@ function FabBar({ active, setActive, onHome }) {
 function mapRecordToSubstance(record) {
   if (!record) return null;
   return {
-    common:        record.cr3e9_df_drugidentifier                                || "—",
-    otherName:     record.cr3e9_df_otherproprietaryname                          || "—",
-    chemical:      record.cr3e9_df_chemicalname                                  || "—",
-    smallQty:      record.cr3e9_df_smallquantitygram      ?? "—",
-    commercialQty: record.cr3e9_df_commercialquantitygram ?? "—",
+    common:        record.df_drugidentifier                                || "—",
+    otherName:     record.df_otherproprietaryname                          || "—",
+    chemical:      record.df_chemicalname                                  || "—",
+    smallQty:      record.df_smallquantitygram      ?? "—",
+    commercialQty: record.df_commercialquantitygram ?? "—",
     unit:          "Gram",
-    notif:         record.cr3e9_df_notificationno_under_viia_xxiiia_of_s2        || "—",
-    notifDate:     record.cr3e9_df_notificationdate                              || "—",
-    notifLink:     record.cr3e9_df_notificationlink                              || "—",
-    iupacName:     record.cr3e9_df_iupacname                                     || "—",
-    iupacWeb:      record.cr3e9_df_iupaclink                                     || "—",
+    notif:         record.df_notificationno_under_viia_xxiiia_of_s2        || "—",
+    notifDate:     record.df_notificationdate                              || "—",
+    notifLink:     record.df_notificationlink                              || "—",
+    iupacName:     record.df_iupacname                                     || "—",
+    iupacWeb:      record.df_iupaclink                                     || "—",
   };
 }
 
@@ -713,17 +713,17 @@ function App() {
 
     const min =
       type === "Small"
-        ? safeNum(data.cr3e9_df_smallminsent)
+        ? safeNum(data.df_smallminsent)
         : type === "Intermediate"
-        ? safeNum(data.cr3e9_df_interminsent)
-        : safeNum(data.cr3e9_df_commminsent);
+        ? safeNum(data.df_interminsent)
+        : safeNum(data.df_commminsent);
 
     const max =
       type === "Small"
-        ? safeNum(data.cr3e9_df_smallmaxsent)
+        ? safeNum(data.df_smallmaxsent)
         : type === "Intermediate"
-        ? safeNum(data.cr3e9_df_intermaxsent)
-        : safeNum(data.cr3e9_df_commmaxsent);
+        ? safeNum(data.df_intermaxsent)
+        : safeNum(data.df_commmaxsent);
 
     return Math.min(Math.max(val, min), max);
   };
@@ -736,21 +736,21 @@ function App() {
   let fine = 0;
 
   if (substanceData) {
-    const smallQty = safeNum(substanceData.cr3e9_df_smallquantitygram);
-    const commercialQty = safeNum(substanceData.cr3e9_df_commercialquantitygram);
+    const smallQty = safeNum(substanceData.df_smallquantitygram);
+    const commercialQty = safeNum(substanceData.df_commercialquantitygram);
     const commercialMaxQty =
-      safeNum(substanceData.cr3e9_df_commercialmaxquantitygram) ||
+      safeNum(substanceData.df_commercialmaxquantitygram) ||
       commercialQty * 2;
 
     const qty = qtyInGrams;
 
     const fineRange = {
-      smallMin: safeNum(substanceData.cr3e9_df_smallminfine),
-      smallMax: safeNum(substanceData.cr3e9_df_smallmaxfine),
-      interMin: safeNum(substanceData.cr3e9_df_interminfine),
-      interMax: safeNum(substanceData.cr3e9_df_intermaxfine),
-      commMin: safeNum(substanceData.cr3e9_df_commminfine),
-      commMax: safeNum(substanceData.cr3e9_df_commmaxfine),
+      smallMin: safeNum(substanceData.df_smallminfine),
+      smallMax: safeNum(substanceData.df_smallmaxfine),
+      interMin: safeNum(substanceData.df_interminfine),
+      interMax: safeNum(substanceData.df_intermaxfine),
+      commMin: safeNum(substanceData.df_commminfine),
+      commMax: safeNum(substanceData.df_commmaxfine),
     };
 
     let rawFine;
@@ -855,7 +855,7 @@ function App() {
 
   function copyReport() {
     const lines = [
-      `Substance: ${substance?.cr3e9_df_drugtype || "—"}`,
+      `Substance: ${substance?.df_drugtype || "—"}`,
       `Quantity: ${propState.qty} ${propState.unit}`,
       `Section: ${base.section}`,
       `Quantity Type: ${base.quantityType}`,

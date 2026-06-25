@@ -160,7 +160,7 @@ export function CalculatorPage() {
   // ── Clipboard report ───────────────────────────────────────────────────────
   function copyReport() {
     const lines = [
-      `Substance: ${substance?.cr3e9_df_drugtype || "—"}`,
+      `Substance: ${substance?.df_drugtype || "—"}`,
       `Quantity: ${propState.qty} ${propState.unit}`,
       `Section: ${base.section}`,
       `Quantity Type: ${base.quantityType}`,
@@ -412,7 +412,7 @@ export function CalculatorPage() {
 
     drawSectionHeader("Case and Substance Details");
     drawTwoColRow("Case Type", "NDPS");
-    drawTwoColRow("Substance Name", substance?.cr3e9_df_drugidentifier || substance?.cr3e9_df_drugtype || "NA");
+    drawTwoColRow("Substance Name", substance?.df_drugidentifier || substance?.df_drugtype || "NA");
     drawTwoColRow("Quantity detained", `${asText(propState.qty, "0")} ${asText(propState.unit, "g")}`);
     drawTwoColRow("Date of Confiscation", formatDate(propState.date));
 
@@ -427,14 +427,14 @@ export function CalculatorPage() {
     drawSectionHeader("Official Notification Details");
     drawThreeColRow(
       "Notification No.",
-      substance?.cr3e9_df_notificationno_under_viia_xxiiia_of_s2 || "NA",
-      formatDate(substance?.cr3e9_df_notificationdate_under_viia_xxiiia_of_s2)
+      substance?.df_notificationno_under_viia_xxiiia_of_s2 || "NA",
+      formatDate(substance?.df_notificationdate_under_viia_xxiiia_of_s2)
     );
-    drawTwoColRow("Notification Report", substance?.cr3e9_df_notificationreportanddate || "NA");
-    drawTwoColRow("Common Name", substance?.cr3e9_df_drugtype || "NA");
-    drawTwoColRow("Chemical Name", substance?.cr3e9_df_chemicalname_defined_in_s2xxiii || "NA");
-    drawTwoColRow("Small Quantity", substance ? `< ${substance.cr3e9_df_smallquantitygram} Gram` : "NA");
-    drawTwoColRow("Commercial Quantity", substance ? `> ${substance.cr3e9_df_commercialquantitygram} Gram` : "NA");
+    drawTwoColRow("Notification Report", substance?.df_notificationreportanddate || "NA");
+    drawTwoColRow("Common Name", substance?.df_drugtype || "NA");
+    drawTwoColRow("Chemical Name", substance?.df_chemicalname_defined_in_s2xxiii || "NA");
+    drawTwoColRow("Small Quantity", substance ? `< ${substance.df_smallquantitygram} Gram` : "NA");
+    drawTwoColRow("Commercial Quantity", substance ? `> ${substance.df_commercialquantitygram} Gram` : "NA");
 
     drawSectionHeader("Calculation as per Discretion of the Court");
     drawTwoColRow("%age Increase in SENTENCE/FINE", `${Number(discState.inc) || 0}%`, "center");
@@ -467,7 +467,7 @@ export function CalculatorPage() {
       doc.text(formatDateTime(reportGeneratedAt), marginX, pageHeight - 16);
     }
 
-    const safeSubstance = String(substance?.cr3e9_df_drugidentifier || "report")
+    const safeSubstance = String(substance?.df_drugidentifier || "report")
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "");

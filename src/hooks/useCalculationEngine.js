@@ -55,8 +55,8 @@ export function useCalculationEngine() {
         };
       }
 
-      const smallQty = safeNum(substance.cr3e9_df_smallquantitygram);
-      const commercialQty = safeNum(substance.cr3e9_df_commercialquantitygram);
+      const smallQty = safeNum(substance.df_smallquantitygram);
+      const commercialQty = safeNum(substance.df_commercialquantitygram);
       const defaultMultiplier = smallQty > 0 ? commercialQty / smallQty : 1;
       const maxCommercialQty =
         multiplier <= 0
@@ -71,10 +71,10 @@ export function useCalculationEngine() {
 
       // ── SMALL QUANTITY ──
       if (qty > 0 && qty < smallQty) {
-        const minSent = safeNum(substance.cr3e9_df_smallminsent);
-        const maxSent = safeNum(substance.cr3e9_df_smallmaxsent);
-        const minFine = safeNum(substance.cr3e9_df_smallminfine);
-        const maxFine = safeNum(substance.cr3e9_df_smallmaxfine);
+        const minSent = safeNum(substance.df_smallminsent);
+        const maxSent = safeNum(substance.df_smallmaxsent);
+        const minFine = safeNum(substance.df_smallminfine);
+        const maxFine = safeNum(substance.df_smallmaxfine);
 
         const ratio = smallQty > 0 ? qty / smallQty : 0;
         let tempSentence = minSent + (maxSent - minSent) * ratio;
@@ -92,10 +92,10 @@ export function useCalculationEngine() {
       }
       // ── INTERMEDIATE QUANTITY ──
       else if (qty >= smallQty && qty <= commercialQty) {
-        const minSent = safeNum(substance.cr3e9_df_interminsent);
-        const maxSent = safeNum(substance.cr3e9_df_intermaxsent);
-        const minFine = safeNum(substance.cr3e9_df_interminfine);
-        const maxFine = safeNum(substance.cr3e9_df_intermaxfine);
+        const minSent = safeNum(substance.df_interminsent);
+        const maxSent = safeNum(substance.df_intermaxsent);
+        const minFine = safeNum(substance.df_interminfine);
+        const maxFine = safeNum(substance.df_intermaxfine);
 
         const qtyDiff = commercialQty - smallQty;
         sentenceDays =
@@ -117,10 +117,10 @@ export function useCalculationEngine() {
       }
       // ── COMMERCIAL QUANTITY ──
       else if (qty > commercialQty && qty <= maxCommercialQty) {
-        const minSent = safeNum(substance.cr3e9_df_commminsent);
-        const maxSent = safeNum(substance.cr3e9_df_commmaxsent);
-        const minFine = safeNum(substance.cr3e9_df_commminfine);
-        const maxFine = safeNum(substance.cr3e9_df_commmaxfine);
+        const minSent = safeNum(substance.df_commminsent);
+        const maxSent = safeNum(substance.df_commmaxsent);
+        const minFine = safeNum(substance.df_commminfine);
+        const maxFine = safeNum(substance.df_commmaxfine);
 
         const qtyDiff = maxCommercialQty - commercialQty;
         sentenceDays =
@@ -142,8 +142,8 @@ export function useCalculationEngine() {
       }
       // ── EXCEEDS COMMERCIAL MAX ──
       else {
-        sentenceDays = safeNum(substance.cr3e9_df_commmaxsent);
-        fineAmount = safeNum(substance.cr3e9_df_commmaxfine);
+        sentenceDays = safeNum(substance.df_commmaxsent);
+        fineAmount = safeNum(substance.df_commmaxfine);
         rawBaseSentence = sentenceDays;
         rawBaseFine = fineAmount;
         setBaseSentence(sentenceDays);
@@ -177,20 +177,20 @@ export function useCalculationEngine() {
         return { sentenceDays: 0, fine: 0, ymd: '0 year(s), 0 month(s), 0 day(s)' };
       }
 
-      const smallQty = safeNum(substance.cr3e9_df_smallquantitygram);
+      const smallQty = safeNum(substance.df_smallquantitygram);
       const minSent =
         quantityType === 'Small'
-          ? safeNum(substance.cr3e9_df_smallminsent)
+          ? safeNum(substance.df_smallminsent)
           : quantityType === 'Intermediate'
-          ? safeNum(substance.cr3e9_df_interminsent)
-          : safeNum(substance.cr3e9_df_commminsent);
+          ? safeNum(substance.df_interminsent)
+          : safeNum(substance.df_commminsent);
 
       const maxSent =
         quantityType === 'Small'
-          ? safeNum(substance.cr3e9_df_smallmaxsent)
+          ? safeNum(substance.df_smallmaxsent)
           : quantityType === 'Intermediate'
-          ? safeNum(substance.cr3e9_df_intermaxsent)
-          : safeNum(substance.cr3e9_df_commmaxsent);
+          ? safeNum(substance.df_intermaxsent)
+          : safeNum(substance.df_commmaxsent);
 
       // Reuse proportional base days (Angular-style). Fall back to recompute if unavailable.
       const ratio = smallQty > 0 ? qty / smallQty : 0;
@@ -242,17 +242,17 @@ export function useCalculationEngine() {
         fineAfterIncDec = (baseFineDays * finePercentage) / 100;
       } else {
         const fineRange = {
-          smallMin: safeNum(substance.cr3e9_df_smallminfine),
-          smallMax: safeNum(substance.cr3e9_df_smallmaxfine),
-          interMin: safeNum(substance.cr3e9_df_interminfine),
-          interMax: safeNum(substance.cr3e9_df_intermaxfine),
-          commMin: safeNum(substance.cr3e9_df_commminfine),
-          commMax: safeNum(substance.cr3e9_df_commmaxfine),
+          smallMin: safeNum(substance.df_smallminfine),
+          smallMax: safeNum(substance.df_smallmaxfine),
+          interMin: safeNum(substance.df_interminfine),
+          interMax: safeNum(substance.df_intermaxfine),
+          commMin: safeNum(substance.df_commminfine),
+          commMax: safeNum(substance.df_commmaxfine),
         };
 
-        const commercialQty = safeNum(substance.cr3e9_df_commercialquantitygram);
+        const commercialQty = safeNum(substance.df_commercialquantitygram);
         const commercialMaxQty =
-          safeNum(substance.cr3e9_df_commercialmaxquantitygram) ||
+          safeNum(substance.df_commercialmaxquantitygram) ||
           commercialQty * 2;
 
         let fineAmount;
@@ -286,7 +286,7 @@ export function useCalculationEngine() {
       let fine = applyFineRules(
         fineAfterIncDec,
         quantityType,
-        safeNum(substance.cr3e9_df_commmaxfine)
+        safeNum(substance.df_commmaxfine)
       );
 
       // ─── STAGE 2 LOGS ──────────────────────────────────────────────────────
@@ -359,7 +359,7 @@ export function useCalculationEngine() {
       const clampedFine = applyFineRules(
         fineAfterFactors,
         quantityType,
-        safeNum(substance.cr3e9_df_commmaxfine)
+        safeNum(substance.df_commmaxfine)
       );
 
       // ─── STAGE 3 LOGS ──────────────────────────────────────────────────────

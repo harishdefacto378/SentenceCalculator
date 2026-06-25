@@ -90,7 +90,7 @@ export async function fetchDrugList() {
       return res.json();
     })
     .then(json => {
-      const data = (json.value || []).filter(d => d.cr3e9_df_drugidentifier);
+      const data = (json.value || []).filter(d => d.df_drugidentifier);
       if (data.length > 0) {
         localStorage.setItem(DRUG_CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
         console.log("[drugListService] Drug data fetched and cached");
