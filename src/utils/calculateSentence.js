@@ -20,7 +20,9 @@ export function calculateSentence(drugRecord, quantityGrams) {
   const smallQty      = safeNum(drugRecord.df_smallquantitygram);
   const commercialQty = safeNum(drugRecord.df_commercialquantitygram);
   const qty           = Math.max(0, safeNum(quantityGrams));
-  const commercialMaxQty = commercialQty;
+  // Angular parity: commercialMaxQty is computed (commercial² / small), not read from a stored field.
+  const defaultMultiplier = smallQty > 0 ? commercialQty / smallQty : 1;
+  const commercialMaxQty  = commercialQty * defaultMultiplier;
 
   // ─── STAGE 1 ── RAW DRUG FIELDS FROM API ───────────────────────────────────
   console.group("╔══ STAGE 1: PROPORTIONAL CALCULATION ══╗");
@@ -28,7 +30,7 @@ export function calculateSentence(drugRecord, quantityGrams) {
   console.log("Drug Name          :", drugRecord.df_drugidentifier);
   console.log("smallquantitygram  :", drugRecord.df_smallquantitygram, " → safeNum:", smallQty);
   console.log("commercialqtygram  :", drugRecord.df_commercialquantitygram, " → safeNum:", commercialQty);
-  console.log("commercialmaxqtygram:", commercialMaxQty, " (commercialQty × 2)");
+  console.log("commercialmaxqty   : computed (commercial² / small) → resolved:", commercialMaxQty);
   console.log("Qty Detained (g)   :", qty);
   console.log("🔎 ALL DRUG RECORD FIELDS:");
   console.table(
@@ -131,6 +133,7 @@ export function calculateSentence(drugRecord, quantityGrams) {
   }
 
   const sentenceDays              = Math.max(0, roundSent(rawSent));
+  //const sentenceDays = Math.max(0, Math.floor(Number(rawSent.toFixed(6))));
   const _fineNum                  = Math.max(0, roundFine(rawFine));
   const sentenceInYearsMonthsDays = daysToYMD(sentenceDays);
   const quantityPercent = commercialQty > 0

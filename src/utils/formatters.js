@@ -54,12 +54,21 @@ export function daysToYMD(days) {
     return '0 year(s), 0 month(s), 0 day(s)';
   }
 
-  const years = Math.floor(days / 365);
-  const months = Math.floor((days % 365) / 30.42);
-  const remainingDays = Math.round((days % 365) % 30.42);
+  // For sentences spanning 4+ years use 365.25 days/year to account for leap
+  // years (matches Angular); shorter sentences use a flat 365.
+  const DAYS_IN_YEAR = days < 1461 ? 365 : 365.25;
+  const DAYS_IN_MONTH = 30.42;
+
+  const years = Math.floor(days / DAYS_IN_YEAR);
+  const months = Math.floor((days % DAYS_IN_YEAR) / DAYS_IN_MONTH);
+  const remainingDays = Math.floor((days % DAYS_IN_YEAR) % DAYS_IN_MONTH);
 
   return `${years} year(s), ${months} month(s), ${remainingDays} day(s)`;
 }
+
+
+
+
 export function fmtRupees(n) {
   if (!n) return "₹0.00";
   return "₹" + n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });

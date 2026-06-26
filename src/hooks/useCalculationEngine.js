@@ -57,7 +57,11 @@ export function useCalculationEngine() {
 
       const smallQty = safeNum(substance.df_smallquantitygram);
       const commercialQty = safeNum(substance.df_commercialquantitygram);
-      const maxCommercialQty = commercialQty;
+      const defaultMultiplier = smallQty > 0 ? commercialQty / smallQty : 1;
+      const maxCommercialQty =
+        multiplier <= 0
+          ? commercialQty * defaultMultiplier
+          : commercialQty * multiplier;
 
       let sentenceDays = 0;
       let fineAmount = 0;
@@ -247,7 +251,9 @@ export function useCalculationEngine() {
         };
 
         const commercialQty = safeNum(substance.df_commercialquantitygram);
-        const commercialMaxQty = commercialQty;
+        // Angular parity: commercialMaxQty is computed (commercial² / small), not read from a stored field.
+        const defaultMultiplier = smallQty > 0 ? commercialQty / smallQty : 1;
+        const commercialMaxQty = commercialQty * defaultMultiplier;
 
         let fineAmount;
         if (qty < smallQty) {

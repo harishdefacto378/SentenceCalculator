@@ -437,15 +437,15 @@ export function CalculatorPage() {
     drawTwoColRow("Commercial Quantity", substance ? `> ${substance.df_commercialquantitygram} Gram` : "NA");
 
     drawSectionHeader("Calculation as per Discretion of the Court");
-    drawTwoColRow("%age Increase in SENTENCE/FINE", `${Number(discState.inc) || 0}`, "center");
-    drawTwoColRow("%age Decrease in SENTENCE/FINE", `${Number(discState.dec) || 0}`, "center");
+    drawTwoColRow("%age Increase in SENTENCE/FINE", `${Number(discState.inc) || 0}%`, "center");
+    drawTwoColRow("%age Decrease in SENTENCE/FINE", `${Number(discState.dec) || 0}%`, "center");
     drawTwoColRow("Sentence in day(s)", asText(discretion.sentenceDays, "0"), "center");
     drawTwoColRow("Sentence in year(s), month(s) and day(s)", daysToYMD(discretion.sentenceDays || 0));
     drawTwoColRow("Fine (in Rupees)", formatRs(discretion.fine || 0), "right");
 
     drawSectionHeader("Aggravating & Mitigating Factors");
-    drawTwoColRow("%age Increase/Decrease in SENTENCE", `${aggSentTotal - mitSentTotal}`, "center");
-    drawTwoColRow("%age Increase/Decrease in FINE", `${aggFineTotal - mitFineTotal}`, "center");
+    drawTwoColRow("%age Increase/Decrease in SENTENCE", `${aggSentTotal - mitSentTotal}%`, "center");
+    drawTwoColRow("%age Increase/Decrease in FINE", `${aggFineTotal - mitFineTotal}%`, "center");
     drawTwoColRow("New Sentence in day(s)", asText(final.sentenceDays, "0"), "center");
     drawTwoColRow("New Sentence in year(s), month(s) and day(s)", daysToYMD(final.sentenceDays || 0));
     drawTwoColRow("New Fine (in Rupees)", formatRs(final.fine || 0), "right");
