@@ -12,8 +12,8 @@ export function FactorSummary({ aggSentTotal, aggFineTotal, mitSentTotal, mitFin
       </div>
       <div className="card-body">
         <div className="summary-grid">
-          <div className="summary-row"><span>%age Increase/Decrease in SENTENCE:</span><span className={"v " + (netSent > 0 ? "v--positive" : netSent < 0 ? "v--negative" : "")}>{netSent > 0 ? "+" : ""}{netSent}%</span></div>
-          <div className="summary-row"><span>%age Increase/Decrease in FINE:</span><span className={"v " + (netFine > 0 ? "v--positive" : netFine < 0 ? "v--negative" : "")}>{netFine > 0 ? "+" : ""}{netFine}%</span></div>
+          <div className="summary-row"><span>%age Increase/Decrease in SENTENCE:</span><span className={"v " + (netSent > 0 ? "v--positive" : netSent < 0 ? "v--negative" : "")}>{netSent}</span></div>
+          <div className="summary-row"><span>%age Increase/Decrease in FINE:</span><span className={"v " + (netFine > 0 ? "v--positive" : netFine < 0 ? "v--negative" : "")}>{netFine}</span></div>
           <div className="summary-row"><span>NEW SENTENCE in day(s):</span><span className="v big">{fmtNum(final.sentenceDays)} days</span></div>
           <div className="summary-row"><span>NEW SENTENCE in year(s), month(s) and day(s):</span><span className="v">{daysToYMD(final.sentenceDays)}</span></div>
           <div className="summary-row"><span>NEW FINE (in Rupees):</span><span className="v big">{fmtRupees(final.fine)}</span></div>

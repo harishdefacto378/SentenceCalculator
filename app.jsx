@@ -388,11 +388,11 @@ function DiscretionCalc({ state, setState, base, discretion, onCalc, calculated 
       <div className="card-body">
         <div className="form-row">
           <label>%age Increase in SENTENCE/FINE<span className="sub-label">(System default 0%)</span></label>
-          <input className="input sm" type="number" min="0" max="100" value={state.inc} onChange={e => setState({ ...state, inc: Math.max(0, Math.min(100, +e.target.value || 0)) })} />
+          <input className="input sm" type="number" min="0" max="100" value={state.inc} onChange={e => setState({ ...state, inc: Math.max(0, Math.min(100, +e.target.value.replace(/^\+/, "") || 0)) })} />
         </div>
         <div className="form-row">
           <label>%age Decrease in SENTENCE/FINE<span className="sub-label">(System default 0%)</span></label>
-          <input className="input sm" type="number" min="0" max="100" value={state.dec} onChange={e => setState({ ...state, dec: Math.max(0, Math.min(100, +e.target.value || 0)) })} />
+          <input className="input sm" type="number" min="0" max="100" value={state.dec} onChange={e => setState({ ...state, dec: Math.max(0, Math.min(100, +e.target.value.replace(/^\+/, "") || 0)) })} />
         </div>
         <div className="banner">We strongly recommend to decrease default to make median at 50%</div>
         <div className="calc-action" style={{ marginTop: 10 }}>
@@ -419,8 +419,8 @@ function FactorSummary({ aggSentTotal, aggFineTotal, mitSentTotal, mitFineTotal,
       </div>
       <div className="card-body">
         <div className="summary-grid">
-          <div className="summary-row"><span>%age Increase/Decrease in SENTENCE:</span><span className="v" style={{ color: netSent > 0 ? "var(--aggrav)" : netSent < 0 ? "var(--mitig)" : "var(--ink)" }}>{netSent > 0 ? "+" : ""}{netSent}%</span></div>
-          <div className="summary-row"><span>%age Increase/Decrease in FINE:</span><span className="v" style={{ color: netFine > 0 ? "var(--aggrav)" : netFine < 0 ? "var(--mitig)" : "var(--ink)" }}>{netFine > 0 ? "+" : ""}{netFine}%</span></div>
+          <div className="summary-row"><span>%age Increase/Decrease in SENTENCE:</span><span className="v" style={{ color: netSent > 0 ? "var(--aggrav)" : netSent < 0 ? "var(--mitig)" : "var(--ink)" }}>{netSent}</span></div>
+          <div className="summary-row"><span>%age Increase/Decrease in FINE:</span><span className="v" style={{ color: netFine > 0 ? "var(--aggrav)" : netFine < 0 ? "var(--mitig)" : "var(--ink)" }}>{netFine}</span></div>
           <div className="summary-row"><span>NEW SENTENCE in day(s):</span><span className="v big">{fmtNum(final.sentenceDays)} days</span></div>
           <div className="summary-row"><span>NEW SENTENCE in year(s), month(s) and day(s):</span><span className="v">{fmtYMD(daysToYMD(final.sentenceDays))}</span></div>
           <div className="summary-row"><span>NEW FINE (in Rupees):</span><span className="v big">{fmtRupees(final.fine)}</span></div>
@@ -441,7 +441,8 @@ function FactorTable({ kind, factors, setFactors, totalSent, totalFine }) {
   const [custom, setCustom] = useState("");
 
   function setField(id, key, val) {
-    setFactors(factors.map(f => f.id === id ? { ...f, [key]: Math.max(0, Math.min(100, +val || 0)) } : f));
+    const cleaned = String(val).replace(/^\+/, "");
+    setFactors(factors.map(f => f.id === id ? { ...f, [key]: Math.max(0, Math.min(100, +cleaned || 0)) } : f));
   }
   function addCustom() {
     if (!custom.trim()) return;

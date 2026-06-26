@@ -10,7 +10,8 @@ export function DiscretionCalc({ state, setState, base, discretion, onCalc, calc
       setState({ ...state, [key]: "" });
       return;
     }
-    const numeric = Number(rawValue);
+    const cleaned = rawValue.replace(/^\+/, "");
+    const numeric = Number(cleaned);
     if (!Number.isFinite(numeric)) return;
     const clamped = Math.max(0, Math.min(100, numeric));
     setState({ ...state, [key]: clamped });

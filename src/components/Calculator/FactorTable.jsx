@@ -10,7 +10,8 @@ export function FactorTable({ kind, factors, setFactors, totalSent, totalFine })
   const [custom, setCustom] = useState("");
 
   function setField(id, key, val) {
-    const parsedValue = Math.max(0, Math.min(100, +val || 0));
+    const cleaned = String(val).replace(/^\+/, "");
+    const parsedValue = Math.max(0, Math.min(100, +cleaned || 0));
     setFactors(
       factors.map((f) => {
         if (f.id !== id) return f;
