@@ -6,7 +6,6 @@ const DRUG_LIST_COLUMNS = [
   "df_drugtype",
   "df_smallquantitygram",
   "df_commercialquantitygram",
-  "df_commercialmaxquantitygram",
   "df_smallminsent",
   "df_smallmaxsent",
   "df_interminsent",

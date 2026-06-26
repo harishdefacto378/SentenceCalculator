@@ -87,9 +87,7 @@ function calculateSentence(drugRecord, quantityGrams) {
   const smallQty      = safeNum(drugRecord.df_smallquantitygram);
   const commercialQty = safeNum(drugRecord.df_commercialquantitygram);
   const qty           = Math.max(0, safeNum(quantityGrams));
-
-  // Commercial upper bound: if API provides it, use it; otherwise double commercial as fallback
-  const commercialMaxQty = safeNum(drugRecord.df_commercialmaxquantitygram) || commercialQty * 2;
+  const commercialMaxQty = commercialQty;
 
   // Sentence field helpers
   const sent = {
@@ -738,9 +736,7 @@ function App() {
   if (substanceData) {
     const smallQty = safeNum(substanceData.df_smallquantitygram);
     const commercialQty = safeNum(substanceData.df_commercialquantitygram);
-    const commercialMaxQty =
-      safeNum(substanceData.df_commercialmaxquantitygram) ||
-      commercialQty * 2;
+    const commercialMaxQty = commercialQty;
 
     const qty = qtyInGrams;
 

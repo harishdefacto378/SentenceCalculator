@@ -20,7 +20,7 @@ export function calculateSentence(drugRecord, quantityGrams) {
   const smallQty      = safeNum(drugRecord.df_smallquantitygram);
   const commercialQty = safeNum(drugRecord.df_commercialquantitygram);
   const qty           = Math.max(0, safeNum(quantityGrams));
-  const commercialMaxQty = safeNum(drugRecord.df_commercialmaxquantitygram) || commercialQty * 2;
+  const commercialMaxQty = commercialQty;
 
   // ─── STAGE 1 ── RAW DRUG FIELDS FROM API ───────────────────────────────────
   console.group("╔══ STAGE 1: PROPORTIONAL CALCULATION ══╗");
@@ -28,7 +28,7 @@ export function calculateSentence(drugRecord, quantityGrams) {
   console.log("Drug Name          :", drugRecord.df_drugidentifier);
   console.log("smallquantitygram  :", drugRecord.df_smallquantitygram, " → safeNum:", smallQty);
   console.log("commercialqtygram  :", drugRecord.df_commercialquantitygram, " → safeNum:", commercialQty);
-  console.log("commercialmaxqtygram:", drugRecord.df_commercialmaxquantitygram, " → resolved:", commercialMaxQty);
+  console.log("commercialmaxqtygram:", commercialMaxQty, " (commercialQty × 2)");
   console.log("Qty Detained (g)   :", qty);
   console.log("🔎 ALL DRUG RECORD FIELDS:");
   console.table(

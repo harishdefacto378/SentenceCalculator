@@ -57,11 +57,7 @@ export function useCalculationEngine() {
 
       const smallQty = safeNum(substance.df_smallquantitygram);
       const commercialQty = safeNum(substance.df_commercialquantitygram);
-      const defaultMultiplier = smallQty > 0 ? commercialQty / smallQty : 1;
-      const maxCommercialQty =
-        multiplier <= 0
-          ? commercialQty * defaultMultiplier
-          : commercialQty * multiplier;
+      const maxCommercialQty = commercialQty;
 
       let sentenceDays = 0;
       let fineAmount = 0;
@@ -251,9 +247,7 @@ export function useCalculationEngine() {
         };
 
         const commercialQty = safeNum(substance.df_commercialquantitygram);
-        const commercialMaxQty =
-          safeNum(substance.df_commercialmaxquantitygram) ||
-          commercialQty * 2;
+        const commercialMaxQty = commercialQty;
 
         let fineAmount;
         if (qty < smallQty) {
