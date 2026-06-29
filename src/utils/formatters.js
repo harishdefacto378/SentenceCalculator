@@ -1,69 +1,34 @@
 // Pure formatting helpers — no React, no side-effects.
-// cover two case
-// export function daysToYMD(days) 
-// {
-//    if (isNaN(days) || days < 0) {
-//     return `0 year(s), 0 month(s), 0 day(s)`;
-//   }
+import sentenceData from './sentence-data.json';
 
-//   const years = Math.floor(days / 365);
-//   let remainingDays = days % 365;
+// Lookup table: days → sentence string (days 1..3652), built once.
+const SENTENCE_BY_DAYS = new Map(sentenceData.map((e) => [e.days, e.sentence]));
 
-//   const months = Math.floor((remainingDays * 12) / 365);
-
-//   let daysLeft = Math.round(
-//     remainingDays - (months * 365) / 12
-//   );
-
-//   // ✅ Fix: prevent 1-day loss for small values
-//   if (daysLeft === 0 && remainingDays > 0) {
-//     daysLeft = 1;
-//   }
-
-//   return `${years} year(s), ${months} month(s), ${daysLeft} day(s)`;
-// }
-
-// export function daysToYMD(days) 
-// {
-//     if (isNaN(days) || days < 0) {
-//     return `0 year(s), 0 month(s), 0 day(s)`;
-//   }
-
-//   const years = Math.floor(days / 365);
-//   let remainingDays = days % 365;
-
-//   const months = Math.floor((remainingDays * 12) / 365);
-
-//   let rawDays = remainingDays - (months * 365) / 12;
-
-//   let daysLeft;
-
-//   // ✅ HYBRID RULE (key logic)
-//   if (remainingDays <= 60) {
-//     // small durations → round (fixes 37 → 7)
-//     daysLeft = Math.round(rawDays);
-//   } else {
-//     // larger durations → floor (fixes 914 → 1)
-//     daysLeft = Math.floor(rawDays);
-//   }
-
-//   return `${years} year(s), ${months} month(s), ${daysLeft} day(s)`;
-// }
 export function daysToYMD(days) {
-  if (isNaN(days)) {
+  const n = Number(days);
+  if (isNaN(n)) {
     return '0 year(s), 0 month(s), 0 day(s)';
   }
 
-  // For sentences spanning 4+ years use 365.25 days/year to account for leap
-  // years (matches Angular); shorter sentences use a flat 365.
-  const DAYS_IN_YEAR = days < 1461 ? 365 : 365.25;
+  const rounded = Math.round(n);
+  if (rounded <= 0) {
+    return '0 year(s), 0 month(s), 0 day(s)';
+  }
+
+  // Authoritative lookup (days 1..3652) — matches Angular output exactly.
+  const matched = SENTENCE_BY_DAYS.get(rounded);
+  if (matched) {
+    return matched;
+  }
+
+  // Fallback for days beyond the table: 365.25/year for 4+ years, else 365.
+  const DAYS_IN_YEAR = rounded < 1461 ? 365 : 365.25;
   const DAYS_IN_MONTH = 30.42;
+  const years = Math.floor(rounded / DAYS_IN_YEAR);
+  const months = Math.floor((rounded % DAYS_IN_YEAR) / DAYS_IN_MONTH);
+  const remainingDays = Math.floor((rounded % DAYS_IN_YEAR) % DAYS_IN_MONTH);
 
-  const years = Math.floor(days / DAYS_IN_YEAR);
-  const months = Math.floor((days % DAYS_IN_YEAR) / DAYS_IN_MONTH);
-  const remainingDays = Math.floor((days % DAYS_IN_YEAR) % DAYS_IN_MONTH);
-
-  return `${years} year(s), ${months} month(s), ${remainingDays} day(s)`;
+  return `${years} year(s) ${months} month(s) ${remainingDays} day(s)`;
 }
 
 
